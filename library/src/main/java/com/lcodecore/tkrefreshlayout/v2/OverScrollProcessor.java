@@ -3,9 +3,11 @@ package com.lcodecore.tkrefreshlayout.v2;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AbsListView;
@@ -22,7 +24,7 @@ public class OverScrollProcessor {
     private CoProcessor cp;
 
     //满足越界的手势的最低速度(默认5000)
-    protected int OVER_SCROLL_MIN_VX = 5000;
+    protected int OVER_SCROLL_MIN_VX = 3000;
 
     public OverScrollProcessor(CoProcessor coProcessor) {
         this.cp = coProcessor;
@@ -35,7 +37,45 @@ public class OverScrollProcessor {
 
     public void init() {
         final View mChildView = cp.getContent();
-        /*mChildView.setOnTouchListener(new View.OnTouchListener() {
+
+        final GestureDetector gestureDetector = new GestureDetector(cp.getContext(), new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                //TODO 最小速度要求
+                //TODO bug 待解决  列表控件没有填满屏幕时，scroll无效
+                //TODO 此处不应走finishRefreshing/finishLoadmore，而应该走隐藏head/bottom
+                if (cp.isRefreshing() && distanceY >= mTouchSlop && !cp.isOpenFloatRefresh()) {
+                    cp.setRefreshing(false);
+                    cp.getAnimProcessor().animHeadByVy((int) vy);
+                }
+                if (cp.isLoadingmore() && distanceY <= -mTouchSlop) {
+                    cp.setLoadingMore(false);
+                    cp.getAnimProcessor().animBottomByVy((int) vy);
+                }
+
+                return super.onScroll(e1, e2, distanceX, distanceY);
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                mVelocityY = velocityY;
+                System.out.println("fling速度："+mVelocityY);
+//            if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
+                //既不是AbsListView也不是RecyclerView,由于这些没有实现OnScrollListener接口,无法回调状态,只能采用延时策略
+                if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {
+                    mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
+                } else {
+                    cur_delay_times = ALL_DELAY_TIMES;
+                }
+//            }
+                return false;
+            }
+        });
+
+        mChildView.setOnTouchListener(new View.OnTouchListener() {
+            int mMaxVelocity = ViewConfiguration.get(cp.getContext()).getScaledMaximumFlingVelocity();
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 //手势监听的两个任务：1.监听fling动作，获取速度  2.监听滚动状态变化
@@ -55,7 +95,7 @@ public class OverScrollProcessor {
                 }
                 return gestureDetector.onTouchEvent(event);
             }
-        });*/
+        });
 
         if (mChildView instanceof AbsListView) {
             ((AbsListView) mChildView).setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -114,8 +154,8 @@ public class OverScrollProcessor {
 
     //主要为了监测Fling的动作,实现越界回弹
     private float mVelocityY;
-    /*private int mMaxVelocity = ViewConfiguration.get(cp.getContext()).getScaledMaximumFlingVelocity();
-    private GestureDetector gestureDetector = new GestureDetector(cp.getContext(), new GestureDetector.SimpleOnGestureListener() {
+
+    /*private GestureDetector gestureDetector = new GestureDetector(cp.getContext(), new GestureDetector.SimpleOnGestureListener() {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
@@ -155,8 +195,7 @@ public class OverScrollProcessor {
             return false;
         }
     });
-
-    */
+*/
 
     //针对部分没有OnScrollListener的View的延时策略
     private static final int MSG_START_COMPUTE_SCROLL = 0; //开始计算

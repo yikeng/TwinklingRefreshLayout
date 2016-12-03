@@ -64,19 +64,19 @@ public class SimpleAdapter extends BaseAdapter {
         public void refreshCard(){
             cards.clear();
             cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-//            cards.add(new Card("我的手机与众不同", "专题",R.drawable.card_cover2));
-//            cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
-//            cards.add(new Card("BuzzFeed", "最好玩的新闻在这里",R.drawable.card_cover4));
-//            cards.add(new Card("Nester", "专治各种熊孩子",R.drawable.card_cover5));
+            cards.add(new Card("我的手机与众不同", "专题",R.drawable.card_cover2));
+            cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
+            cards.add(new Card("BuzzFeed", "最好玩的新闻在这里",R.drawable.card_cover4));
+            cards.add(new Card("Nester", "专治各种熊孩子",R.drawable.card_cover5));
             notifyDataSetChanged();
         }
 
         public void loadMoreCard(){
-//            cards.add(new Card("二次元专题", "啊喂，别总想去四维空间啦",R.drawable.card_cover6));
-//            cards.add(new Card("Music Player", "闻其名，余音绕梁",R.drawable.card_cover7));
-//            cards.add(new Card("el", "剪纸人の唯美旅程",R.drawable.card_cover8));
-//            cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-//            cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
+            cards.add(new Card("二次元专题", "啊喂，别总想去四维空间啦",R.drawable.card_cover6));
+            cards.add(new Card("Music Player", "闻其名，余音绕梁",R.drawable.card_cover7));
+            cards.add(new Card("el", "剪纸人の唯美旅程",R.drawable.card_cover8));
+            cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
+            cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
             notifyDataSetChanged();
         }
     }

@@ -11,7 +11,8 @@ import android.widget.GridView;
 
 import com.lcodecore.tkrefreshlayout.Footer.LoadingView;
 import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
-import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v2.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.SimpleAdapter;
 
 /**
@@ -45,7 +46,7 @@ public class GridViewFragment extends Fragment {
         gridView.setAdapter(adapter);
         adapter.refreshCard();
 
-        refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
+        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {

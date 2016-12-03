@@ -35,8 +35,8 @@ public class RecyclerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (rootView==null){
-            rootView = inflater.inflate(R.layout.fragment_recycler,container,false);
+        if (rootView == null) {
+            rootView = inflater.inflate(R.layout.fragment_recycler, container, false);
             rv = (RecyclerView) rootView.findViewById(R.id.recyclerview);
             setupRecyclerView(rv);
         }
@@ -57,7 +57,7 @@ public class RecyclerFragment extends Fragment {
         refreshCard();
 
 
-        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
+        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {
@@ -66,7 +66,7 @@ public class RecyclerFragment extends Fragment {
                         refreshCard();
                         refreshLayout.finishRefreshing();
                     }
-                },2000);
+                }, 2000);
             }
 
             @Override
@@ -77,35 +77,35 @@ public class RecyclerFragment extends Fragment {
                         loadMoreCard();
                         refreshLayout.finishLoadmore();
                     }
-                },2000);
+                }, 2000);
             }
         });
 
-        //refreshLayout.startRefresh();
+//        refreshLayout.startRefresh();
     }
 
-    void addHeader(){
-        ViewPagerHolder holder = new ViewPagerHolder(rv.getContext(),rv);
+    void addHeader() {
+        ViewPagerHolder holder = new ViewPagerHolder(rv.getContext(), rv);
         cardAdapter.setHeadHolder(holder);
     }
 
-    void refreshCard(){
+    void refreshCard() {
         List<Card> cards = new ArrayList<>();
-        cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-        cards.add(new Card("我的手机与众不同", "专题",R.drawable.card_cover2));
-        cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
-        cards.add(new Card("BuzzFeed", "最好玩的新闻在这里",R.drawable.card_cover4));
-        cards.add(new Card("Nester", "专治各种熊孩子",R.drawable.card_cover5));
+        cards.add(new Card("God of Light", "点亮世界之光", R.drawable.card_cover1));
+        cards.add(new Card("我的手机与众不同", "专题", R.drawable.card_cover2));
+        cards.add(new Card("BlackLight", "做最纯粹的微博客户端", R.drawable.card_cover3));
+        cards.add(new Card("BuzzFeed", "最好玩的新闻在这里", R.drawable.card_cover4));
+        cards.add(new Card("Nester", "专治各种熊孩子", R.drawable.card_cover5));
         cardAdapter.setDataList(cards);
     }
 
-    void loadMoreCard(){
+    void loadMoreCard() {
         List<Card> cards = new ArrayList<>();
-        cards.add(new Card("二次元专题", "啊喂，别总想去四维空间啦",R.drawable.card_cover6));
-        cards.add(new Card("Music Player", "闻其名，余音绕梁",R.drawable.card_cover7));
-        cards.add(new Card("el", "剪纸人の唯美旅程",R.drawable.card_cover8));
-        cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-        cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
+        cards.add(new Card("二次元专题", "啊喂，别总想去四维空间啦", R.drawable.card_cover6));
+        cards.add(new Card("Music Player", "闻其名，余音绕梁", R.drawable.card_cover7));
+        cards.add(new Card("el", "剪纸人の唯美旅程", R.drawable.card_cover8));
+        cards.add(new Card("God of Light", "点亮世界之光", R.drawable.card_cover1));
+        cards.add(new Card("BlackLight", "做最纯粹的微博客户端", R.drawable.card_cover3));
         cardAdapter.addItems(cards);
     }
 }

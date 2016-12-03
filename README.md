@@ -238,12 +238,15 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 
 ## 更新日志
 #### v1.04
+##### 新增功能
 - **第二次重构完成**,将核心逻辑拆分为RefreshProcessor、AnimProcessor、OverScrollProcessor、CoProcessor
 - **优化越界策越，手势决定越界高度**
-- 添加类似SwipeRefreshLayout的悬浮刷新功能(ProgressLayout)
-- 将Head,Footer修改为设置位移，而不是设置高度（原为head.requestLayout()）
-- 修复刷新或加载更多时，列表item没有铺满列表控件，滑动无效的问题
+- 添加类似SwipeRefreshLayout的**悬浮刷新**功能(ProgressLayout)
+- 将Head,Footer修改为设置位移，而不是设置高度
 - 允许在结束刷新之前执行一个动效：IHeadView.onFinish(animEndListener)
+
+##### fixed bugs
+- 修复刷新或加载更多时，列表item没有铺满列表控件，滑动无效的问题
 - 滑到底部自动加载or回弹可选，默认自动加载
 - 添加主动刷新/加载更多的方法：startRefresh(),startLoadMore()
 - 修复顶部和底部越界高度不一致的问题

@@ -1,11 +1,9 @@
 package com.lcodecore.tkrefreshlayout.v2;
 
-import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.view.View;
+import android.os.Handler;
 import android.view.animation.DecelerateInterpolator;
 
 import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout.CoProcessor;
@@ -22,7 +20,7 @@ public class AnimProcessor {
 
     private CoProcessor cp;
     private ValueAnimator va;
-    private static final float animFraction = 2;
+    private static final float animFraction = 1.5f;
     //动画的变化率
     private DecelerateInterpolator decelerateInterpolator;
 
@@ -142,7 +140,8 @@ public class AnimProcessor {
 
     //保证快速回到不可见状态
     public void animLayoutByVy(int start, int end, int vy) {
-        animLayoutByTime(start, end, Math.abs(start - end) * 1000 / vy);
+        if (vy == 0) vy = 5000;
+        animLayoutByTime(start, end, 5 * Math.abs((start - end) * 1000 / vy));
     }
 
     public void animLayoutByTime(int start, int end) {
@@ -163,6 +162,14 @@ public class AnimProcessor {
         va.addListener(listener);
         va.start();
     }
+
+    public void animLayoutByTime(int start, int end, long time, AnimatorUpdateListener listener) {
+        va.setIntValues(start, end);
+        va.setDuration(time);
+        va.addUpdateListener(listener);
+        va.start();
+    }
+
 
 
     private AnimatorUpdateListener animUpListener = new AnimatorUpdateListener() {
@@ -200,6 +207,15 @@ public class AnimProcessor {
         }
     };
 
+    private AnimatorUpdateListener overScrollTopUpListener = new AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            int height = (int) animation.getAnimatedValue();
+            cp.getHeader().setTranslationY(-cp.getHeadHeight() + height);
+            if (cp.isOverScrollRefreshShow()) cp.getContent().setTranslationY(height);
+        }
+    };
+
     /**
      * 执行顶部越界  To executive cross-border springback at the top.
      * 越界高度height ∝ vy/computeTimes，此处采用的模型是 height=A*(vy + B)/computeTimes
@@ -208,28 +224,32 @@ public class AnimProcessor {
      * @param computeTimes 从满足条件到滚动到顶部总共计算的次数 Calculation times from sliding to top.
      */
     public void animOverScrollTop(float vy, int computeTimes) {
+//        if (vy == 0) vy = 5000;
         cp.setStatePTD();
-        int overHeight = (int) (vy / computeTimes / 6);
-        int time = 5 * overHeight;
-        animLayoutByTime(0, overHeight, time, new AnimatorListenerAdapter() {
+        int oh = (int) Math.abs(vy / computeTimes / 2);
+        final int overHeight = oh > 300 ? 300 : oh;
+        final int time = overHeight <= 50 ? 105 : (int) (0.5 * overHeight + 80);
+        animLayoutByTime(0, overHeight, time);
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void onAnimationEnd(Animator animation) {
-                va.removeListener(this);
-                va.reverse();
+            public void run() {
+                animLayoutByTime(overHeight, 0, time);
             }
-        });
+        }, time);
     }
 
     public void animOverScrollBottom(float vy, int computeTimes) {
+//        if (vy == 0) vy = 5000;
         cp.setStatePBU();
-        int overHeight = (int) (vy / computeTimes / 6);
-        int time = 5 * overHeight;
-        animLayoutByTime(0, overHeight, time, new AnimatorListenerAdapter() {
+        int oh = (int) Math.abs(vy / computeTimes / 2);
+        final int overHeight = oh > 300 ? 300 : oh;
+        final int time = overHeight <= 50 ? 105 : (int) (0.5 * overHeight + 80);
+        animLayoutByTime(0, overHeight, time);
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void onAnimationEnd(Animator animation) {
-                va.removeListener(this);
-                va.reverse();
+            public void run() {
+                animLayoutByTime(overHeight, 0, time);
             }
-        });
+        }, time);
     }
 }

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/refreshLayout"
+<com.lcodecore.twinklingrefreshlayout.BounceableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!--<ScrollView-->
+        <!--android:id="@+id/scrollView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
         <TextView
             android:id="@+id/textView"
@@ -25,5 +24,6 @@ California's diverse geography ranges from the Sierra Nevada in the east to the 
 \n\n
 California is regarded as a global trendsetter in both popular culture and politics, and is the birthplace of the film industry, the hippie counterculture, the Internet,[13] and the personal computer. The state's economy is centered on finance, government, real estate services, technology, and professional, scientific and technical business services; together comprising 58% of the state's economy.[14] Three of the world's largest 20 firms by revenue, Chevron, Apple, and McKesson, are headquartered in the state.[15] Although only 1.5% of the state's economy,[14] California's agriculture industry has the highest output of any United States state.[16] If it were a country, California would be the 6th largest economy in the world[17] and the 35th most populous."
             android:textSize="18sp" />
-    </ScrollView>
-</com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout>
+    <!--</ScrollView>-->
+
+</com.lcodecore.twinklingrefreshlayout.BounceableLinearLayout>

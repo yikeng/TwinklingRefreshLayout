@@ -50,10 +50,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
 
     //刷新的状态
-    protected boolean isRefreshing;
+    protected boolean isRefreshing = false;
 
     //加载更多的状态
-    protected boolean isLoadingmore;
+    protected boolean isLoadingmore = false;
 
     //是否需要加载更多,默认需要
     protected boolean enableLoadmore = true;
@@ -67,10 +67,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
     protected boolean isPureScrollModeOn = false;
 
     //是否自动加载更多
-    protected boolean autoLoadMore = true;
+    protected boolean autoLoadMore = false;
 
     //是否开启悬浮刷新模式
-    protected boolean floatRefresh = true;
+    protected boolean floatRefresh = false;
 
     //满足越界的手势的最低速度(默认5000)
     protected int overScrollMinVx = 5000;
@@ -126,7 +126,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
             this.addView(mHeadLayout);//addView(view,-1)添加到-1的位置
 
             if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
-            mHeadLayout.setTranslationY(mHeadHeight);
+            mHeadLayout.setTranslationY(-mHeadHeight);
         }
 
         //添加底部
@@ -148,6 +148,8 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         //获得子控件
         mChildView = getChildAt(0);
+
+        cp.init();
     }
 
 
@@ -396,7 +398,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 if (mBottomLayout != null) mBottomLayout.setVisibility(VISIBLE);
             }
 
-
             overScrollProcessor.init();
             animProcessor.init();
         }
@@ -458,6 +459,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
 
         public void startRefresh() {
+            setRefreshing(true);
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -474,6 +476,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
 
         public void startLoadMore() {
+            setLoadingMore(true);
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -490,21 +493,25 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
 
         public void finishRefreshing() {
-            setRefreshing(false);
             onFinishRefresh();
         }
 
         public void finishRefreshAfterAnim() {
-            if (mChildView != null) {
+//            setRefreshing(false);
+            if (isRefreshing() && mChildView != null) {
+                setStatePTD();
+                setRefreshing(false);
                 animProcessor.animLayoutByTime((int) mHeadHeight, 0);
             }
         }
 
         public void finishLoadmore() {
-            setLoadingMore(false);
+//            setLoadingMore(false);
             onFinishLoadMore();
-            if (mChildView != null) {
+            if (isLoadingmore() && mChildView != null) {
                 ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
+                setStatePBU();
+                setLoadingMore(false);
                 animProcessor.animLayoutByTime((int) mBottomHeight, 0);
             }
         }

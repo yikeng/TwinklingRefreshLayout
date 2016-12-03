@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
 
 /**
  * Created by lcodecore on 2016/10/2.

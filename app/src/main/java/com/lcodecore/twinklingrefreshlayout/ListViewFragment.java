@@ -9,7 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v2.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.SimpleAdapter;
 
 /**
@@ -33,11 +34,12 @@ public class ListViewFragment extends Fragment {
 
     private void setupListView(ListView listView) {
         TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) rootView.findViewById(R.id.refresh);
+        refreshLayout.setEnableOverlayRefreshView(false);
         adapter = new SimpleAdapter();
         listView.setAdapter(adapter);
         adapter.refreshCard();
 
-        refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
+        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {
