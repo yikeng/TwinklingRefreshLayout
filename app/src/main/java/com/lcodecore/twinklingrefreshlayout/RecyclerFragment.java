@@ -49,9 +49,10 @@ public class RecyclerFragment extends Fragment {
         rv.setAdapter(cardAdapter);
 
         final TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) rootView.findViewById(R.id.refresh);
-        ProgressLayout headerView = new ProgressLayout(getContext());
-        //BezierLayout headerView = new BezierLayout(getContext());
+//        ProgressLayout headerView = new ProgressLayout(getContext());
+        BezierLayout headerView = new BezierLayout(getContext());
         refreshLayout.setHeaderView(headerView);
+        refreshLayout.setEnableOverlayRefreshView(false);
 
         addHeader();
         refreshCard();

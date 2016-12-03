@@ -288,8 +288,9 @@ public class TwinklingRefreshLayout extends FrameLayout {
      */
     public void setPureScrollModeOn(boolean pureScrollModeOn) {
         isPureScrollModeOn = pureScrollModeOn;
-        isOverlayRefreshShow = !isPureScrollModeOn;
+//        isOverlayRefreshShow = !isPureScrollModeOn;
         if (pureScrollModeOn) {
+            isOverlayRefreshShow = false;
             setWaveHeight(mOverScrollHeight);
             setHeaderHeight(mOverScrollHeight);
             setBottomHeight(mOverScrollHeight);
@@ -392,10 +393,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 setEnableOverlayRefreshView(false);
                 if (mHeadLayout != null) mHeadLayout.setVisibility(GONE);
                 if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
-            } else {
-                setEnableOverlayRefreshView(true);
-                if (mHeadLayout != null) mHeadLayout.setVisibility(VISIBLE);
-                if (mBottomLayout != null) mBottomLayout.setVisibility(VISIBLE);
             }
 
             overScrollProcessor.init();
