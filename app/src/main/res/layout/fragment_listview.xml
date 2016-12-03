@@ -10,4 +10,9 @@
         android:layout_height="match_parent"
         android:background="@android:color/white"
         android:dividerHeight="0dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Hello! 我是多出来的一个View"/>
 </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>

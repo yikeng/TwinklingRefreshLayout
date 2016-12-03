@@ -27,5 +27,5 @@ public interface IHeaderView {
 
     void startAnim(float maxHeadHeight,float headHeight);
 
-    void onFinish();
+    void onFinish(OnAnimEndListener animEndListener);
 }

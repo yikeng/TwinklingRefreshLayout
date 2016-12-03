@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.lcodecore.tkrefreshlayout.IHeaderView;
+import com.lcodecore.tkrefreshlayout.OnAnimEndListener;
 
 /**
  * Created by lcodecore on 2016/10/1.
@@ -48,7 +49,7 @@ public class TextHeaderView extends TextView implements IHeaderView {
     }
 
     @Override
-    public void onFinish() {
-
+    public void onFinish(OnAnimEndListener listener) {
+        listener.onAnimEnd();
     }
 }

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lcodecore.tkrefreshlayout.IHeaderView;
+import com.lcodecore.tkrefreshlayout.OnAnimEndListener;
 import com.lcodecore.tkrefreshlayout.R;
 
 /**
@@ -96,7 +97,7 @@ public class SinaRefreshView extends FrameLayout implements IHeaderView {
     }
 
     @Override
-    public void onFinish() {
-
+    public void onFinish(OnAnimEndListener listener) {
+        listener.onAnimEnd();
     }
 }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
+import com.lcodecore.tkrefreshlayout.OnAnimEndListener;
 import com.lcodecore.tkrefreshlayout.R;
 import com.lcodecore.tkrefreshlayout.IHeaderView;
 
@@ -51,13 +52,6 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
         r1 = (RoundDotView) headView.findViewById(R.id.round1);
         r2 = (RoundProgressView) headView.findViewById(R.id.round2);
         r2.setVisibility(View.GONE);
-
-        rippleView.setRippleListener(new RippleView.RippleListener() {
-            @Override
-            public void onRippleFinish() {
-                //执行一个自定义动画
-            }
-        });
 
         addView(headView);
     }
@@ -155,10 +149,11 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
     }
 
     @Override
-    public void onFinish() {
+    public void onFinish(final OnAnimEndListener animEndListener) {
         r2.stopAnim();
         r2.animate().scaleX((float)0.0);
         r2.animate().scaleY((float)0.0);
+        rippleView.setAnimEndListener(animEndListener);
         rippleView.startReveal();
     }
 }

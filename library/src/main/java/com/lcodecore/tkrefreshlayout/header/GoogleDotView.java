@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
+import com.lcodecore.tkrefreshlayout.OnAnimEndListener;
 import com.lcodecore.tkrefreshlayout.R;
 import com.lcodecore.tkrefreshlayout.IHeaderView;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
@@ -48,7 +49,7 @@ public class GoogleDotView extends View implements IHeaderView {
     ValueAnimator animator1, animator2;
 
     private void init() {
-        r = DensityUtil.dp2px(getContext(),4);
+        r = DensityUtil.dp2px(getContext(), 4);
 
         mPath = new Paint();
         mPath.setAntiAlias(true);
@@ -205,7 +206,7 @@ public class GoogleDotView extends View implements IHeaderView {
     }
 
     @Override
-    public void onFinish() {
-
+    public void onFinish(OnAnimEndListener listener) {
+        listener.onAnimEnd();
     }
 }

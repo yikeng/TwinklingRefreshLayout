@@ -10,13 +10,15 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.lcodecore.tkrefreshlayout.OnAnimEndListener;
+
 /**
  * cjj
  */
 public class RippleView extends View {
     private Paint mPaint;
     private int r;
-    private RippleListener listener;
+    private OnAnimEndListener listener;
 
     public int getR() {
         return r;
@@ -66,7 +68,7 @@ public class RippleView extends View {
                 public void onAnimationEnd(Animator animation) {
                     setVisibility(GONE);
                     if (listener != null) {
-                        listener.onRippleFinish();
+                        listener.onAnimEnd();
                     }
                 }
             });
@@ -80,12 +82,7 @@ public class RippleView extends View {
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, r, mPaint);
     }
 
-    public void setRippleListener(RippleListener listener) {
+    public void setAnimEndListener(OnAnimEndListener listener) {
         this.listener = listener;
     }
-
-    public interface RippleListener {
-        void onRippleFinish();
-    }
-
 }

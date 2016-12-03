@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lcodecore.tkrefreshlayout.header.bezierlayout.BezierLayout;
-import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v2.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.CardAdapter;
 import com.lcodecore.twinklingrefreshlayout.adapter.ViewPagerHolder;
 import com.lcodecore.twinklingrefreshlayout.beans.Card;
@@ -45,15 +48,16 @@ public class RecyclerFragment extends Fragment {
         cardAdapter = new CardAdapter();
         rv.setAdapter(cardAdapter);
 
-        TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) rootView.findViewById(R.id.refresh);
-        BezierLayout headerView = new BezierLayout(getContext());
+        final TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) rootView.findViewById(R.id.refresh);
+        ProgressLayout headerView = new ProgressLayout(getContext());
+        //BezierLayout headerView = new BezierLayout(getContext());
         refreshLayout.setHeaderView(headerView);
 
         addHeader();
         refreshCard();
 
 
-        refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
+        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {
@@ -76,6 +80,8 @@ public class RecyclerFragment extends Fragment {
                 },2000);
             }
         });
+
+        //refreshLayout.startRefresh();
     }
 
     void addHeader(){

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 
@@ -74,6 +75,15 @@ public class TwinklingRefreshLayout extends FrameLayout {
     //是否隐藏刷新控件,开启越界回弹模式(开启之后刷新控件将隐藏)
     protected boolean isPureScrollModeOn = false;
 
+    //是否自动加载更多
+    protected boolean autoLoadMore = true;
+
+    //是否开启悬浮刷新模式
+    protected boolean floatRefresh = false;
+
+    //满足越界的手势的最低速度(默认5000)
+    protected int overScrollMinVx = 5000;
+
     //触摸获得Y的位置
     private float mTouchY;
     //触摸获得X的位置(为防止滑动冲突而设置)
@@ -109,7 +119,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
     private void init() {
         //使用isInEditMode解决可视化编辑器无法识别自定义控件的问题
         if (isInEditMode()) return;
-        if (getChildCount() > 1) throw new RuntimeException("Only one childView is supported. 只能拥有一个子控件哦。");
 
         //在动画开始的地方快然后慢;
         decelerateInterpolator = new DecelerateInterpolator(10);
@@ -167,6 +176,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
         handleScrollEvent();
     }
 
+//    private MsgCenter controlCenter;
     /*************************************  触摸事件处理  *****************************************/
     /**
      * 拦截事件
@@ -212,7 +222,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
                     if (mChildView != null) {
                         float offsetY = decelerateInterpolator.getInterpolation(dy / mWaveHeight / 2) * dy / 2;
-                        mChildView.setTranslationY(offsetY);
+                        if (!floatRefresh) mChildView.setTranslationY(offsetY);
 
                         mHeadLayout.getLayoutParams().height = (int) offsetY;
                         mHeadLayout.requestLayout();
@@ -242,14 +252,16 @@ public class TwinklingRefreshLayout extends FrameLayout {
             case MotionEvent.ACTION_UP:
                 if (mChildView != null) {
                     if (state == PULL_DOWN_REFRESH) {
-                        if (!isPureScrollModeOn && mChildView.getTranslationY() >= mHeadHeight - mTouchSlop) {
-                            animChildView(mHeadHeight);//回到限制的最大高度处
+                        if (!isPureScrollModeOn && /*mChildView.getTranslationY()*/mHeadLayout.getLayoutParams().height >= mHeadHeight - mTouchSlop) {
+                            if (!floatRefresh) animChildView(mHeadHeight);//回到限制的最大高度处
+                            else animFloatRefresh(mHeadHeight);
                             isRefreshing = true;
                             if (pullListener != null) {
                                 pullListener.onRefresh(TwinklingRefreshLayout.this);
                             }
                         } else {
-                            animChildView(0f);
+                            if (!floatRefresh) animChildView(0f);
+                            else animFloatRefresh(0f);
                         }
                     } else if (state == PULL_UP_LOAD) {
                         if (!isPureScrollModeOn && Math.abs(mChildView.getTranslationY()) >= mBottomHeight - mTouchSlop) {
@@ -269,8 +281,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
         return super.onTouchEvent(e);
     }
 
-    /*************************************  越界回弹策略  *****************************************/
-    private void handleScrollEvent(){
+    /*************************************
+     * 越界回弹策略
+     *****************************************/
+    private void handleScrollEvent() {
         mChildView.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -287,10 +301,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 @Override
                 public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                     if (!isRefreshing && !isLoadingmore && firstVisibleItem == 0 || ((AbsListView) mChildView).getLastVisiblePosition() == totalItemCount - 1) {
-                        if (mVelocityY >= 5000 && ScrollingUtil.isAbsListViewToTop((AbsListView) mChildView)) {
+                        if (mVelocityY >= overScrollMinVx && ScrollingUtil.isAbsListViewToTop((AbsListView) mChildView)) {
                             animOverScrollTop();
                         }
-                        if (mVelocityY <= -5000 && ScrollingUtil.isAbsListViewToBottom((AbsListView) mChildView)) {
+                        if (mVelocityY <= -overScrollMinVx && ScrollingUtil.isAbsListViewToBottom((AbsListView) mChildView)) {
                             animOverScrollBottom();
                         }
                     }
@@ -301,10 +315,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                     if (!isRefreshing && !isLoadingmore && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        if (mVelocityY >= 5000 && ScrollingUtil.isRecyclerViewToTop((RecyclerView) mChildView)) {
+                        if (mVelocityY >= overScrollMinVx && ScrollingUtil.isRecyclerViewToTop((RecyclerView) mChildView)) {
                             animOverScrollTop();
                         }
-                        if (mVelocityY <= -5000 && ScrollingUtil.isRecyclerViewToBottom((RecyclerView) mChildView)) {
+                        if (mVelocityY <= -overScrollMinVx && ScrollingUtil.isRecyclerViewToBottom((RecyclerView) mChildView)) {
                             animOverScrollBottom();
                         }
                     }
@@ -320,7 +334,9 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (isRefreshing && distanceY >= mTouchSlop) finishRefreshing();
+            //TODO bug 待解决  列表控件没有填满屏幕时，scroll无效
+            //TODO 此处不应走finishRefreshing/finishLoadmore，而应该走隐藏head/bottom
+            if (isRefreshing && distanceY >= mTouchSlop && !floatRefresh) finishRefreshing();
             if (isLoadingmore && distanceY <= -mTouchSlop) finishLoadmore();
 
             return super.onScroll(e1, e2, distanceX, distanceY);
@@ -331,7 +347,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
             mVelocityY = velocityY;
             if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
                 //既不是AbsListView也不是RecyclerView,由于这些没有实现OnScrollListener接口,无法回调状态,只能采用延时策略
-                if (Math.abs(mVelocityY) >= 5000) {
+                if (Math.abs(mVelocityY) >= overScrollMinVx) {
                     mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
                 } else {
                     cur_delay_times = ALL_DELAY_TIMES;
@@ -347,7 +363,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
     private static final int MSG_STOP_COMPUTE_SCROLL = 2; //停止计算
 
     private int cur_delay_times = 0; //当前计算次数
-    private static final int ALL_DELAY_TIMES = 20;  //10ms计算一次,总共计算20次
+    private static final int ALL_DELAY_TIMES = 60;  //10ms计算一次,总共计算20次
     private int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private Handler mHandler = new Handler() {
@@ -359,13 +375,19 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 case MSG_CONTINUE_COMPUTE_SCROLL:
                     cur_delay_times++;
 
-                    if (!isRefreshing && !isLoadingmore && mVelocityY >= 5000 && (mChildView != null && Math.abs(mChildView.getScrollY()) <= mTouchSlop)) {
+                    if (!isRefreshing && !isLoadingmore && mVelocityY >= overScrollMinVx && (mChildView != null && Math.abs(mChildView.getScrollY()) <= 2*mTouchSlop)) {
                         animOverScrollTop();
                         cur_delay_times = ALL_DELAY_TIMES;
                     }
 
-                    if (!isRefreshing && !isLoadingmore && mVelocityY <= -5000 && mChildView != null) {
-                        if (mChildView instanceof ViewGroup) {
+                    if (!isRefreshing && !isLoadingmore && mVelocityY <= -overScrollMinVx && mChildView != null) {
+                        if (mChildView instanceof WebView) {
+                            WebView webview = (WebView) (mChildView);
+                            if (Math.abs(webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())) <= 2*mTouchSlop) {
+                                animOverScrollBottom();
+                                cur_delay_times = ALL_DELAY_TIMES;
+                            }
+                        } else if (mChildView instanceof ViewGroup) {
                             View subChildView = ((ViewGroup) mChildView).getChildAt(0);
                             if (subChildView != null && subChildView.getMeasuredHeight() <= mChildView.getScrollY() + mChildView.getHeight()) {
                                 //滚动到了底部
@@ -391,6 +413,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
     /*************************************  执行动画  *****************************************/
     /**
      * 向下兼容,把mChildView.animate().setUpdateListener()改成ObjectAnimator.addUpdateListener
+     *
      * @param endValue mChildView最终位移
      */
     private void animChildView(float endValue) {
@@ -411,7 +434,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
                     mHeadLayout.getLayoutParams().height = height;
                     mHeadLayout.requestLayout();//重绘
 
-                    if (isOverlayRefreshShow){
+                    if (isOverlayRefreshShow) {
                         mHeadLayout.setVisibility(VISIBLE);
                         mBottomLayout.setVisibility(GONE);
                     }
@@ -437,10 +460,40 @@ public class TwinklingRefreshLayout extends FrameLayout {
         oa.start();
     }
 
+    private void animFloatRefresh(float endValue) {
+        animFloatRefresh(endValue, 300);
+    }
+    private void animFloatRefresh(float endValue, long duration){
+        ValueAnimator oa = ValueAnimator.ofInt(mHeadLayout.getLayoutParams().height, (int)endValue);
+        oa.setDuration(duration);
+        oa.setInterpolator(new DecelerateInterpolator());//设置速率为递减
+        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int height = (int) animation.getAnimatedValue();
+
+                if (state == PULL_DOWN_REFRESH) {
+                    mHeadLayout.getLayoutParams().height = height;
+                    mHeadLayout.requestLayout();//重绘
+
+                    if (isOverlayRefreshShow) {
+                        mHeadLayout.setVisibility(VISIBLE);
+                        mBottomLayout.setVisibility(GONE);
+                    }
+
+                    if (pullListener != null) {
+                        pullListener.onPullDownReleasing(TwinklingRefreshLayout.this, height / mHeadHeight);
+                    }
+                }
+            }
+        });
+        oa.start();
+    }
+
     private void animOverScrollTop() {
         mVelocityY = 0;
         state = PULL_DOWN_REFRESH;
-        if (isOverlayRefreshShow) animChildView(mOverScrollHeight, 150);
+        if (isOverlayRefreshShow && !floatRefresh) animChildView(mOverScrollHeight, 150);
         else mChildView.animate().translationY(mOverScrollHeight).setDuration(150).start();
         mChildView.postDelayed(new Runnable() {
             @Override
@@ -454,21 +507,67 @@ public class TwinklingRefreshLayout extends FrameLayout {
     private void animOverScrollBottom() {
         mVelocityY = 0;
         state = PULL_UP_LOAD;
-        if (isOverlayRefreshShow) animChildView(-mOverScrollHeight, 150);
-        else mChildView.animate().translationY(-mOverScrollHeight).setDuration(150).start();
-        mChildView.postDelayed(new Runnable() {
+
+        if (autoLoadMore && !isPureScrollModeOn) {
+            isLoadingmore = true;
+            animChildView(-mBottomHeight, 150);
+
+            if (pullListener != null) {
+                pullListener.onLoadMore(TwinklingRefreshLayout.this);
+            }
+        } else {
+            if (isOverlayRefreshShow) animChildView(-mOverScrollHeight, 150);
+            else mChildView.animate().translationY(-mOverScrollHeight).setDuration(150).start();
+            mChildView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (isOverlayRefreshShow) animChildView(0f);
+                    else mChildView.animate().translationY(0).start();
+                }
+            }, 150);
+        }
+    }
+
+    //主动刷新
+    public void startRefresh() {
+        post(new Runnable() {
             @Override
             public void run() {
-                if (isOverlayRefreshShow) animChildView(0f);
-                else mChildView.animate().translationY(0).start();
+                state = PULL_DOWN_REFRESH;
+                if (!isPureScrollModeOn && mChildView != null) {
+                    if (!floatRefresh) animChildView(mHeadHeight);//回到限制的最大高度处
+                    else animFloatRefresh(mHeadHeight);
+                    isRefreshing = true;
+                    if (pullListener != null) {
+                        pullListener.onRefresh(TwinklingRefreshLayout.this);
+                    }
+                }
             }
-        }, 150);
+        });
+    }
+
+    //主动加载跟多
+    public void startLoadMore() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                state = PULL_UP_LOAD;
+                if (!isPureScrollModeOn && mChildView != null) {
+                    isLoadingmore = true;
+                    animChildView(-mBottomHeight);
+                    if (pullListener != null) {
+                        pullListener.onLoadMore(TwinklingRefreshLayout.this);
+                    }
+                }
+            }
+        });
     }
 
     /**
      * 设置拖动屏幕的监听器
      */
     private PullListener pullListener;
+
     private void setPullListener(PullListener pullListener) {
         this.pullListener = pullListener;
     }
@@ -480,9 +579,9 @@ public class TwinklingRefreshLayout extends FrameLayout {
     public void finishRefreshing() {
         isRefreshing = false;
         if (pullListener != null) pullListener.onFinishRefresh();
-        if (mChildView != null) {
-            animChildView(0f);
-        }
+//        if (mChildView != null) {
+//            animChildView(0f);
+//        }
     }
 
     /**
@@ -495,6 +594,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
             animChildView(0f);
             ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
         }
+    }
+
+    public void setOverScrollMinVx(int overScrollMinVx){
+        this.overScrollMinVx = overScrollMinVx;
     }
 
     /**
@@ -583,6 +686,11 @@ public class TwinklingRefreshLayout extends FrameLayout {
     public void setPureScrollModeOn(boolean pureScrollModeOn) {
         isPureScrollModeOn = pureScrollModeOn;
         isOverlayRefreshShow = !isPureScrollModeOn;
+        if (pureScrollModeOn){
+            setWaveHeight(mOverScrollHeight);
+            setHeaderHeight(mOverScrollHeight);
+            setBottomHeight(mOverScrollHeight);
+        }
     }
 
     public interface PullListener {
@@ -672,7 +780,15 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         @Override
         public void onFinishRefresh() {
-            mHeadView.onFinish();
+            mHeadView.onFinish(new OnAnimEndListener() {
+                @Override
+                public void onAnimEnd() {
+                    if (mChildView != null) {
+                        if (!floatRefresh) animChildView(0f);
+                        else animFloatRefresh(0f);
+                    }
+                }
+            });
         }
 
         @Override
