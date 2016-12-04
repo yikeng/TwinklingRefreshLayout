@@ -47,11 +47,11 @@ public class OverScrollProcessor {
                 //TODO 此处不应走finishRefreshing/finishLoadmore，而应该走隐藏head/bottom
                 if (cp.isRefreshing() && distanceY >= mTouchSlop && !cp.isOpenFloatRefresh()) {
                     cp.setRefreshing(false);
-                    cp.getAnimProcessor().animHeadByVy((int) vy);
+                    cp.getAnimProcessor().animHeadHideByVy((int) vy);
                 }
                 if (cp.isLoadingmore() && distanceY <= -mTouchSlop) {
                     cp.setLoadingMore(false);
-                    cp.getAnimProcessor().animBottomByVy((int) vy);
+                    cp.getAnimProcessor().animBottomHideByVy((int) vy);
                 }
 
                 return super.onScroll(e1, e2, distanceX, distanceY);
@@ -60,7 +60,6 @@ public class OverScrollProcessor {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 mVelocityY = velocityY;
-                System.out.println("fling速度："+mVelocityY);
 //            if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
                 //既不是AbsListView也不是RecyclerView,由于这些没有实现OnScrollListener接口,无法回调状态,只能采用延时策略
                 if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {

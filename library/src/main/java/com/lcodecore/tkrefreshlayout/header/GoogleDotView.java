@@ -180,7 +180,7 @@ public class GoogleDotView extends View implements IHeaderView {
             animator1.cancel();
             invalidate();
         }
-        if (animator2.isRunning()) animator1.cancel();
+        if (animator2.isRunning()) animator2.cancel();
     }
 
     @Override
@@ -193,7 +193,7 @@ public class GoogleDotView extends View implements IHeaderView {
                 animator1.cancel();
                 invalidate();
             }
-            if (animator2.isRunning()) animator1.cancel();
+            if (animator2.isRunning()) animator2.cancel();
         }
     }
 

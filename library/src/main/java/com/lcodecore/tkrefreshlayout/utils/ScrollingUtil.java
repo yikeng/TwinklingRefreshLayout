@@ -279,6 +279,12 @@ public class ScrollingUtil {
         }
     }
 
+    public static void scrollToBottom(View view){
+        if (view instanceof RecyclerView) scrollToBottom((RecyclerView) view);
+        if (view instanceof AbsListView) scrollToBottom((AbsListView) view);
+        if (view instanceof ScrollView) scrollToBottom((ScrollView) view);
+    }
+
 
     public static int getScreenHeight(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

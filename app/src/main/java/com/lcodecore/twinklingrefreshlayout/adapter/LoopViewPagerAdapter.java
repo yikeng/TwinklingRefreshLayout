@@ -36,6 +36,7 @@ public class LoopViewPagerAdapter extends BaseLoopPagerAdapter {
     public void setList(List<Card> heroes) {
         mHeroes.clear();
         mHeroes.addAll(heroes);
+        initIndicators();
         notifyDataSetChanged();
     }
 
@@ -61,12 +62,6 @@ public class LoopViewPagerAdapter extends BaseLoopPagerAdapter {
                 mIndicators.addView(indicator);
             }
         }
-    }
-
-    @Override
-    public void notifyDataSetChanged() {
-        initIndicators();
-        super.notifyDataSetChanged();
     }
 
     @Override

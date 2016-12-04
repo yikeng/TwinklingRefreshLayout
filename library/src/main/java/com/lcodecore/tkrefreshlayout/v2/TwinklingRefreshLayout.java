@@ -94,7 +94,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
         mWaveHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_wave_height, (int) DensityUtil.dp2px(context, 120));
         mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
         mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
-        mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) DensityUtil.dp2px(context, 80));
+        mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
         enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
         isPureScrollModeOn = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_pureScrollMode_on, false);
         isOverlayRefreshShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_show_overlay_refreshview, true);
@@ -235,6 +235,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
     }
 
+    public void setFloatRefresh(boolean ifOpenFloatRefreshMode) {
+        floatRefresh = ifOpenFloatRefreshMode;
+    }
+
     /**
      * 设置wave的下拉高度
      *
@@ -295,6 +299,22 @@ public class TwinklingRefreshLayout extends FrameLayout {
             setHeaderHeight(mOverScrollHeight);
             setBottomHeight(mOverScrollHeight);
         }
+    }
+
+    /**
+     * 设置越界高度
+     */
+    public void setOverScrollHeight(int overScrollHeight) {
+        this.mOverScrollHeight = overScrollHeight;
+    }
+
+    /**
+     * 设置OverScroll时自动加载更多
+     *
+     * @param ifAutoLoadMore 为true表示底部越界时主动进入加载跟多模式，否则直接回弹
+     */
+    public void setAutoLoadMore(boolean ifAutoLoadMore) {
+        autoLoadMore = ifAutoLoadMore;
     }
 
     /**
@@ -407,6 +427,35 @@ public class TwinklingRefreshLayout extends FrameLayout {
             return ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
 
+        private boolean isOverScrollTopLocked = false;
+
+        public void lockOsTop() {
+            isOverScrollTopLocked = true;
+        }
+
+        public void releaseOsTopLock() {
+            isOverScrollTopLocked = false;
+        }
+
+        public boolean isOsTopLocked() {
+            return isOverScrollTopLocked;
+        }
+
+        private boolean isOverScrollBottomLocked = false;
+
+        public void lockOsBottom() {
+            isOverScrollBottomLocked = true;
+        }
+
+        public void releaseOsBottomLock() {
+            isOverScrollBottomLocked = false;
+        }
+
+        public boolean isOsBottomLocked() {
+            return isOverScrollBottomLocked;
+        }
+
+
         public AnimProcessor getAnimProcessor() {
             return animProcessor;
         }
@@ -423,24 +472,20 @@ public class TwinklingRefreshLayout extends FrameLayout {
             return mWaveHeight;
         }
 
-        public float getHeadHeight() {
-            return mHeadHeight;
+        public int getHeadHeight() {
+            return (int) mHeadHeight;
         }
 
-        public float getBottomHeight() {
-            return mBottomHeight;
+        public int getBottomHeight() {
+            return (int) mBottomHeight;
+        }
+
+        public int getOsHeight() {
+            return (int) mOverScrollHeight;
         }
 
         public View getScrollableView() {
             return mChildView;
-        }
-
-        public View getHeadLayout() {
-            return mHeadLayout;
-        }
-
-        public View getBottomLayout() {
-            return mBottomLayout;
         }
 
         public View getContent() {
@@ -463,7 +508,8 @@ public class TwinklingRefreshLayout extends FrameLayout {
                     setStatePTD();
                     if (!isPureScrollModeOn && mChildView != null) {
                         setRefreshing(true);
-                        animProcessor.animLayoutByTime(0, (int) mHeadHeight);
+                        animProcessor.animHeadToRefresh();
+//                        animProcessor.animLayoutByTime(0, (int) mHeadHeight);
                         if (pullListener != null) {
                             pullListener.onRefresh(TwinklingRefreshLayout.this);
                         }
@@ -480,7 +526,8 @@ public class TwinklingRefreshLayout extends FrameLayout {
                     setStatePBU();
                     if (!isPureScrollModeOn && mChildView != null) {
                         setLoadingMore(true);
-                        animProcessor.animLayoutByTime(0, (int) mBottomHeight);
+                        animProcessor.animBottomToLoad();
+//                        animProcessor.animLayoutByTime(0, (int) mBottomHeight);
                         if (pullListener != null) {
                             pullListener.onLoadMore(TwinklingRefreshLayout.this);
                         }
@@ -494,22 +541,22 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
 
         public void finishRefreshAfterAnim() {
-//            setRefreshing(false);
             if (isRefreshing() && mChildView != null) {
                 setStatePTD();
                 setRefreshing(false);
-                animProcessor.animLayoutByTime((int) mHeadHeight, 0);
+                animProcessor.animHeadBack();
+//                animProcessor.animLayoutByTime((int) mHeadHeight, 0);
             }
         }
 
         public void finishLoadmore() {
-//            setLoadingMore(false);
             onFinishLoadMore();
             if (isLoadingmore() && mChildView != null) {
                 ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
                 setStatePBU();
                 setLoadingMore(false);
-                animProcessor.animLayoutByTime((int) mBottomHeight, 0);
+                animProcessor.animBottomBack();
+//                animProcessor.animLayoutByTime((int) mBottomHeight, 0);
             }
         }
 
@@ -546,6 +593,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         public boolean isOpenFloatRefresh() {
             return floatRefresh;
+        }
+
+        public boolean autoLoadMore() {
+            return autoLoadMore;
         }
 
         public boolean isPureScrollModeOn() {

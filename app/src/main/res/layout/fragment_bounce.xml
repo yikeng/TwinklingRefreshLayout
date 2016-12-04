@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.lcodecore.twinklingrefreshlayout.BounceableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <!--<ScrollView-->
-        <!--android:id="@+id/scrollView"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content">-->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/textView"
@@ -16,14 +17,22 @@
             android:layout_marginRight="8dp"
             android:lineSpacingExtra="4dp"
             android:background="@android:color/white"
-            android:text="California is the most populous state in the United States. It is also the third most extensive by area. Los Angeles, in Southern California, is the state's most populous city and the country's second largest after New York City. California also includes the nation's most populous county, Los Angeles County, and the largest county by area, San Bernardino County. Geographically located in the western part of the United States, California is bordered by the other United States states of Oregon to the north, Nevada to the east, and Arizona to the southeast. California shares an international border with the Mexican state of Baja California to the south and the Pacific Ocean is on the state's western coastline. The state capital is Sacramento, which is located in the northern part of the state. A majority of California's cities are located in either the San Francisco Bay Area or the Sacramento metropolitan area in Northern California; or the Los Angeles area, the Riverside-San Bernardino-Inland Empire, or the San Diego metropolitan area in Southern California.
-\n\n
-What is now California was first settled by various Native American tribes before being explored by a number of European expeditions during the 16th and 17th centuries. It was then claimed by the Spanish Empire as part of Alta California in the larger territory of New Spain. Alta California became a part of Mexico in 1821 following its successful war for independence, but was ceded to the United States in 1848 after the Mexican–American War. The western portion of Alta California was organized as the State of California, which was admitted as the 31st state on September 9, 1850. The California Gold Rush starting in 1848 led to dramatic social and demographic changes, with large-scale immigration from the east and abroad with an accompanying economic boom.
-\n\n
-California's diverse geography ranges from the Sierra Nevada in the east to the Pacific Coast in the west, from the redwood–Douglas fir forests of the northwest, to the Mojave Desert areas in the southeast. The center of the state is dominated by the Central Valley, a major agricultural area. California contains both the highest point (Mount Whitney) and the lowest point (Death Valley) in the contiguous United States. Earthquakes are common because of the state's location along the Pacific Ring of Fire. About 37,000 earthquakes are recorded each year, but most are too small to be felt.[12]
-\n\n
-California is regarded as a global trendsetter in both popular culture and politics, and is the birthplace of the film industry, the hippie counterculture, the Internet,[13] and the personal computer. The state's economy is centered on finance, government, real estate services, technology, and professional, scientific and technical business services; together comprising 58% of the state's economy.[14] Three of the world's largest 20 firms by revenue, Chevron, Apple, and McKesson, are headquartered in the state.[15] Although only 1.5% of the state's economy,[14] California's agriculture industry has the highest output of any United States state.[16] If it were a country, California would be the 6th largest economy in the world[17] and the 35th most populous."
+            android:text="California is the most populous state in the United States. It is also the third most extensive by area. Los Angeles, in Southern California, is the state's most populous city and the country's second largest after New York City. California also includes the nation's most populous county, Los Angeles County, and the largest county by area, San Bernardino County. Geographically located in the western part of the United States, California is bordered by the other United States states of Oregon to the north, Nevada to the east, and Arizona to the southeast. "
             android:textSize="18sp" />
-    <!--</ScrollView>-->
+    </ScrollView>
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:dividerHeight="0dp"/>
+
+    <ListView
+        android:id="@+id/listView2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:dividerHeight="0dp"/>
 
 </com.lcodecore.twinklingrefreshlayout.BounceableLinearLayout>
