@@ -12,8 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lcodecore.tkrefreshlayout.header.bezierlayout.BezierLayout;
-import com.lcodecore.tkrefreshlayout.v2.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
 import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.CardAdapter;
 import com.lcodecore.twinklingrefreshlayout.adapter.ViewPagerHolder;
@@ -49,12 +49,12 @@ public class RecyclerFragment extends Fragment {
         rv.setAdapter(cardAdapter);
 
         final TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) rootView.findViewById(R.id.refresh);
-        ProgressLayout headerView = new ProgressLayout(getContext());
-//        BezierLayout headerView = new BezierLayout(getContext());
+//        ProgressLayout headerView = new ProgressLayout(getContext());
+        BezierLayout headerView = new BezierLayout(getContext());
         refreshLayout.setHeaderView(headerView);
-        refreshLayout.setFloatRefresh(false);
-        refreshLayout.setPureScrollModeOn(true);
-        refreshLayout.setEnableOverlayRefreshView(false);
+//        refreshLayout.setFloatRefresh(false);
+//        refreshLayout.setPureScrollModeOn(true);
+//        refreshLayout.setEnableOverlayRefreshView(false);
 //        refreshLayout.setAutoLoadMore(true);
 
         addHeader();

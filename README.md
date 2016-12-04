@@ -245,6 +245,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 滑到底部**自动加载更多**or回弹可选，默认为回弹
 - 将Head,Footer修改为设置位移，而不是设置高度
 - 允许在结束刷新之前执行一个动效：IHeadView.onFinish(animEndListener)
+- 新增支持Header(可以为任意类型)
 
 ##### fixed bugs
 - 修复刷新或加载更多时，列表item没有铺满列表控件，滑动无效的问题
