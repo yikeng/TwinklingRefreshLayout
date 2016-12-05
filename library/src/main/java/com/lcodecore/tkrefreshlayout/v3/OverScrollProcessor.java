@@ -23,7 +23,7 @@ public class OverScrollProcessor {
 
     private CoProcessor cp;
 
-    //满足越界的手势的最低速度(默认5000)
+    //满足越界的手势的最低速度(默认3000)
     protected int OVER_SCROLL_MIN_VX = 3000;
 
     public OverScrollProcessor(CoProcessor coProcessor) {
@@ -154,48 +154,6 @@ public class OverScrollProcessor {
     //主要为了监测Fling的动作,实现越界回弹
     private float mVelocityY;
 
-    /*private GestureDetector gestureDetector = new GestureDetector(cp.getContext(), new GestureDetector.SimpleOnGestureListener() {
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            //TODO 最小速度要求
-            //TODO bug 待解决  列表控件没有填满屏幕时，scroll无效
-            //TODO 此处不应走finishRefreshing/finishLoadmore，而应该走隐藏head/bottom
-            if (cp.isRefreshing() && distanceY >= mTouchSlop && !cp.isOpenFloatRefresh()) {
-                cp.getAnimProcessor().animHeadByVy((int) vy);
-            }
-            if (cp.isLoadingmore() && distanceY <= -mTouchSlop) {
-                cp.getAnimProcessor().animBottomByVy((int) vy);
-            }
-
-            //释放速度计算器资源
-            if (e2.getAction() == MotionEvent.ACTION_UP || e2.getAction() == MotionEvent.ACTION_CANCEL) {
-                if (null != moveTracker) {
-                    moveTracker.clear();
-                    moveTracker.recycle();
-                    moveTracker = null;
-                }
-            }
-
-            return super.onScroll(e1, e2, distanceX, distanceY);
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            mVelocityY = velocityY;
-//            if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
-            //既不是AbsListView也不是RecyclerView,由于这些没有实现OnScrollListener接口,无法回调状态,只能采用延时策略
-            if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {
-                mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
-            } else {
-                cur_delay_times = ALL_DELAY_TIMES;
-            }
-//            }
-            return false;
-        }
-    });
-*/
-
     //针对部分没有OnScrollListener的View的延时策略
     private static final int MSG_START_COMPUTE_SCROLL = 0; //开始计算
     private static final int MSG_CONTINUE_COMPUTE_SCROLL = 1;//继续计算
@@ -217,7 +175,6 @@ public class OverScrollProcessor {
                     View mChildView = cp.getContent();
 
                     if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
-                        //
 
                         if (cp.allowOverScroll() && mVelocityY >= OVER_SCROLL_MIN_VX && (mChildView != null && Math.abs(mChildView.getScrollY()) <= 2 * mTouchSlop)) {
                             cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
@@ -243,7 +200,6 @@ public class OverScrollProcessor {
                                 cur_delay_times = ALL_DELAY_TIMES;
                             }
                         }
-                        //
                     }
 
                     if (cur_delay_times < ALL_DELAY_TIMES)

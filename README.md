@@ -252,7 +252,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 添加主动刷新/加载更多的方法：startRefresh(),startLoadMore()
 - 修复顶部和底部越界高度不一致的问题
 - 修复WebView在底部fling时不能越界的问题
-- 动画执行时间与高度相关，动效更加柔和 TODO
+- 动画执行时间与高度相关，动效更加柔和
 
 
 #### v1.03

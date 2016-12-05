@@ -8,8 +8,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.lcodecore.tkrefreshlayout.Footer.BottomProgressView;
 import com.lcodecore.tkrefreshlayout.IBottomView;
@@ -23,7 +25,7 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 /**
  * Created by lcodecore on 16/3/2.
  */
-public class TwinklingRefreshLayout extends FrameLayout {
+public class TwinklingRefreshLayout extends RelativeLayout {
 
     //波浪的高度,最大扩展高度
     protected float mWaveHeight;
@@ -42,6 +44,8 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
     //整个头部
     private FrameLayout mExtraHeadLayout;
+    //附加顶部高度
+    private int mExHeadHeight = 0;
 
     private IHeaderView mHeadView;
     private IBottomView mBottomView;
@@ -120,25 +124,20 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         //添加头部
         if (mHeadLayout == null) {
-            LinearLayout wholeHead = new LinearLayout(getContext());
-            wholeHead.setOrientation(LinearLayout.VERTICAL);
-            LayoutParams wholeLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-            wholeLayoutParams.gravity = Gravity.TOP;
-            wholeHead.setLayoutParams(wholeLayoutParams);
-
             FrameLayout headViewLayout = new FrameLayout(getContext());
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
+            layoutParams.addRule(ALIGN_PARENT_TOP);
+            layoutParams.addRule(CENTER_VERTICAL);
 
             FrameLayout extraHeadLayout = new FrameLayout(getContext());
-            LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            extraHeadLayout.setId(View.NO_ID);
+            LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
-            wholeHead.addView(headViewLayout, layoutParams);
-            wholeHead.addView(extraHeadLayout, layoutParams2);
+            this.addView(headViewLayout, layoutParams);
+            this.addView(extraHeadLayout, layoutParams2);
 
             mExtraHeadLayout = extraHeadLayout;
             mHeadLayout = headViewLayout;
-
-            this.addView(wholeHead);
 
             if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
         }
@@ -147,7 +146,9 @@ public class TwinklingRefreshLayout extends FrameLayout {
         if (mBottomLayout == null) {
             FrameLayout bottomViewLayout = new FrameLayout(getContext());
             LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
-            layoutParams2.gravity = Gravity.BOTTOM;
+            layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
+            layoutParams2.addRule(CENTER_VERTICAL);
+//            layoutParams2.gravity = Gravity.BOTTOM;
             bottomViewLayout.setLayoutParams(layoutParams2);
 
             mBottomLayout = bottomViewLayout;
@@ -237,18 +238,37 @@ public class TwinklingRefreshLayout extends FrameLayout {
     /**
      * 设置额外的头部
      */
-    public void addExtraHeaderView() {
-        if (mExtraHeadLayout != null) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    View testView = new View(getContext());
-                    testView.setBackgroundColor(getResources().getColor(R.color.Orange));
-                    LayoutParams testLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, DensityUtil.dp2px(getContext(), 200));
-                    mExtraHeadLayout.addView(testView, testLayoutParams);
-                }
-            });
+    private void addExtraHeaderView() {
+        View testView = new View(getContext());
+        testView.setBackgroundColor(getResources().getColor(R.color.Orange));
+        LayoutParams testLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, DensityUtil.dp2px(getContext(), 30));
+        testView.setLayoutParams(testLayoutParams);
+        addFixedExHeader(testView);
+    }
+
+    public void addFixedExHeader(View view) {
+        if (view != null && mExtraHeadLayout != null) {
+            mExtraHeadLayout.addView(view);
+            cp.onAddExHead();
+            cp.setExHeadFixed();
         }
+    }
+
+    /**TODO 适配可以随界面滚动的Header
+     public void addNormalExHeader(View view) {
+     if (view != null && mExtraHeadLayout != null) {
+     mExtraHeadLayout.addView(view);
+     cp.onAddExHead();
+     cp.setExHeadNormal();
+     }
+     }
+     **/
+
+    /**
+     * 获取额外附加的头部
+     */
+    public View getExtraHeaderView() {
+        return mExtraHeadLayout;
     }
 
     /**
@@ -360,9 +380,7 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
     }
 
-    /**
-     * 设置拖动屏幕的监听器
-     */
+    //设置拖动屏幕的监听器
     private PullListener pullListener;
 
     private void setPullListener(PullListener pullListener) {
@@ -433,6 +451,10 @@ public class TwinklingRefreshLayout extends FrameLayout {
         private final static int PULLING_BOTTOM_UP = 1;
         private int state = PULLING_TOP_DOWN;
 
+        private static final int EX_MODE_NORMAL = 0;
+        private static final int EX_MODE_FIXED = 1;
+        private int exHeadMode = EX_MODE_NORMAL;
+
 
         public CoProcessor() {
             animProcessor = new AnimProcessor(this);
@@ -451,6 +473,46 @@ public class TwinklingRefreshLayout extends FrameLayout {
             animProcessor.init();
         }
 
+        public AnimProcessor getAnimProcessor() {
+            return animProcessor;
+        }
+
+        public float getMaxHeadHeight() {
+            return mWaveHeight;
+        }
+
+        public int getHeadHeight() {
+            return (int) mHeadHeight;
+        }
+
+        public int getExtraHeadHeight() {
+            return mExtraHeadLayout.getHeight();
+        }
+
+        public int getBottomHeight() {
+            return (int) mBottomHeight;
+        }
+
+        public int getOsHeight() {
+            return (int) mOverScrollHeight;
+        }
+
+        public View getScrollableView() {
+            return mChildView;
+        }
+
+        public View getContent() {
+            return mChildView;
+        }
+
+        public View getHeader() {
+            return mHeadLayout;
+        }
+
+        public View getFooter() {
+            return mBottomLayout;
+        }
+
         public Context getContext() {
             return TwinklingRefreshLayout.this.getContext();
         }
@@ -459,6 +521,17 @@ public class TwinklingRefreshLayout extends FrameLayout {
             return ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
 
+        public boolean interceptTouchEvent(MotionEvent ev) {
+            return refreshProcessor.interceptTouchEvent(ev);
+        }
+
+        public boolean consumeTouchEvent(MotionEvent ev) {
+            return refreshProcessor.consumeTouchEvent(ev);
+        }
+
+        /**
+         * 在越界时阻止再次进入这个状态而导致动画闪烁。  Prevent entering the overscroll-mode again on animating.
+         */
         private boolean isOverScrollTopLocked = false;
 
         public void lockOsTop() {
@@ -487,51 +560,51 @@ public class TwinklingRefreshLayout extends FrameLayout {
             return isOverScrollBottomLocked;
         }
 
+        /**
+         * 在添加附加Header前锁住，阻止一些额外的位移动画
+         */
+        private boolean isExHeadLocked = true;
 
-        public AnimProcessor getAnimProcessor() {
-            return animProcessor;
+        public boolean isExHeadLocked() {
+            return isExHeadLocked;
         }
 
-        public boolean interceptTouchEvent(MotionEvent ev) {
-            return refreshProcessor.interceptTouchEvent(ev);
+        private void unlockExHead() {
+            isExHeadLocked = false;
         }
 
-        public boolean consumeTouchEvent(MotionEvent ev) {
-            return refreshProcessor.consumeTouchEvent(ev);
+        public View getExHead() {
+            return mExtraHeadLayout;
         }
 
-        public float getMaxHeadHeight() {
-            return mWaveHeight;
+        public void setExHeadNormal() {
+            exHeadMode = EX_MODE_NORMAL;
         }
 
-        public int getHeadHeight() {
-            return (int) mHeadHeight;
+        public void setExHeadFixed() {
+            exHeadMode = EX_MODE_FIXED;
         }
 
-        public int getBottomHeight() {
-            return (int) mBottomHeight;
+        public boolean isExHeadNormal() {
+            return exHeadMode == EX_MODE_NORMAL;
         }
 
-        public int getOsHeight() {
-            return (int) mOverScrollHeight;
+        public boolean isExHeadFixed() {
+            return exHeadMode == EX_MODE_FIXED;
         }
 
-        public View getScrollableView() {
-            return mChildView;
+        //添加了额外头部时触发
+        public void onAddExHead() {
+            unlockExHead();
+            LayoutParams params = (LayoutParams) mChildView.getLayoutParams();
+            params.addRule(BELOW, mExtraHeadLayout.getId());
+            mChildView.setLayoutParams(params);
         }
 
-        public View getContent() {
-            return mChildView;
-        }
 
-        public View getHeader() {
-            return mHeadLayout;
-        }
-
-        public View getFooter() {
-            return mBottomLayout;
-        }
-
+        /**
+         * 主动刷新、加载更多、结束
+         */
         public void startRefresh() {
             setRefreshing(true);
             post(new Runnable() {
@@ -541,7 +614,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                     if (!isPureScrollModeOn && mChildView != null) {
                         setRefreshing(true);
                         animProcessor.animHeadToRefresh();
-//                        animProcessor.animLayoutByTime(0, (int) mHeadHeight);
                         if (pullListener != null) {
                             pullListener.onRefresh(TwinklingRefreshLayout.this);
                         }
@@ -559,7 +631,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                     if (!isPureScrollModeOn && mChildView != null) {
                         setLoadingMore(true);
                         animProcessor.animBottomToLoad();
-//                        animProcessor.animLayoutByTime(0, (int) mBottomHeight);
                         if (pullListener != null) {
                             pullListener.onLoadMore(TwinklingRefreshLayout.this);
                         }
@@ -577,7 +648,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 setStatePTD();
                 setRefreshing(false);
                 animProcessor.animHeadBack();
-//                animProcessor.animLayoutByTime((int) mHeadHeight, 0);
             }
         }
 
@@ -588,7 +658,6 @@ public class TwinklingRefreshLayout extends FrameLayout {
                 setStatePBU();
                 setLoadingMore(false);
                 animProcessor.animBottomBack();
-//                animProcessor.animLayoutByTime((int) mBottomHeight, 0);
             }
         }
 

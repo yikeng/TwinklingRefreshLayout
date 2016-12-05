@@ -7,6 +7,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.animation.DecelerateInterpolator;
 
+import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout.CoProcessor;
 
 import static android.view.View.GONE;
@@ -17,10 +18,8 @@ import static android.view.View.VISIBLE;
  */
 
 public class AnimProcessor {
-    //AnimTasks
 
     private CoProcessor cp;
-    //    private ValueAnimator va;
     private static final float animFraction = 1f;
     //动画的变化率
     private DecelerateInterpolator decelerateInterpolator;
@@ -31,20 +30,7 @@ public class AnimProcessor {
         decelerateInterpolator = new DecelerateInterpolator(10);
     }
 
-
-//    private boolean isRefreshing, isLoadingmore, isOverScrollTop, isOverScrollBottom;
-//    private boolean isPureScrollModeOn, isOverlayRefreshShow, floatRefresh, enableOverScrollTop, enableOverScrollBottom;
-//
-//    private int PULLING_TOP_DOWN = 0;
-//    private int PULLING_BOTTOM_UP = 1;
-//    private int state = PULLING_TOP_DOWN;
-
-
     public void init() {
-//        mChildView.animate().setInterpolator(new DecelerateInterpolator());
-
-        //在动画开始的地方快然后慢;
-
     }
 
 
@@ -54,12 +40,13 @@ public class AnimProcessor {
         if (cp.getHeader().getVisibility() != VISIBLE) cp.getHeader().setVisibility(VISIBLE);
 
         if (cp.isPureScrollModeOn()) cp.getHeader().setVisibility(GONE);
-//        cp.getHeader().setTranslationY(-cp.getHeadHeight() + offsetY);
         cp.getHeader().getLayoutParams().height = (int) Math.abs(offsetY);
         cp.getHeader().requestLayout();
 
-        if (!cp.isOpenFloatRefresh()) cp.getContent().setTranslationY(offsetY);
-
+        if (!cp.isOpenFloatRefresh()) {
+            cp.getContent().setTranslationY(offsetY);
+            translateExHead((int) offsetY);
+        }
         cp.onPullingDown(offsetY);
     }
 
@@ -69,7 +56,6 @@ public class AnimProcessor {
         if (cp.getFooter().getVisibility() != VISIBLE) cp.getFooter().setVisibility(VISIBLE);
 
         if (cp.isPureScrollModeOn()) cp.getFooter().setVisibility(GONE);
-//        cp.getFooter().setTranslationY(cp.getBottomHeight() - offsetY);
         cp.getFooter().getLayoutParams().height = (int) Math.abs(offsetY);
         cp.getFooter().requestLayout();
 
@@ -101,12 +87,10 @@ public class AnimProcessor {
     }
 
     private int getVisibleHeadHeight() {
-//        return (int) (cp.getHeadHeight() + cp.getHeader().getTranslationY());
         return cp.getHeader().getLayoutParams().height;
     }
 
     private int getVisibleFootHeight() {
-//        return (int) (cp.getBottomHeight() - cp.getFooter().getTranslationY());
         return cp.getFooter().getLayoutParams().height;
     }
 
@@ -117,8 +101,6 @@ public class AnimProcessor {
      */
     public void animHeadToRefresh() {
         isAnimHeadToRefresh = true;
-        //if (!floatRefresh) animChildView(mHeadHeight);
-//        animLayoutByTime(getVisibleHeadHeight(), (int) cp.getHeadHeight());
         animLayoutByTime(getVisibleHeadHeight(), cp.getHeadHeight(), animHeadUpListener, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -134,9 +116,6 @@ public class AnimProcessor {
      */
     public void animHeadBack() {
         isAnimHeadBack = true;
-//        if (!floatRefresh) animChildView(0f);
-//        else animFloatRefresh(0f);
-//        animLayoutByTime(getVisibleHeadHeight(), 0);
         animLayoutByTime(getVisibleHeadHeight(), 0, animHeadUpListener, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -152,7 +131,6 @@ public class AnimProcessor {
      */
     public void animBottomToLoad() {
         isAnimBottomToLoad = true;
-//        animLayoutByTime(getVisibleFootHeight(), (int) cp.getBottomHeight());
         animLayoutByTime(getVisibleFootHeight(), cp.getBottomHeight(), animBottomUpListener, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -168,7 +146,6 @@ public class AnimProcessor {
      */
     public void animBottomBack() {
         isAnimBottomBack = true;
-//        animLayoutByTime(getVisibleFootHeight(), 0);
         animLayoutByTime(getVisibleFootHeight(), 0, animBottomUpListener, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -186,8 +163,7 @@ public class AnimProcessor {
      */
     public void animHeadHideByVy(int vy) {
         isAnimHeadHide = true;
-//        animLayoutByVy((int) cp.getHeadHeight(), 0, vy);
-        if (vy == 0) vy = 5000;
+        if (vy == 0) vy = 10000;
         vy = Math.abs(vy);
         animLayoutByTime(getVisibleHeadHeight(), 0, 5 * Math.abs(getVisibleHeadHeight() * 1000 / vy), animHeadUpListener, new AnimatorListenerAdapter() {
             @Override
@@ -206,8 +182,7 @@ public class AnimProcessor {
      */
     public void animBottomHideByVy(int vy) {
         isAnimBottomHide = true;
-//        animLayoutByVy((int) cp.getBottomHeight(), 0, vy);
-        if (vy == 0) vy = 5000;
+        if (vy == 0) vy = 10000;
         vy = Math.abs(vy);
         animLayoutByTime(getVisibleFootHeight(), 0, 5 * getVisibleFootHeight() * 1000 / vy, animBottomUpListener, new AnimatorListenerAdapter() {
             @Override
@@ -286,10 +261,12 @@ public class AnimProcessor {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             int height = (int) animation.getAnimatedValue();
-//            cp.getHeader().setTranslationY(-cp.getHeadHeight() + height);
             cp.getHeader().getLayoutParams().height = height;
             cp.getHeader().requestLayout();
-            if (!cp.isOpenFloatRefresh()) cp.getContent().setTranslationY(height);
+            if (!cp.isOpenFloatRefresh()) {
+                cp.getContent().setTranslationY(height);
+                translateExHead(height);
+            }
             cp.onPullDownReleasing(height);
         }
     };
@@ -298,7 +275,6 @@ public class AnimProcessor {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             int height = (int) animation.getAnimatedValue();
-//            cp.getFooter().setTranslationY(cp.getBottomHeight() - height);
             cp.getFooter().getLayoutParams().height = height;
             cp.getFooter().requestLayout();
             cp.getContent().setTranslationY(-height);
@@ -311,11 +287,13 @@ public class AnimProcessor {
         public void onAnimationUpdate(ValueAnimator animation) {
             int height = (int) animation.getAnimatedValue();
             if (cp.isOverScrollRefreshShow()) {
-//                cp.getHeader().setTranslationY(-cp.getHeadHeight() + height);
                 cp.getHeader().getLayoutParams().height = height;
                 cp.getHeader().requestLayout();
             } else cp.getHeader().setVisibility(GONE);
+
             cp.getContent().setTranslationY(height);
+            translateExHead(height);
+
             cp.onPullDownReleasing(height);
         }
     };
@@ -325,7 +303,6 @@ public class AnimProcessor {
         public void onAnimationUpdate(ValueAnimator animation) {
             int height = (int) animation.getAnimatedValue();
             if (cp.isOverScrollRefreshShow()) {
-//                cp.getFooter().setTranslationY(cp.getBottomHeight() - height);
                 cp.getFooter().getLayoutParams().height = height;
                 cp.getFooter().requestLayout();
             } else cp.getFooter().setVisibility(GONE);
@@ -334,36 +311,13 @@ public class AnimProcessor {
         }
     };
 
-    //保证快速回到不可见状态
-//    public void animLayoutByVy(int start, int end, int vy) {
-//        if (vy == 0) vy = 5000;
-//        animLayoutByTime(start, end, 5 * Math.abs((start - end) * 1000 / vy));
-//    }
+    public void onScrolled(int distanceY) {
+        //TODO 支持正常模式的Header  to support the normal-mode ex-header.
+    }
 
-//    public void animLayoutByTime(int start, int end) {
-//        ValueAnimator va = ValueAnimator.ofInt(start, end);
-//        va.setInterpolator(new DecelerateInterpolator());
-//        va.addUpdateListener(animUpListener);
-//        va.setDuration((int) (Math.abs(start - end) * animFraction));
-//        va.start();
-//    }
-
-//    public void animLayoutByTime(int start, int end, long time) {
-//        ValueAnimator va = ValueAnimator.ofInt(start, end);
-//        va.setInterpolator(new DecelerateInterpolator());
-//        va.addUpdateListener(animUpListener);
-//        va.setDuration(time);
-//        va.start();
-//    }
-
-//    public void animLayoutByTime(int start, int end, long time, AnimatorListener listener) {
-//        ValueAnimator va = ValueAnimator.ofInt(start, end);
-//        va.setInterpolator(new DecelerateInterpolator());
-//        va.addUpdateListener(animUpListener);
-//        va.setDuration(time);
-//        va.addListener(listener);
-//        va.start();
-//    }
+    private void translateExHead(int offsetY) {
+        if (!cp.isExHeadLocked()) cp.getExHead().setTranslationY(offsetY);
+    }
 
     public void animLayoutByTime(int start, int end, long time, AnimatorUpdateListener listener, AnimatorListener animatorListener) {
         ValueAnimator va = ValueAnimator.ofInt(start, end);
@@ -390,41 +344,4 @@ public class AnimProcessor {
         va.setDuration((int) (Math.abs(start - end) * animFraction));
         va.start();
     }
-
-    private AnimatorUpdateListener animUpListener = new AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            int height = (int) animation.getAnimatedValue();
-
-            if (cp.isStatePTD()) {
-//                if (!cp.isPureScrollModeOn())
-                cp.getHeader().setTranslationY(-cp.getHeadHeight() + height);
-//                cp.getHeader().getLayoutParams().height = height;
-//                cp.getHeader().requestLayout();//重绘
-
-                if (!cp.isOpenFloatRefresh()) cp.getContent().setTranslationY(height);
-
-//                if (cp.isOverScrollRefreshShow()) {
-//                    cp.getHeader().setVisibility(VISIBLE);
-//                    cp.getFooter().setVisibility(GONE);
-//                }
-
-                cp.onPullDownReleasing(height);
-            } else if (cp.isStatePBU()) {
-//                if (!cp.isPureScrollModeOn())
-                cp.getFooter().setTranslationY(cp.getBottomHeight() - height);
-//                cp.getFooter().getLayoutParams().height = height;
-//                cp.getFooter().requestLayout();
-
-                cp.getContent().setTranslationY(-height);
-
-//                if (cp.isOverScrollRefreshShow()) {
-//                    cp.getHeader().setVisibility(GONE);
-//                    cp.getFooter().setVisibility(VISIBLE);
-//                }
-
-                cp.onPullUpReleasing(height);
-            }
-        }
-    };
 }
