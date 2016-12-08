@@ -65,6 +65,7 @@ public class OverScrollProcessor {
                 if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {
                     mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
                 } else {
+                    mVelocityY = 0;
                     cur_delay_times = ALL_DELAY_TIMES;
                 }
 //            }
@@ -107,10 +108,12 @@ public class OverScrollProcessor {
                     if (cp.allowOverScroll() && firstVisibleItem == 0 || ((AbsListView) mChildView).getLastVisiblePosition() == totalItemCount - 1) {
                         if (mVelocityY >= OVER_SCROLL_MIN_VX && ScrollingUtil.isAbsListViewToTop((AbsListView) mChildView)) {
                             cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
+                            mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
                         if (mVelocityY <= -OVER_SCROLL_MIN_VX && ScrollingUtil.isAbsListViewToBottom((AbsListView) mChildView)) {
                             cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                            mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
                     }
@@ -123,10 +126,12 @@ public class OverScrollProcessor {
                     if (cp.allowOverScroll() && newState == RecyclerView.SCROLL_STATE_IDLE) {
                         if (mVelocityY >= OVER_SCROLL_MIN_VX && ScrollingUtil.isRecyclerViewToTop((RecyclerView) mChildView)) {
                             cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
+                            mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
                         if (mVelocityY <= -OVER_SCROLL_MIN_VX && ScrollingUtil.isRecyclerViewToBottom((RecyclerView) mChildView)) {
                             cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                            mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
                     }
@@ -178,6 +183,7 @@ public class OverScrollProcessor {
 
                         if (cp.allowOverScroll() && mVelocityY >= OVER_SCROLL_MIN_VX && (mChildView != null && Math.abs(mChildView.getScrollY()) <= 2 * mTouchSlop)) {
                             cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
+                            mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
 
@@ -186,6 +192,7 @@ public class OverScrollProcessor {
                                 WebView webview = (WebView) (mChildView);
                                 if (Math.abs(webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())) <= 2 * mTouchSlop) {
                                     cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                                    mVelocityY = 0;
                                     cur_delay_times = ALL_DELAY_TIMES;
                                 }
                             } else if (mChildView instanceof ViewGroup) {
@@ -193,10 +200,12 @@ public class OverScrollProcessor {
                                 if (subChildView != null && subChildView.getMeasuredHeight() <= mChildView.getScrollY() + mChildView.getHeight()) {
                                     //滚动到了底部
                                     cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                                    mVelocityY = 0;
                                     cur_delay_times = ALL_DELAY_TIMES;
                                 }
                             } else if (mChildView.getScrollY() >= mChildView.getHeight()) {
                                 cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                                mVelocityY = 0;
                                 cur_delay_times = ALL_DELAY_TIMES;
                             }
                         }

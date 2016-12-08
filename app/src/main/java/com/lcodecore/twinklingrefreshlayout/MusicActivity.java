@@ -12,6 +12,7 @@ import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.MusicAdapter;
+
 //TODO 1.float refresh有问题   2.优化SwipeCircle显示问题
 public class MusicActivity extends AppCompatActivity {
 
@@ -36,10 +37,10 @@ public class MusicActivity extends AppCompatActivity {
 
     private void setupListView(ListView listView) {
         TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refresh);
-        GoogleDotView headerView = new GoogleDotView(this);
-//        ProgressLayout headerView = new ProgressLayout(this);
+//        GoogleDotView headerView = new GoogleDotView(this);
+        ProgressLayout headerView = new ProgressLayout(this);
         refreshLayout.setHeaderView(headerView);
-        View exHeader = View.inflate(this,R.layout.header_music,null);
+        View exHeader = View.inflate(this, R.layout.header_music, null);
         refreshLayout.addFixedExHeader(exHeader);
         refreshLayout.setEnableOverlayRefreshView(false);
 //        refreshLayout.setFloatRefresh(true);
@@ -47,7 +48,7 @@ public class MusicActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         adapter.refreshCard();
 
-        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
+        refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {

@@ -20,7 +20,8 @@
             android:layout_height="match_parent"
             android:background="@android:color/white"
             android:divider="#FAFBFF"
-            android:dividerHeight="2dp" />
+            android:dividerHeight="2dp"
+            android:overScrollMode="never" />
 
     </com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout>
 

@@ -11,8 +11,8 @@ import android.widget.GridView;
 
 import com.lcodecore.tkrefreshlayout.Footer.LoadingView;
 import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
-import com.lcodecore.tkrefreshlayout.v2.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.SimpleAdapter;
 
 /**
@@ -49,6 +49,7 @@ public class GridViewFragment extends Fragment {
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
+                System.out.println("阿西吧，据说正在刷新...");
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {

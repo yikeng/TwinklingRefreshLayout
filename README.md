@@ -229,8 +229,9 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 如上所示，轻而易举就可以实现一个个性化的Header或者Footer。（更简单的实现请参考Demo中的 **TextHeaderView(图四)**）。
 
 
-## 剩余问题
-- 制作一个star相关的动效。
+## TODO
+- 制作一个star相关的动效
+- CoordinateLayout及NestedScroll支持
 - 对回弹效果做一下优化，比如支持使用不同的插值器
 - 带视差效果的Header
 - SwipeRefreshLayout风格的刷新View
@@ -246,6 +247,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 将Head,Footer修改为设置位移，而不是设置高度
 - 允许在结束刷新之前执行一个动效：IHeadView.onFinish(animEndListener)
 - 新增支持Header(可以为任意类型)
+- 优化BezierLayout、SinaRefreshLayout等的显示并增加调节属性
 
 ##### fixed bugs
 - 修复刷新或加载更多时，列表item没有铺满列表控件，滑动无效的问题

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +19,13 @@ import com.lcodecore.tkrefreshlayout.IHeaderView;
  * Created by lcodecore on 2016/10/2.
  */
 
-public class BezierLayout extends FrameLayout implements IHeaderView{
+public class BezierLayout extends FrameLayout implements IHeaderView {
     public BezierLayout(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public BezierLayout(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public BezierLayout(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -56,8 +57,13 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
         addView(headView);
     }
 
+    public void setWaveColor(@ColorInt int color) {
+        waveView.setWaveColor(color);
+    }
+
     /**
      * 限定值
+     *
      * @param a
      * @param b
      * @return
@@ -77,12 +83,13 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
     }
 
     @Override
-    public void onPullingDown(float fraction,float maxHeadHeight,float headHeight) {
+    public void onPullingDown(float fraction, float maxHeadHeight, float headHeight) {
+        if (rippleView.getVisibility() == VISIBLE) rippleView.setVisibility(GONE);
         waveView.setHeadHeight((int) (headHeight * limitValue(1, fraction)));
         waveView.setWaveHeight((int) (maxHeadHeight * Math.max(0, fraction - 1)));
         waveView.invalidate();
 
-                /*处理圈圈**/
+        /*处理圈圈**/
         r1.setCir_x((int) (30 * limitValue(1, fraction)));
         r1.setVisibility(View.VISIBLE);
         r1.invalidate();
@@ -93,20 +100,24 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
     }
 
     @Override
-    public void onPullReleasing(float fraction,float maxHeadHeight,float headHeight) {
-            r1.setCir_x((int)(30 * limitValue(1, fraction)));
-            r1.invalidate();
+    public void onPullReleasing(float fraction, float maxHeadHeight, float headHeight) {
+        waveView.setHeadHeight((int) (headHeight * limitValue(1, fraction)));
+        waveView.setWaveHeight((int) (maxHeadHeight * Math.max(0, fraction - 1)));
+        waveView.invalidate();
+
+        r1.setCir_x((int) (30 * limitValue(1, fraction)));
+        r1.invalidate();
     }
 
     @Override
-    public void startAnim(float maxHeadHeight,float headHeight) {
-        waveView.setHeadHeight((int)headHeight);
-        ValueAnimator animator = ValueAnimator.ofInt(waveView.getWaveHeight(), 0,-300,0,-100,0);
+    public void startAnim(float maxHeadHeight, float headHeight) {
+        waveView.setHeadHeight((int) headHeight);
+        ValueAnimator animator = ValueAnimator.ofInt(waveView.getWaveHeight(), 0, -300, 0, -100, 0);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
 //                        Log.i("anim", "value--->" + (int) animation.getAnimatedValue());
-                waveView.setWaveHeight((int) animation.getAnimatedValue()/2);
+                waveView.setWaveHeight((int) animation.getAnimatedValue() / 2);
                 waveView.invalidate();
 
             }
@@ -130,7 +141,7 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
                         //r2.setAnimStart();
                         r2.startAnim();
                     }
-                },200);
+                }, 200);
             }
         });
 
@@ -151,9 +162,14 @@ public class BezierLayout extends FrameLayout implements IHeaderView{
     @Override
     public void onFinish(final OnAnimEndListener animEndListener) {
         r2.stopAnim();
-        r2.animate().scaleX((float)0.0);
-        r2.animate().scaleY((float)0.0);
-        rippleView.setAnimEndListener(animEndListener);
+        r2.animate().scaleX((float) 0.0);
+        r2.animate().scaleY((float) 0.0);
+        rippleView.setRippleEndListener(new RippleView.OnRippleEndListener() {
+            @Override
+            public void onRippleEnd() {
+                animEndListener.onAnimEnd();
+            }
+        });
         rippleView.startReveal();
     }
 }

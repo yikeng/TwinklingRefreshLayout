@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -54,6 +55,10 @@ public class WaveView extends View {
 
     public void setWaveHeight(int waveHeight) {
         this.waveHeight = waveHeight;
+    }
+
+    public void setWaveColor(@ColorInt int color) {
+        if (paint != null) paint.setColor(color);
     }
 
     @Override

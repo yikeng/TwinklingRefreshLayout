@@ -46,9 +46,10 @@ public class PhotoActivity extends AppCompatActivity {
 //        ProgressLayout headerView = new ProgressLayout(this);
         BezierLayout headerView = new BezierLayout(this);
         refreshLayout.setHeaderView(headerView);
+        refreshLayout.setWaveHeight(140);
 //        refreshLayout.setFloatRefresh(true);
 //        refreshLayout.setPureScrollModeOn(true);
-        refreshLayout.setEnableOverlayRefreshView(false);
+//        refreshLayout.setEnableOverlayRefreshView(false);
 //        refreshLayout.setAutoLoadMore(true);
 
 //        addHeader();

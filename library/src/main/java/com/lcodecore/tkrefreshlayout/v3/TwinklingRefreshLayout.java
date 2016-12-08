@@ -80,10 +80,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     //是否开启悬浮刷新模式
     protected boolean floatRefresh = false;
 
-    //满足越界的手势的最低速度(默认5000)
-    protected int overScrollMinVx = 5000;
-
-
     private CoProcessor cp;
 
     public TwinklingRefreshLayout(Context context) {
@@ -133,8 +129,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             extraHeadLayout.setId(View.NO_ID);
             LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
-            this.addView(headViewLayout, layoutParams);
             this.addView(extraHeadLayout, layoutParams2);
+            this.addView(headViewLayout, layoutParams);
 
             mExtraHeadLayout = extraHeadLayout;
             mHeadLayout = headViewLayout;
@@ -148,7 +144,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
             layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
             layoutParams2.addRule(CENTER_VERTICAL);
-//            layoutParams2.gravity = Gravity.BOTTOM;
             bottomViewLayout.setLayoutParams(layoutParams2);
 
             mBottomLayout = bottomViewLayout;
@@ -187,6 +182,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     }
 
 
+    /*************************************  开放api区  *****************************************/
     //主动刷新
     public void startRefresh() {
         cp.startRefresh();
@@ -197,8 +193,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         cp.startLoadMore();
     }
 
-
-    /*************************************  开放api区  *****************************************/
     /**
      * 刷新结束
      */
@@ -211,10 +205,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
      */
     public void finishLoadmore() {
         cp.finishLoadmore();
-    }
-
-    public void setOverScrollMinVx(int overScrollMinVx) {
-        this.overScrollMinVx = overScrollMinVx;
     }
 
     /**
@@ -234,16 +224,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     }
 
     /**
-     * 设置额外的头部
+     * 设置固定在顶部的header
      */
-    private void addExtraHeaderView() {
-        View testView = new View(getContext());
-        testView.setBackgroundColor(getResources().getColor(R.color.Orange));
-        LayoutParams testLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, DensityUtil.dp2px(getContext(), 30));
-        testView.setLayoutParams(testLayoutParams);
-        addFixedExHeader(testView);
-    }
-
     public void addFixedExHeader(final View view) {
 
         post(new Runnable() {
@@ -298,24 +280,24 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     /**
      * 设置wave的下拉高度
      *
-     * @param waveHeight
+     * @param waveHeightDp
      */
-    public void setWaveHeight(float waveHeight) {
-        this.mWaveHeight = waveHeight;
+    public void setWaveHeight(float waveHeightDp) {
+        this.mWaveHeight = DensityUtil.dp2px(getContext(), waveHeightDp);
     }
 
     /**
      * 设置下拉头的高度
      */
-    public void setHeaderHeight(float headHeight) {
-        this.mHeadHeight = headHeight;
+    public void setHeaderHeight(float headHeightDp) {
+        this.mHeadHeight = DensityUtil.dp2px(getContext(), headHeightDp);
     }
 
     /**
      * 设置底部高度
      */
-    public void setBottomHeight(float bottomHeight) {
-        this.mBottomHeight = bottomHeight;
+    public void setBottomHeight(float bottomHeightDp) {
+        this.mBottomHeight = DensityUtil.dp2px(getContext(), bottomHeightDp);
     }
 
     /**
@@ -360,8 +342,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     /**
      * 设置越界高度
      */
-    public void setOverScrollHeight(int overScrollHeight) {
-        this.mOverScrollHeight = overScrollHeight;
+    public void setOverScrollHeight(float overScrollHeightDp) {
+        this.mOverScrollHeight = DensityUtil.dp2px(getContext(), overScrollHeightDp);
     }
 
     /**

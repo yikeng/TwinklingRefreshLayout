@@ -28,4 +28,9 @@ public interface IHeaderView {
     void startAnim(float maxHeadHeight,float headHeight);
 
     void onFinish(OnAnimEndListener animEndListener);
+
+    /**
+     * TODO 用于在必要情况下复位View，清除动画
+     */
+    //void reset();
 }

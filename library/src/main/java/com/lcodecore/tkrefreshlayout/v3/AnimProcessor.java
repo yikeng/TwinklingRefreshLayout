@@ -36,7 +36,6 @@ public class AnimProcessor {
 
     public void scrollHeadByMove(float moveY) {
         float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getMaxHeadHeight() / 2) * moveY / 2;
-
         if (cp.getHeader().getVisibility() != VISIBLE) cp.getHeader().setVisibility(VISIBLE);
 
         if (cp.isPureScrollModeOn()) cp.getHeader().setVisibility(GONE);
@@ -67,9 +66,6 @@ public class AnimProcessor {
     public void dealPullDownRelease() {
         if (!cp.isPureScrollModeOn() && getVisibleHeadHeight() >= cp.getHeadHeight() - cp.getTouchSlop()) {
             animHeadToRefresh();
-            cp.setRefreshing(true);
-
-            cp.onRefresh();
         } else {
             animHeadBack();
         }
@@ -77,10 +73,7 @@ public class AnimProcessor {
 
     public void dealPullUpRelease() {
         if (!cp.isPureScrollModeOn() && getVisibleFootHeight() >= cp.getBottomHeight() - cp.getTouchSlop()) {
-            cp.setLoadingMore(true);
             animBottomToLoad();
-
-            cp.onLoadMore();
         } else {
             animBottomBack();
         }
@@ -105,6 +98,9 @@ public class AnimProcessor {
             @Override
             public void onAnimationEnd(Animator animation) {
                 isAnimHeadToRefresh = false;
+
+                cp.setRefreshing(true);
+                cp.onRefresh();
             }
         });
     }
@@ -135,6 +131,9 @@ public class AnimProcessor {
             @Override
             public void onAnimationEnd(Animator animation) {
                 isAnimBottomToLoad = false;
+
+                cp.setLoadingMore(true);
+                cp.onLoadMore();
             }
         });
     }

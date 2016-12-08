@@ -48,10 +48,11 @@
             android:id="@+id/gridView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchMode="spacingWidthUniform"
             android:columnWidth="164dp"
-            android:verticalSpacing="12dp"
-            android:numColumns="2" />
+            android:numColumns="2"
+            android:overScrollMode="never"
+            android:stretchMode="spacingWidthUniform"
+            android:verticalSpacing="12dp" />
 
     </com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout>
 
