@@ -2,6 +2,7 @@ package com.lcodecore.tkrefreshlayout.header;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.view.View;
@@ -46,6 +47,10 @@ public class SinaRefreshView extends FrameLayout implements IHeaderView {
 
     public void setArrowResource(@DrawableRes int resId) {
         refreshArrow.setImageResource(resId);
+    }
+
+    public void setTextColor(@ColorInt int color){
+        refreshTextView.setTextColor(color);
     }
 
     public void setPullDownStr(String pullDownStr1) {

@@ -7,6 +7,49 @@
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+    <Button
+        android:id="@+id/bt_music"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Music"/>
+
+    <Button
+        android:id="@+id/bt_food"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Food"/>
+
+    <Button
+        android:id="@+id/bt_science"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Science"/>
+
+    <Button
+        android:id="@+id/bt_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Photo"/>
+
+    <Button
+        android:id="@+id/bt_story"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Story"/>
+
+    <Button
+        android:id="@+id/bt_enjoy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Dribbble"/>
+
+
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
         app:tabBackground="@android:color/white"

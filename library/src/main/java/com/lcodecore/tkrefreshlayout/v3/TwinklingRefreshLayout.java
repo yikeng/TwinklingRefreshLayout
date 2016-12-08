@@ -164,8 +164,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         mChildView = getChildAt(0);
 
         cp.init();
-
-        addExtraHeaderView();
     }
 
 
@@ -246,12 +244,18 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         addFixedExHeader(testView);
     }
 
-    public void addFixedExHeader(View view) {
-        if (view != null && mExtraHeadLayout != null) {
-            mExtraHeadLayout.addView(view);
-            cp.onAddExHead();
-            cp.setExHeadFixed();
-        }
+    public void addFixedExHeader(final View view) {
+
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (view != null && mExtraHeadLayout != null) {
+                    mExtraHeadLayout.addView(view);
+                    cp.onAddExHead();
+                    cp.setExHeadFixed();
+                }
+            }
+        });
     }
 
     /**TODO 适配可以随界面滚动的Header

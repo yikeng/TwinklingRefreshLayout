@@ -54,10 +54,10 @@ public class RecyclerFragment extends Fragment {
         refreshLayout.setHeaderView(headerView);
 //        refreshLayout.setFloatRefresh(false);
 //        refreshLayout.setPureScrollModeOn(true);
-//        refreshLayout.setEnableOverlayRefreshView(false);
+        refreshLayout.setEnableOverlayRefreshView(false);
 //        refreshLayout.setAutoLoadMore(true);
 
-        addHeader();
+//        addHeader();
         refreshCard();
 
 
