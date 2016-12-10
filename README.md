@@ -20,12 +20,12 @@ TwinklingRefreshLayout extended the thoughts of SwipeRefreshLayout,using a ViewG
 
 You can download the Video for more details.
 
-[Music - ListView - FixedHeader](atr/gif_listview.mp4)
-[Food - RecyclerView - PureScrollMode](art/gif_recyclerview.mp4)
-[Science - GridView - SinaHeader](art/gif_gridview.mp4)
-[Photo - RecyclerView - BezierLayout](art/gif_recyclerview2.mp4)
-[Story - ScrollView - GoogleDotView](art/gif_scrollview.mp4)
-[Dribbble - WebView - FloatRefresh](art/gif_webview.mp4)
+- [Music - ListView - FixedHeader](art/gif_listview.mp4)
+- [Food - RecyclerView - PureScrollMode](art/gif_recyclerview.mp4)
+- [Science - GridView - SinaHeader](art/gif_gridview.mp4)
+- [Photo - RecyclerView - BezierLayout](art/gif_recyclerview2.mp4)
+- [Story - ScrollView - GoogleDotView](art/gif_scrollview.mp4)
+- [Dribbble - WebView - FloatRefresh](art/gif_webview.mp4)
 
 ## Usage
 #### 1.Add a gradle dependency.
