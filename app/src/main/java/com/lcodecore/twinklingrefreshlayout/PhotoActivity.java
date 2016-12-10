@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.lcodecore.tkrefreshlayout.header.bezierlayout.BezierLayout;
-import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.PhotoAdapter;
 import com.lcodecore.twinklingrefreshlayout.beans.Photo;
 
@@ -49,7 +49,7 @@ public class PhotoActivity extends AppCompatActivity {
         refreshLayout.setWaveHeight(140);
 //        refreshLayout.setFloatRefresh(true);
 //        refreshLayout.setPureScrollModeOn(true);
-//        refreshLayout.setEnableOverlayRefreshView(false);
+        refreshLayout.setOverScrollBottomShow(false);
 //        refreshLayout.setAutoLoadMore(true);
 
 //        addHeader();

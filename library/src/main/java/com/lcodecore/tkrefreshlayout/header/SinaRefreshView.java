@@ -37,7 +37,7 @@ public class SinaRefreshView extends FrameLayout implements IHeaderView {
         init();
     }
 
-    private void init(){
+    private void init() {
         View rootView = View.inflate(getContext(), R.layout.view_sinaheader, null);
         refreshArrow = (ImageView) rootView.findViewById(R.id.iv_arrow);
         refreshTextView = (TextView) rootView.findViewById(R.id.tv);
@@ -49,7 +49,7 @@ public class SinaRefreshView extends FrameLayout implements IHeaderView {
         refreshArrow.setImageResource(resId);
     }
 
-    public void setTextColor(@ColorInt int color){
+    public void setTextColor(@ColorInt int color) {
         refreshTextView.setTextColor(color);
     }
 
@@ -98,11 +98,18 @@ public class SinaRefreshView extends FrameLayout implements IHeaderView {
         refreshTextView.setText(refreshingStr);
         refreshArrow.setVisibility(GONE);
         loadingView.setVisibility(VISIBLE);
-        ((AnimationDrawable)loadingView.getDrawable()).start();
+        ((AnimationDrawable) loadingView.getDrawable()).start();
     }
 
     @Override
     public void onFinish(OnAnimEndListener listener) {
         listener.onAnimEnd();
+    }
+
+    @Override
+    public void reset() {
+        refreshArrow.setVisibility(VISIBLE);
+        loadingView.setVisibility(GONE);
+        refreshTextView.setText(pullDownStr);
     }
 }

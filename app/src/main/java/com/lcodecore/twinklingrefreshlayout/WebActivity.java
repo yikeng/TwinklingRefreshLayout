@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.webkit.WebView;
 
 import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
-import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
-// TODO setEnableLoadmore  setEnableRefresh 引入了bug
+import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+
 public class WebActivity extends AppCompatActivity {
 
     private WebView mWebView;
@@ -22,10 +22,10 @@ public class WebActivity extends AppCompatActivity {
         ProgressLayout header = new ProgressLayout(this);
         refreshLayout.setHeaderView(header);
         refreshLayout.setFloatRefresh(true);
-        refreshLayout.setEnableOverlayRefreshView(false);
+        refreshLayout.setOverScrollRefreshShow(false);
         refreshLayout.setHeaderHeight(140);
         refreshLayout.setWaveHeight(240);
-        refreshLayout.setOverScrollHeight(240);
+        refreshLayout.setOverScrollHeight(200);
         refreshLayout.setEnableLoadmore(false);
         refreshLayout.setEnableRefresh(false);
 

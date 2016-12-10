@@ -59,4 +59,9 @@ public class LoadingView extends ImageView implements IBottomView {
     public void onFinish() {
 
     }
+
+    @Override
+    public void reset() {
+
+    }
 }

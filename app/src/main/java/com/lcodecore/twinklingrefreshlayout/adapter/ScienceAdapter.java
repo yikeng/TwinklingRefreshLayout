@@ -64,28 +64,6 @@ public class ScienceAdapter extends BaseAdapter {
 
     public void refreshCard() {
         cards.clear();
-//        cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-//        cards.add(new Card("我的手机与众不同", "专题",R.drawable.card_cover2));
-//        cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
-//        cards.add(new Card("BuzzFeed", "最好玩的新闻在这里",R.drawable.card_cover4));
-//        cards.add(new Card("Nester", "专治各种熊孩子",R.drawable.card_cover5));
-        cards.add(new Card("genetics", "", R.drawable.science1));
-        cards.add(new Card("globe", "", R.drawable.science2));
-        cards.add(new Card("lab-flask-leaf", "", R.drawable.science3));
-        cards.add(new Card("magnet", "", R.drawable.science4));
-        cards.add(new Card("microscope", "", R.drawable.science5));
-        cards.add(new Card("moon", "", R.drawable.science6));
-        notifyDataSetChanged();
-    }
-
-    public void loadMoreCard() {
-//        cards.add(new Card("二次元专题", "啊喂，别总想去四维空间啦",R.drawable.card_cover6));
-//        cards.add(new Card("Music Player", "闻其名，余音绕梁",R.drawable.card_cover7));
-//        cards.add(new Card("el", "剪纸人の唯美旅程",R.drawable.card_cover8));
-//        cards.add(new Card("God of Light", "点亮世界之光",R.drawable.card_cover1));
-//        cards.add(new Card("BlackLight", "做最纯粹的微博客户端",R.drawable.card_cover3));
-
-
         cards.add(new Card("genetics", "", R.drawable.science1));
         cards.add(new Card("globe", "", R.drawable.science2));
         cards.add(new Card("lab-flask-leaf", "", R.drawable.science3));
@@ -96,8 +74,20 @@ public class ScienceAdapter extends BaseAdapter {
         cards.add(new Card("satellite", "", R.drawable.science8));
         cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
         cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
-//        cards.add(new Card("globe","",R.drawable.science2));
-//        cards.add(new Card("globe","",R.drawable.science2));
+        notifyDataSetChanged();
+    }
+
+    public void loadMoreCard() {
+        cards.add(new Card("genetics", "", R.drawable.science1));
+        cards.add(new Card("globe", "", R.drawable.science2));
+        cards.add(new Card("lab-flask-leaf", "", R.drawable.science3));
+        cards.add(new Card("magnet", "", R.drawable.science4));
+        cards.add(new Card("microscope", "", R.drawable.science5));
+        cards.add(new Card("moon", "", R.drawable.science6));
+        cards.add(new Card("telescope", "", R.drawable.science7));
+        cards.add(new Card("satellite", "", R.drawable.science8));
+        cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
+        cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
         notifyDataSetChanged();
     }
 }

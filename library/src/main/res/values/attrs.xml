@@ -7,7 +7,9 @@
         <attr name="tr_overscroll_height" format="dimension"/>
         <attr name="tr_enable_loadmore" format="boolean"/>
         <attr name="tr_pureScrollMode_on" format="boolean"/>
-        <attr name="tr_show_overlay_refreshview" format="boolean"/>
+        <attr name="tr_overscroll_top_show" format="boolean"/>
+        <attr name="tr_overscroll_bottom_show" format="boolean"/>
+        <attr name="tr_enable_overscroll" format="boolean"/>
         <attr name="tr_headerView" format="dimension"/>
         <attr name="tr_bottomView" format="dimension"/>
     </declare-styleable>

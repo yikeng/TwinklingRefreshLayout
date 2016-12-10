@@ -209,4 +209,12 @@ public class GoogleDotView extends View implements IHeaderView {
     public void onFinish(OnAnimEndListener listener) {
         listener.onAnimEnd();
     }
+
+    @Override
+    public void reset() {
+        animating = false;
+        if (animator1.isRunning()) animator1.cancel();
+        if (animator2.isRunning()) animator2.cancel();
+        invalidate();
+    }
 }

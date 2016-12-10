@@ -1,23 +1,14 @@
 package com.lcodecore.tkrefreshlayout;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.webkit.WebView;
-import android.widget.AbsListView;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.lcodecore.tkrefreshlayout.Footer.BottomProgressView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
@@ -27,11 +18,7 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 /**
  * Created by lcodecore on 16/3/2.
  */
-public class TwinklingRefreshLayout extends FrameLayout {
-
-    private static final int PULL_DOWN_REFRESH = 1;//标志当前进入的刷新模式
-    private static final int PULL_UP_LOAD = 2;
-    private int state = PULL_DOWN_REFRESH;
+public class TwinklingRefreshLayout extends RelativeLayout {
 
     //波浪的高度,最大扩展高度
     protected float mWaveHeight;
@@ -48,6 +35,11 @@ public class TwinklingRefreshLayout extends FrameLayout {
     //头部layout
     protected FrameLayout mHeadLayout;
 
+    //整个头部
+    private FrameLayout mExtraHeadLayout;
+    //附加顶部高度
+    private int mExHeadHeight = 0;
+
     private IHeaderView mHeadView;
     private IBottomView mBottomView;
 
@@ -58,11 +50,11 @@ public class TwinklingRefreshLayout extends FrameLayout {
     private FrameLayout mBottomLayout;
 
 
-    //刷新的状态
-    protected boolean isRefreshing;
+    //是否刷新视图可见
+    protected boolean isRefreshVisible = false;
 
-    //加载更多的状态
-    protected boolean isLoadingmore;
+    //是否加载更多视图可见
+    protected boolean isLoadingVisible = false;
 
     //是否需要加载更多,默认需要
     protected boolean enableLoadmore = true;
@@ -70,28 +62,23 @@ public class TwinklingRefreshLayout extends FrameLayout {
     protected boolean enableRefresh = true;
 
     //是否在越界回弹的时候显示下拉图标
-    protected boolean isOverlayRefreshShow = true;
+    protected boolean isOverScrollTopShow = true;
+    //是否在越界回弹的时候显示上拉图标
+    protected boolean isOverScrollBottomShow = true;
 
     //是否隐藏刷新控件,开启越界回弹模式(开启之后刷新控件将隐藏)
     protected boolean isPureScrollModeOn = false;
 
     //是否自动加载更多
-    protected boolean autoLoadMore = true;
+    protected boolean autoLoadMore = false;
 
     //是否开启悬浮刷新模式
     protected boolean floatRefresh = false;
 
-    //满足越界的手势的最低速度(默认5000)
-    protected int overScrollMinVx = 5000;
+    //是否允许进入越界回弹模式
+    protected boolean enableOverScroll = true;
 
-    //触摸获得Y的位置
-    private float mTouchY;
-    //触摸获得X的位置(为防止滑动冲突而设置)
-    private float mTouchX;
-
-    //动画的变化率
-    private DecelerateInterpolator decelerateInterpolator;
-
+    private CoProcessor cp;
 
     public TwinklingRefreshLayout(Context context) {
         this(context, null, 0);
@@ -109,20 +96,22 @@ public class TwinklingRefreshLayout extends FrameLayout {
         mWaveHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_wave_height, (int) DensityUtil.dp2px(context, 120));
         mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
         mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
-        mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) DensityUtil.dp2px(context, 80));
+        mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
         enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
         isPureScrollModeOn = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_pureScrollMode_on, false);
-        isOverlayRefreshShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_show_overlay_refreshview, true);
+        isOverScrollTopShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_top_show, true);
+        isOverScrollBottomShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_bottom_show, true);
+        enableOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_overscroll, true);
         a.recycle();
+
+        cp = new CoProcessor();
     }
 
     private void init() {
         //使用isInEditMode解决可视化编辑器无法识别自定义控件的问题
         if (isInEditMode()) return;
 
-        //在动画开始的地方快然后慢;
-        decelerateInterpolator = new DecelerateInterpolator(10);
-        setPullListener(new SimplePullListener());
+        setPullListener(new TwinklingPullListener());
     }
 
     @Override
@@ -132,13 +121,19 @@ public class TwinklingRefreshLayout extends FrameLayout {
         //添加头部
         if (mHeadLayout == null) {
             FrameLayout headViewLayout = new FrameLayout(getContext());
-            LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
-            layoutParams.gravity = Gravity.TOP;
-            headViewLayout.setLayoutParams(layoutParams);
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
+            layoutParams.addRule(ALIGN_PARENT_TOP);
+            layoutParams.addRule(CENTER_VERTICAL);
 
+            FrameLayout extraHeadLayout = new FrameLayout(getContext());
+            extraHeadLayout.setId(View.NO_ID);
+            LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+            this.addView(extraHeadLayout, layoutParams2);
+            this.addView(headViewLayout, layoutParams);
+
+            mExtraHeadLayout = extraHeadLayout;
             mHeadLayout = headViewLayout;
-
-            this.addView(mHeadLayout);//addView(view,-1)添加到-1的位置
 
             if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
         }
@@ -147,7 +142,8 @@ public class TwinklingRefreshLayout extends FrameLayout {
         if (mBottomLayout == null) {
             FrameLayout bottomViewLayout = new FrameLayout(getContext());
             LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
-            layoutParams2.gravity = Gravity.BOTTOM;
+            layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
+            layoutParams2.addRule(CENTER_VERTICAL);
             bottomViewLayout.setLayoutParams(layoutParams2);
 
             mBottomLayout = bottomViewLayout;
@@ -159,24 +155,13 @@ public class TwinklingRefreshLayout extends FrameLayout {
             }
         }
 
-        if (isPureScrollModeOn) {
-            setEnableOverlayRefreshView(false);
-            if (mHeadLayout != null) mHeadLayout.setVisibility(GONE);
-            if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
-        } else {
-            setEnableOverlayRefreshView(true);
-            if (mHeadLayout != null) mHeadLayout.setVisibility(VISIBLE);
-            if (mBottomLayout != null) mBottomLayout.setVisibility(VISIBLE);
-        }
-
         //获得子控件
         mChildView = getChildAt(0);
-        if (mChildView == null) return;
-        mChildView.animate().setInterpolator(new DecelerateInterpolator());
-        handleScrollEvent();
+
+        cp.init();
     }
 
-//    private MsgCenter controlCenter;
+
     /*************************************  触摸事件处理  *****************************************/
     /**
      * 拦截事件
@@ -186,418 +171,42 @@ public class TwinklingRefreshLayout extends FrameLayout {
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mTouchX = ev.getX();
-                mTouchY = ev.getY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float dx = ev.getX() - mTouchX;
-                float dy = ev.getY() - mTouchY;
-                if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
-                    if (dy > 0 && !ScrollingUtil.canChildScrollUp(mChildView) && enableRefresh) {
-                        state = PULL_DOWN_REFRESH;
-                        return true;
-                    } else if (dy < 0 && !ScrollingUtil.canChildScrollDown(mChildView) && enableLoadmore) {
-                        state = PULL_UP_LOAD;
-                        return true;
-                    }
-                }
-                break;
-        }
-        return super.onInterceptTouchEvent(ev);
+        boolean intercept = cp.interceptTouchEvent(ev);
+        return intercept || super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        if (isRefreshing || isLoadingmore) return super.onTouchEvent(e);
-
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-                float dy = e.getY() - mTouchY;
-
-                if (state == PULL_DOWN_REFRESH) {
-                    dy = Math.min(mWaveHeight * 2, dy);
-                    dy = Math.max(0, dy);
-
-                    if (mChildView != null) {
-                        float offsetY = decelerateInterpolator.getInterpolation(dy / mWaveHeight / 2) * dy / 2;
-                        if (!floatRefresh) mChildView.setTranslationY(offsetY);
-
-                        mHeadLayout.getLayoutParams().height = (int) offsetY;
-                        mHeadLayout.requestLayout();
-
-                        if (pullListener != null) {
-                            pullListener.onPullingDown(TwinklingRefreshLayout.this, offsetY / mHeadHeight);
-                        }
-                    }
-                } else if (state == PULL_UP_LOAD) {
-                    //加载更多的动作
-                    dy = Math.min(mBottomHeight * 2, Math.abs(dy));
-                    dy = Math.max(0, dy);
-                    if (mChildView != null) {
-                        float offsetY = -decelerateInterpolator.getInterpolation(dy / mBottomHeight / 2) * dy / 2;
-                        mChildView.setTranslationY(offsetY);
-
-                        mBottomLayout.getLayoutParams().height = (int) -offsetY;
-                        mBottomLayout.requestLayout();
-
-                        if (pullListener != null) {
-                            pullListener.onPullingUp(TwinklingRefreshLayout.this, offsetY / mHeadHeight);
-                        }
-                    }
-                }
-                return true;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                if (mChildView != null) {
-                    if (state == PULL_DOWN_REFRESH) {
-                        if (!isPureScrollModeOn && /*mChildView.getTranslationY()*/mHeadLayout.getLayoutParams().height >= mHeadHeight - mTouchSlop) {
-                            if (!floatRefresh) animChildView(mHeadHeight);//回到限制的最大高度处
-                            else animFloatRefresh(mHeadHeight);
-                            isRefreshing = true;
-                            if (pullListener != null) {
-                                pullListener.onRefresh(TwinklingRefreshLayout.this);
-                            }
-                        } else {
-                            if (!floatRefresh) animChildView(0f);
-                            else animFloatRefresh(0f);
-                        }
-                    } else if (state == PULL_UP_LOAD) {
-                        if (!isPureScrollModeOn && Math.abs(mChildView.getTranslationY()) >= mBottomHeight - mTouchSlop) {
-                            isLoadingmore = true;
-                            animChildView(-mBottomHeight);
-
-                            if (pullListener != null) {
-                                pullListener.onLoadMore(TwinklingRefreshLayout.this);
-                            }
-                        } else {
-                            animChildView(0f);
-                        }
-                    }
-                }
-                return true;
-        }
-        return super.onTouchEvent(e);
+        boolean resume = cp.consumeTouchEvent(e);
+        return resume || super.onTouchEvent(e);
     }
+
 
     /*************************************
-     * 越界回弹策略
+     * 开放api区
      *****************************************/
-    private void handleScrollEvent() {
-        mChildView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        });
-
-        if (mChildView instanceof AbsListView) {
-            ((AbsListView) mChildView).setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if (!isRefreshing && !isLoadingmore && firstVisibleItem == 0 || ((AbsListView) mChildView).getLastVisiblePosition() == totalItemCount - 1) {
-                        if (mVelocityY >= overScrollMinVx && ScrollingUtil.isAbsListViewToTop((AbsListView) mChildView)) {
-                            animOverScrollTop();
-                        }
-                        if (mVelocityY <= -overScrollMinVx && ScrollingUtil.isAbsListViewToBottom((AbsListView) mChildView)) {
-                            animOverScrollBottom();
-                        }
-                    }
-                }
-            });
-        } else if (mChildView instanceof RecyclerView) {
-            ((RecyclerView) mChildView).addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    if (!isRefreshing && !isLoadingmore && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        if (mVelocityY >= overScrollMinVx && ScrollingUtil.isRecyclerViewToTop((RecyclerView) mChildView)) {
-                            animOverScrollTop();
-                        }
-                        if (mVelocityY <= -overScrollMinVx && ScrollingUtil.isRecyclerViewToBottom((RecyclerView) mChildView)) {
-                            animOverScrollBottom();
-                        }
-                    }
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-            });
-        }
-    }
-
-    //主要为了监测Fling的动作,实现越界回弹
-    private float mVelocityY;
-    GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            //TODO bug 待解决  列表控件没有填满屏幕时，scroll无效
-            //TODO 此处不应走finishRefreshing/finishLoadmore，而应该走隐藏head/bottom
-            if (isRefreshing && distanceY >= mTouchSlop && !floatRefresh) finishRefreshing();
-            if (isLoadingmore && distanceY <= -mTouchSlop) finishLoadmore();
-
-            return super.onScroll(e1, e2, distanceX, distanceY);
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            mVelocityY = velocityY;
-            if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
-                //既不是AbsListView也不是RecyclerView,由于这些没有实现OnScrollListener接口,无法回调状态,只能采用延时策略
-                if (Math.abs(mVelocityY) >= overScrollMinVx) {
-                    mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
-                } else {
-                    cur_delay_times = ALL_DELAY_TIMES;
-                }
-            }
-            return false;
-        }
-    });
-
-    //针对部分没有OnScrollListener的View的延时策略
-    private static final int MSG_START_COMPUTE_SCROLL = 0; //开始计算
-    private static final int MSG_CONTINUE_COMPUTE_SCROLL = 1;//继续计算
-    private static final int MSG_STOP_COMPUTE_SCROLL = 2; //停止计算
-
-    private int cur_delay_times = 0; //当前计算次数
-    private static final int ALL_DELAY_TIMES = 60;  //10ms计算一次,总共计算20次
-    private int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_START_COMPUTE_SCROLL:
-                    cur_delay_times = -1; //这里没有break,写作-1方便计数
-                case MSG_CONTINUE_COMPUTE_SCROLL:
-                    cur_delay_times++;
-
-                    if (!isRefreshing && !isLoadingmore && mVelocityY >= overScrollMinVx && (mChildView != null && Math.abs(mChildView.getScrollY()) <= 2*mTouchSlop)) {
-                        animOverScrollTop();
-                        cur_delay_times = ALL_DELAY_TIMES;
-                    }
-
-                    if (!isRefreshing && !isLoadingmore && mVelocityY <= -overScrollMinVx && mChildView != null) {
-                        if (mChildView instanceof WebView) {
-                            WebView webview = (WebView) (mChildView);
-                            if (Math.abs(webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())) <= 2*mTouchSlop) {
-                                animOverScrollBottom();
-                                cur_delay_times = ALL_DELAY_TIMES;
-                            }
-                        } else if (mChildView instanceof ViewGroup) {
-                            View subChildView = ((ViewGroup) mChildView).getChildAt(0);
-                            if (subChildView != null && subChildView.getMeasuredHeight() <= mChildView.getScrollY() + mChildView.getHeight()) {
-                                //滚动到了底部
-                                animOverScrollBottom();
-                                cur_delay_times = ALL_DELAY_TIMES;
-                            }
-                        } else if (mChildView.getScrollY() >= mChildView.getHeight()) {
-                            animOverScrollBottom();
-                            cur_delay_times = ALL_DELAY_TIMES;
-                        }
-                    }
-
-                    if (cur_delay_times < ALL_DELAY_TIMES)
-                        mHandler.sendEmptyMessageDelayed(MSG_CONTINUE_COMPUTE_SCROLL, 10);
-                    break;
-                case MSG_STOP_COMPUTE_SCROLL:
-                    cur_delay_times = ALL_DELAY_TIMES;
-                    break;
-            }
-        }
-    };
-
-    /*************************************  执行动画  *****************************************/
-    /**
-     * 向下兼容,把mChildView.animate().setUpdateListener()改成ObjectAnimator.addUpdateListener
-     *
-     * @param endValue mChildView最终位移
-     */
-    private void animChildView(float endValue) {
-        animChildView(endValue, 300);
-    }
-
-    private void animChildView(float endValue, long duration) {
-        ObjectAnimator oa = ObjectAnimator.ofFloat(mChildView, "translationY", mChildView.getTranslationY(), endValue);
-        oa.setDuration(duration);
-        oa.setInterpolator(new DecelerateInterpolator());//设置速率为递减
-        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int height = (int) mChildView.getTranslationY();//获得mChildView当前y的位置
-                height = Math.abs(height);
-
-                if (state == PULL_DOWN_REFRESH) {
-                    mHeadLayout.getLayoutParams().height = height;
-                    mHeadLayout.requestLayout();//重绘
-
-                    if (isOverlayRefreshShow) {
-                        mHeadLayout.setVisibility(VISIBLE);
-                        mBottomLayout.setVisibility(GONE);
-                    }
-
-                    if (pullListener != null) {
-                        pullListener.onPullDownReleasing(TwinklingRefreshLayout.this, height / mHeadHeight);
-                    }
-                } else if (state == PULL_UP_LOAD) {
-                    mBottomLayout.getLayoutParams().height = height;
-                    mBottomLayout.requestLayout();
-
-                    if (isOverlayRefreshShow) {
-                        mHeadLayout.setVisibility(GONE);
-                        mBottomLayout.setVisibility(VISIBLE);
-                    }
-
-                    if (pullListener != null) {
-                        pullListener.onPullUpReleasing(TwinklingRefreshLayout.this, height / mBottomHeight);
-                    }
-                }
-            }
-        });
-        oa.start();
-    }
-
-    private void animFloatRefresh(float endValue) {
-        animFloatRefresh(endValue, 300);
-    }
-    private void animFloatRefresh(float endValue, long duration){
-        ValueAnimator oa = ValueAnimator.ofInt(mHeadLayout.getLayoutParams().height, (int)endValue);
-        oa.setDuration(duration);
-        oa.setInterpolator(new DecelerateInterpolator());//设置速率为递减
-        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int height = (int) animation.getAnimatedValue();
-
-                if (state == PULL_DOWN_REFRESH) {
-                    mHeadLayout.getLayoutParams().height = height;
-                    mHeadLayout.requestLayout();//重绘
-
-                    if (isOverlayRefreshShow) {
-                        mHeadLayout.setVisibility(VISIBLE);
-                        mBottomLayout.setVisibility(GONE);
-                    }
-
-                    if (pullListener != null) {
-                        pullListener.onPullDownReleasing(TwinklingRefreshLayout.this, height / mHeadHeight);
-                    }
-                }
-            }
-        });
-        oa.start();
-    }
-
-    private void animOverScrollTop() {
-        mVelocityY = 0;
-        state = PULL_DOWN_REFRESH;
-        if (isOverlayRefreshShow && !floatRefresh) animChildView(mOverScrollHeight, 150);
-        else mChildView.animate().translationY(mOverScrollHeight).setDuration(150).start();
-        mChildView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isOverlayRefreshShow) animChildView(0f);
-                else mChildView.animate().translationY(0).start();
-            }
-        }, 150);
-    }
-
-    private void animOverScrollBottom() {
-        mVelocityY = 0;
-        state = PULL_UP_LOAD;
-
-        if (autoLoadMore && !isPureScrollModeOn) {
-            isLoadingmore = true;
-            animChildView(-mBottomHeight, 150);
-
-            if (pullListener != null) {
-                pullListener.onLoadMore(TwinklingRefreshLayout.this);
-            }
-        } else {
-            if (isOverlayRefreshShow) animChildView(-mOverScrollHeight, 150);
-            else mChildView.animate().translationY(-mOverScrollHeight).setDuration(150).start();
-            mChildView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (isOverlayRefreshShow) animChildView(0f);
-                    else mChildView.animate().translationY(0).start();
-                }
-            }, 150);
-        }
-    }
-
     //主动刷新
     public void startRefresh() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                state = PULL_DOWN_REFRESH;
-                if (!isPureScrollModeOn && mChildView != null) {
-                    if (!floatRefresh) animChildView(mHeadHeight);//回到限制的最大高度处
-                    else animFloatRefresh(mHeadHeight);
-                    isRefreshing = true;
-                    if (pullListener != null) {
-                        pullListener.onRefresh(TwinklingRefreshLayout.this);
-                    }
-                }
-            }
-        });
+        cp.startRefresh();
     }
 
     //主动加载跟多
     public void startLoadMore() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                state = PULL_UP_LOAD;
-                if (!isPureScrollModeOn && mChildView != null) {
-                    isLoadingmore = true;
-                    animChildView(-mBottomHeight);
-                    if (pullListener != null) {
-                        pullListener.onLoadMore(TwinklingRefreshLayout.this);
-                    }
-                }
-            }
-        });
+        cp.startLoadMore();
     }
 
-    /**
-     * 设置拖动屏幕的监听器
-     */
-    private PullListener pullListener;
-
-    private void setPullListener(PullListener pullListener) {
-        this.pullListener = pullListener;
-    }
-
-    /*************************************  开放api区  *****************************************/
     /**
      * 刷新结束
      */
     public void finishRefreshing() {
-        isRefreshing = false;
-        if (pullListener != null) pullListener.onFinishRefresh();
-//        if (mChildView != null) {
-//            animChildView(0f);
-//        }
+        cp.finishRefreshing();
     }
 
     /**
      * 加载更多结束
      */
     public void finishLoadmore() {
-        isLoadingmore = false;
-        if (pullListener != null) pullListener.onFinishLoadMore();
-        if (mChildView != null) {
-            animChildView(0f);
-            ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
-        }
-    }
-
-    public void setOverScrollMinVx(int overScrollMinVx){
-        this.overScrollMinVx = overScrollMinVx;
+        cp.finishLoadmore();
     }
 
     /**
@@ -617,6 +226,40 @@ public class TwinklingRefreshLayout extends FrameLayout {
     }
 
     /**
+     * 设置固定在顶部的header
+     */
+    public void addFixedExHeader(final View view) {
+
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (view != null && mExtraHeadLayout != null) {
+                    mExtraHeadLayout.addView(view);
+                    cp.onAddExHead();
+                    cp.setExHeadFixed();
+                }
+            }
+        });
+    }
+
+    /**TODO 适配可以随界面滚动的Header
+     public void addNormalExHeader(View view) {
+     if (view != null && mExtraHeadLayout != null) {
+     mExtraHeadLayout.addView(view);
+     cp.onAddExHead();
+     cp.setExHeadNormal();
+     }
+     }
+     **/
+
+    /**
+     * 获取额外附加的头部
+     */
+    public View getExtraHeaderView() {
+        return mExtraHeadLayout;
+    }
+
+    /**
      * 设置底部View
      */
     public void setBottomView(final IBottomView bottomView) {
@@ -632,27 +275,31 @@ public class TwinklingRefreshLayout extends FrameLayout {
         }
     }
 
+    public void setFloatRefresh(boolean ifOpenFloatRefreshMode) {
+        floatRefresh = ifOpenFloatRefreshMode;
+    }
+
     /**
      * 设置wave的下拉高度
      *
-     * @param waveHeight
+     * @param waveHeightDp
      */
-    public void setWaveHeight(float waveHeight) {
-        this.mWaveHeight = waveHeight;
+    public void setWaveHeight(float waveHeightDp) {
+        this.mWaveHeight = DensityUtil.dp2px(getContext(), waveHeightDp);
     }
 
     /**
      * 设置下拉头的高度
      */
-    public void setHeaderHeight(float headHeight) {
-        this.mHeadHeight = headHeight;
+    public void setHeaderHeight(float headHeightDp) {
+        this.mHeadHeight = DensityUtil.dp2px(getContext(), headHeightDp);
     }
 
     /**
      * 设置底部高度
      */
-    public void setBottomHeight(float bottomHeight) {
-        this.mBottomHeight = bottomHeight;
+    public void setBottomHeight(float bottomHeightDp) {
+        this.mBottomHeight = DensityUtil.dp2px(getContext(), bottomHeightDp);
     }
 
     /**
@@ -676,8 +323,24 @@ public class TwinklingRefreshLayout extends FrameLayout {
     /**
      * 是否允许越界时显示刷新控件
      */
-    public void setEnableOverlayRefreshView(boolean enableShow) {
-        isOverlayRefreshShow = enableShow;
+    public void setOverScrollTopShow(boolean isOverScrollTopShow) {
+        this.isOverScrollTopShow = isOverScrollTopShow;
+    }
+
+    public void setOverScrollBottomShow(boolean isOverScrollBottomShow) {
+        this.isOverScrollBottomShow = isOverScrollBottomShow;
+    }
+
+    public void setOverScrollRefreshShow(boolean isOverScrollRefreshShow) {
+        this.isOverScrollTopShow = isOverScrollRefreshShow;
+        this.isOverScrollBottomShow = isOverScrollRefreshShow;
+    }
+
+    /**
+     * 是否允许开启越界回弹模式
+     */
+    public void setEnableOverScroll(boolean enableOverScroll1) {
+        this.enableOverScroll = enableOverScroll1;
     }
 
     /**
@@ -685,61 +348,50 @@ public class TwinklingRefreshLayout extends FrameLayout {
      */
     public void setPureScrollModeOn(boolean pureScrollModeOn) {
         isPureScrollModeOn = pureScrollModeOn;
-        isOverlayRefreshShow = !isPureScrollModeOn;
-        if (pureScrollModeOn){
+        if (pureScrollModeOn) {
+            isOverScrollTopShow = false;
+            isOverScrollBottomShow = false;
             setWaveHeight(mOverScrollHeight);
             setHeaderHeight(mOverScrollHeight);
             setBottomHeight(mOverScrollHeight);
         }
     }
 
-    public interface PullListener {
-        /**
-         * 下拉中
-         *
-         * @param refreshLayout
-         * @param fraction
-         */
-        void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction);
-
-        /**
-         * 上拉
-         */
-        void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction);
-
-        /**
-         * 下拉松开
-         *
-         * @param refreshLayout
-         * @param fraction
-         */
-        void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction);
-
-        /**
-         * 上拉松开
-         */
-        void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction);
-
-        /**
-         * 刷新中。。。
-         */
-        void onRefresh(TwinklingRefreshLayout refreshLayout);
-
-        /**
-         * 加载更多中
-         */
-        void onLoadMore(TwinklingRefreshLayout refreshLayout);
-
-        /**
-         * 手动调用finishRefresh或者finishLoadmore之后的回调
-         */
-        void onFinishRefresh();
-
-        void onFinishLoadMore();
+    /**
+     * 设置越界高度
+     */
+    public void setOverScrollHeight(float overScrollHeightDp) {
+        this.mOverScrollHeight = DensityUtil.dp2px(getContext(), overScrollHeightDp);
     }
 
+    /**
+     * 设置OverScroll时自动加载更多
+     *
+     * @param ifAutoLoadMore 为true表示底部越界时主动进入加载跟多模式，否则直接回弹
+     */
+    public void setAutoLoadMore(boolean ifAutoLoadMore) {
+        autoLoadMore = ifAutoLoadMore;
+    }
 
-    private class SimplePullListener implements PullListener {
+    /**
+     * 设置刷新控件监听器
+     */
+    private RefreshListenerAdapter refreshListener;
+
+    public void setOnRefreshListener(RefreshListenerAdapter refreshListener) {
+        if (refreshListener != null) {
+            this.refreshListener = refreshListener;
+        }
+    }
+
+    //设置拖动屏幕的监听器
+    private PullListener pullListener;
+
+    private void setPullListener(PullListener pullListener) {
+        this.pullListener = pullListener;
+    }
+
+    private class TwinklingPullListener implements PullListener {
 
         @Override
         public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
@@ -780,64 +432,349 @@ public class TwinklingRefreshLayout extends FrameLayout {
 
         @Override
         public void onFinishRefresh() {
+            if (!isRefreshVisible) return;
             mHeadView.onFinish(new OnAnimEndListener() {
                 @Override
                 public void onAnimEnd() {
-                    if (mChildView != null) {
-                        if (!floatRefresh) animChildView(0f);
-                        else animFloatRefresh(0f);
-                    }
+                    cp.finishRefreshAfterAnim();
                 }
             });
         }
 
         @Override
         public void onFinishLoadMore() {
+            if (!isLoadingVisible) return;
             mBottomView.onFinish();
         }
     }
 
-    private OnRefreshListener refreshListener;
+    public class CoProcessor {
+        private RefreshProcessor refreshProcessor;
+        private OverScrollProcessor overScrollProcessor;
+        private AnimProcessor animProcessor;
 
-    public static class OnRefreshListener implements PullListener {
-        @Override
-        public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
+        private final static int PULLING_TOP_DOWN = 0;
+        private final static int PULLING_BOTTOM_UP = 1;
+        private int state = PULLING_TOP_DOWN;
+
+        private static final int EX_MODE_NORMAL = 0;
+        private static final int EX_MODE_FIXED = 1;
+        private int exHeadMode = EX_MODE_NORMAL;
+
+
+        public CoProcessor() {
+            animProcessor = new AnimProcessor(this);
+            overScrollProcessor = new OverScrollProcessor(this);
+            refreshProcessor = new RefreshProcessor(this);
         }
 
-        @Override
-        public void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction) {
+        public void init() {
+            if (isPureScrollModeOn) {
+                setOverScrollTopShow(false);
+                setOverScrollBottomShow(false);
+                if (mHeadLayout != null) mHeadLayout.setVisibility(GONE);
+                if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
+            }
+
+            overScrollProcessor.init();
+            animProcessor.init();
         }
 
-        @Override
-        public void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
+        public AnimProcessor getAnimProcessor() {
+            return animProcessor;
         }
 
-        @Override
-        public void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
+        public float getMaxHeadHeight() {
+            return mWaveHeight;
         }
 
-        @Override
-        public void onRefresh(TwinklingRefreshLayout refreshLayout) {
+        public int getHeadHeight() {
+            return (int) mHeadHeight;
         }
 
-        @Override
-        public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
+        public int getExtraHeadHeight() {
+            return mExtraHeadLayout.getHeight();
         }
 
-        @Override
+        public int getBottomHeight() {
+            return (int) mBottomHeight;
+        }
+
+        public int getOsHeight() {
+            return (int) mOverScrollHeight;
+        }
+
+        public View getScrollableView() {
+            return mChildView;
+        }
+
+        public View getContent() {
+            return mChildView;
+        }
+
+        public View getHeader() {
+            return mHeadLayout;
+        }
+
+        public View getFooter() {
+            return mBottomLayout;
+        }
+
+        public Context getContext() {
+            return TwinklingRefreshLayout.this.getContext();
+        }
+
+        public int getTouchSlop() {
+            return ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        }
+
+        public boolean interceptTouchEvent(MotionEvent ev) {
+            return refreshProcessor.interceptTouchEvent(ev);
+        }
+
+        public boolean consumeTouchEvent(MotionEvent ev) {
+            return refreshProcessor.consumeTouchEvent(ev);
+        }
+
+        /**
+         * 在越界时阻止再次进入这个状态而导致动画闪烁。  Prevent entering the overscroll-mode again on animating.
+         */
+        private boolean isOverScrollTopLocked = false;
+
+        public void lockOsTop() {
+            isOverScrollTopLocked = true;
+        }
+
+        public void releaseOsTopLock() {
+            isOverScrollTopLocked = false;
+        }
+
+        public boolean isOsTopLocked() {
+            return isOverScrollTopLocked;
+        }
+
+        private boolean isOverScrollBottomLocked = false;
+
+        public void lockOsBottom() {
+            isOverScrollBottomLocked = true;
+        }
+
+        public void releaseOsBottomLock() {
+            isOverScrollBottomLocked = false;
+        }
+
+        public boolean isOsBottomLocked() {
+            return isOverScrollBottomLocked;
+        }
+
+        public void resetHeaderView() {
+            if (mHeadView != null) mHeadView.reset();
+        }
+
+        public void resetBottomView() {
+            if (mBottomView != null) mBottomView.reset();
+        }
+
+        /**
+         * 在添加附加Header前锁住，阻止一些额外的位移动画
+         */
+        private boolean isExHeadLocked = true;
+
+        public boolean isExHeadLocked() {
+            return isExHeadLocked;
+        }
+
+        private void unlockExHead() {
+            isExHeadLocked = false;
+        }
+
+        public View getExHead() {
+            return mExtraHeadLayout;
+        }
+
+        public void setExHeadNormal() {
+            exHeadMode = EX_MODE_NORMAL;
+        }
+
+        public void setExHeadFixed() {
+            exHeadMode = EX_MODE_FIXED;
+        }
+
+        public boolean isExHeadNormal() {
+            return exHeadMode == EX_MODE_NORMAL;
+        }
+
+        public boolean isExHeadFixed() {
+            return exHeadMode == EX_MODE_FIXED;
+        }
+
+        //添加了额外头部时触发
+        public void onAddExHead() {
+            unlockExHead();
+            LayoutParams params = (LayoutParams) mChildView.getLayoutParams();
+            params.addRule(BELOW, mExtraHeadLayout.getId());
+            mChildView.setLayoutParams(params);
+        }
+
+
+        /**
+         * 主动刷新、加载更多、结束
+         */
+        public void startRefresh() {
+            setRefreshing(true);
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    setStatePTD();
+                    if (!isPureScrollModeOn && mChildView != null) {
+                        setRefreshing(true);
+                        animProcessor.animHeadToRefresh();
+                        if (pullListener != null) {
+                            pullListener.onRefresh(TwinklingRefreshLayout.this);
+                        }
+                    }
+                }
+            });
+        }
+
+        public void startLoadMore() {
+            setLoadingMore(true);
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    setStatePBU();
+                    if (!isPureScrollModeOn && mChildView != null) {
+                        setLoadingMore(true);
+                        animProcessor.animBottomToLoad();
+                        if (pullListener != null) {
+                            pullListener.onLoadMore(TwinklingRefreshLayout.this);
+                        }
+                    }
+                }
+            });
+        }
+
+        public void finishRefreshing() {
+            onFinishRefresh();
+        }
+
+        public void finishRefreshAfterAnim() {
+            if (isRefreshVisible() && mChildView != null) {
+                setRefreshing(false);
+                animProcessor.animHeadBack();
+            }
+        }
+
+        public void finishLoadmore() {
+            onFinishLoadMore();
+            if (isLoadingVisible() && mChildView != null) {
+                ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
+                setLoadingMore(false);
+                animProcessor.animBottomBack();
+            }
+        }
+
+        //TODO 支持分别设置头部或者顶部允许越界
+        private boolean enableOverScrollTop = false, enableOverScrollBottom = false;
+
+        public boolean enableOverScroll() {
+            return enableOverScroll;
+        }
+
+        public boolean allowPullDown() {
+            return enableRefresh || enableOverScrollTop;
+        }
+
+        public boolean allowPullUp() {
+            return enableLoadmore || enableOverScrollBottom;
+        }
+
+        public boolean allowOverScroll() {
+            return (!isRefreshVisible && !isLoadingVisible);
+        }
+
+        public boolean isRefreshVisible() {
+            return isRefreshVisible;
+        }
+
+        public boolean isLoadingVisible() {
+            return isLoadingVisible;
+        }
+
+        public void setRefreshing(boolean refreshing) {
+            isRefreshVisible = refreshing;
+        }
+
+        public void setLoadingMore(boolean loadingMore) {
+            isLoadingVisible = loadingMore;
+        }
+
+        public boolean isOpenFloatRefresh() {
+            return floatRefresh;
+        }
+
+        public boolean autoLoadMore() {
+            return autoLoadMore;
+        }
+
+        public boolean isPureScrollModeOn() {
+            return isPureScrollModeOn;
+        }
+
+        public boolean isOverScrollTopShow() {
+            return isOverScrollTopShow;
+        }
+
+        public boolean isOverScrollBottomShow() {
+            return isOverScrollBottomShow;
+        }
+
+        public void onPullingDown(float offsetY) {
+            pullListener.onPullingDown(TwinklingRefreshLayout.this, offsetY / mHeadHeight);
+        }
+
+        public void onPullingUp(float offsetY) {
+            pullListener.onPullingUp(TwinklingRefreshLayout.this, offsetY / mBottomHeight);
+        }
+
+        public void onRefresh() {
+            pullListener.onRefresh(TwinklingRefreshLayout.this);
+        }
+
+        public void onLoadMore() {
+            pullListener.onLoadMore(TwinklingRefreshLayout.this);
+        }
+
         public void onFinishRefresh() {
-
+            pullListener.onFinishRefresh();
         }
 
-        @Override
         public void onFinishLoadMore() {
-
+            pullListener.onFinishLoadMore();
         }
-    }
 
-    public void setOnRefreshListener(OnRefreshListener refreshListener) {
-        if (refreshListener != null) {
-            this.refreshListener = refreshListener;
+        public void onPullDownReleasing(float offsetY) {
+            pullListener.onPullDownReleasing(TwinklingRefreshLayout.this, offsetY / mHeadHeight);
+        }
+
+        public void onPullUpReleasing(float offsetY) {
+            pullListener.onPullUpReleasing(TwinklingRefreshLayout.this, offsetY / mBottomHeight);
+        }
+
+        public void setStatePTD() {
+            state = PULLING_TOP_DOWN;
+        }
+
+        public void setStatePBU() {
+            state = PULLING_BOTTOM_UP;
+        }
+
+        public boolean isStatePTD() {
+            return PULLING_TOP_DOWN == state;
+        }
+
+        public boolean isStatePBU() {
+            return PULLING_BOTTOM_UP == state;
         }
     }
 }

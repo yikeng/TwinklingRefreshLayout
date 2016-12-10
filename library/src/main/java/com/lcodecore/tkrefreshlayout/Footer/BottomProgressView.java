@@ -57,4 +57,9 @@ public class BottomProgressView extends ProgressView implements IBottomView {
     public void onFinish() {
 
     }
+
+    @Override
+    public void reset() {
+
+    }
 }

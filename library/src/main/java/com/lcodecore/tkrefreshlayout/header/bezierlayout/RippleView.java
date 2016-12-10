@@ -7,6 +7,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -48,16 +49,20 @@ public class RippleView extends View {
         mPaint.setStyle(Paint.Style.FILL);
     }
 
+    public void setRippleColor(@ColorInt int color) {
+        if (mPaint != null) mPaint.setColor(color);
+    }
+
     public void startReveal() {
         setVisibility(VISIBLE);
         if (va == null) {
             int bigRadius = (int) (Math.sqrt(Math.pow(getHeight(), 2) + Math.pow(getWidth(), 2)));
-            va = ValueAnimator.ofInt(0, bigRadius/2);
+            va = ValueAnimator.ofInt(0, bigRadius / 2);
             va.setDuration(bigRadius);
             va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    r = (int) animation.getAnimatedValue()*2;
+                    r = (int) animation.getAnimatedValue() * 2;
                     invalidate();
                 }
             });
@@ -73,6 +78,10 @@ public class RippleView extends View {
         va.start();
     }
 
+    public void stopAnim(){
+        if (va!=null && va.isRunning()) va.cancel();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -82,7 +91,8 @@ public class RippleView extends View {
     public void setRippleEndListener(OnRippleEndListener listener) {
         this.listener = listener;
     }
-    public interface OnRippleEndListener{
+
+    public interface OnRippleEndListener {
         void onRippleEnd();
     }
 }

@@ -1,8 +1,6 @@
-package com.lcodecore.tkrefreshlayout.v2;
+package com.lcodecore.tkrefreshlayout;
 
 import android.view.MotionEvent;
-
-import com.lcodecore.tkrefreshlayout.v2.TwinklingRefreshLayout.CoProcessor;
 
 import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
@@ -12,9 +10,9 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 public class RefreshProcessor {
     private float mTouchX, mTouchY;
-    private CoProcessor cp;
+    private TwinklingRefreshLayout.CoProcessor cp;
 
-    public RefreshProcessor(CoProcessor coProcessor) {
+    public RefreshProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
         this.cp = coProcessor;
     }
 
@@ -42,8 +40,7 @@ public class RefreshProcessor {
     }
 
     public boolean consumeTouchEvent(MotionEvent e) {
-        //TODO 消费touch事件  改成isHeadVisible,isFootVisible
-        if (cp.isRefreshing() || cp.isLoadingmore()) return false;
+        if (cp.isRefreshVisible() || cp.isLoadingVisible()) return false;
 
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:

@@ -36,4 +36,5 @@ dependencies {
     compile 'com.wang.avi:library:1.0.1'
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile 'com.squareup.leakcanary:leakcanary-android:1.5'
 }

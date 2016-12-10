@@ -4,9 +4,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
-import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
+import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 
 public class StoryActivity extends AppCompatActivity {
 
@@ -19,7 +18,7 @@ public class StoryActivity extends AppCompatActivity {
 //        ProgressLayout header = new ProgressLayout(this);
 //        refreshLayout.setHeaderView(header);
 //        refreshLayout.setFloatRefresh(true);
-        refreshLayout.setEnableOverlayRefreshView(false);
+        refreshLayout.setOverScrollRefreshShow(false);
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {

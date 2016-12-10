@@ -1,4 +1,4 @@
-package com.lcodecore.tkrefreshlayout.v2;
+package com.lcodecore.tkrefreshlayout;
 
 public abstract class RefreshListenerAdapter implements PullListener {
         @Override

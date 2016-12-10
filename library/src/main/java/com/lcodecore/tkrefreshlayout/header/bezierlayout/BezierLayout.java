@@ -61,6 +61,10 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
         waveView.setWaveColor(color);
     }
 
+    public void setRippleColor(@ColorInt int color) {
+        rippleView.setRippleColor(color);
+    }
+
     /**
      * 限定值
      *
@@ -109,25 +113,26 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
         r1.invalidate();
     }
 
+    private ValueAnimator waveAnimator, circleAnimator;
+
     @Override
     public void startAnim(float maxHeadHeight, float headHeight) {
         waveView.setHeadHeight((int) headHeight);
-        ValueAnimator animator = ValueAnimator.ofInt(waveView.getWaveHeight(), 0, -300, 0, -100, 0);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        waveAnimator = ValueAnimator.ofInt(waveView.getWaveHeight(), 0, -300, 0, -100, 0);
+        waveAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-//                        Log.i("anim", "value--->" + (int) animation.getAnimatedValue());
                 waveView.setWaveHeight((int) animation.getAnimatedValue() / 2);
                 waveView.invalidate();
 
             }
         });
-        animator.setInterpolator(new DecelerateInterpolator());
-        animator.setDuration(800);
-        animator.start();
+        waveAnimator.setInterpolator(new DecelerateInterpolator());
+        waveAnimator.setDuration(800);
+        waveAnimator.start();
         /*处理圈圈进度条**/
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1, 0);
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
+        circleAnimator = ValueAnimator.ofFloat(1, 0);
+        circleAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -138,14 +143,13 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
                 r2.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //r2.setAnimStart();
                         r2.startAnim();
                     }
                 }, 200);
             }
         });
 
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        circleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
@@ -154,9 +158,9 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
             }
 
         });
-        valueAnimator.setInterpolator(new DecelerateInterpolator());
-        valueAnimator.setDuration(300);
-        valueAnimator.start();
+        circleAnimator.setInterpolator(new DecelerateInterpolator());
+        circleAnimator.setDuration(300);
+        circleAnimator.start();
     }
 
     @Override
@@ -171,5 +175,19 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
             }
         });
         rippleView.startReveal();
+    }
+
+    @Override
+    public void reset() {
+        if (waveAnimator != null && waveAnimator.isRunning()) waveAnimator.cancel();
+        waveView.setWaveHeight(0);
+        if (circleAnimator != null && circleAnimator.isRunning()) circleAnimator.cancel();
+        r1.setVisibility(VISIBLE);
+        r2.stopAnim();
+        r2.setScaleX(0);
+        r2.setScaleY(0);
+        r2.setVisibility(View.GONE);
+        rippleView.stopAnim();
+        rippleView.setVisibility(GONE);
     }
 }

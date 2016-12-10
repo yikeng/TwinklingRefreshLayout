@@ -52,4 +52,9 @@ public class TextHeaderView extends TextView implements IHeaderView {
     public void onFinish(OnAnimEndListener listener) {
         listener.onAnimEnd();
     }
+
+    @Override
+    public void reset() {
+        setText("下拉刷新");
+    }
 }

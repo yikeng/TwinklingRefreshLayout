@@ -44,11 +44,11 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
     private MaterialProgressDrawable mProgress;
 
     public ProgressLayout(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public ProgressLayout(Context context, AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public ProgressLayout(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -68,7 +68,7 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
         mProgress.setBackgroundColor(CIRCLE_BG_LIGHT);
         mCircleView.setImageDrawable(mProgress);
         mCircleView.setVisibility(View.GONE);
-        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.CENTER);
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
         mCircleView.setLayoutParams(params);
         addView(mCircleView);
     }
@@ -140,7 +140,8 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
         mCircleView.setImageDrawable(mProgress);
     }
 
-    private void reset() {
+    @Override
+    public void reset() {
         mCircleView.clearAnimation();
         mProgress.stop();
         mCircleView.setVisibility(View.GONE);
@@ -149,7 +150,7 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
         mProgress.setAlpha(MAX_ALPHA);
         ViewCompat.setScaleX(mCircleView, 0);
         ViewCompat.setScaleY(mCircleView, 0);
-        ViewCompat.setAlpha(mCircleView,1);
+        ViewCompat.setAlpha(mCircleView, 1);
     }
 
     @Override
@@ -173,13 +174,13 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
         if (fraction >= 1f) {
             ViewCompat.setScaleX(mCircleView, 1f);
             ViewCompat.setScaleY(mCircleView, 1f);
-        }else {
+        } else {
             ViewCompat.setScaleX(mCircleView, fraction);
             ViewCompat.setScaleY(mCircleView, fraction);
         }
 
-        if (fraction<=1f){
-        mProgress.setAlpha((int) (STARTING_PROGRESS_ALPHA+(MAX_ALPHA-STARTING_PROGRESS_ALPHA)*fraction));
+        if (fraction <= 1f) {
+            mProgress.setAlpha((int) (STARTING_PROGRESS_ALPHA + (MAX_ALPHA - STARTING_PROGRESS_ALPHA) * fraction));
         }
 
         float adjustedPercent = (float) Math.max(fraction - .4, 0) * 5 / 3;
@@ -196,7 +197,7 @@ public class ProgressLayout extends FrameLayout implements IHeaderView {
         if (fraction >= 1f) {
             ViewCompat.setScaleX(mCircleView, 1f);
             ViewCompat.setScaleY(mCircleView, 1f);
-        }else {
+        } else {
             ViewCompat.setScaleX(mCircleView, fraction);
             ViewCompat.setScaleY(mCircleView, fraction);
         }

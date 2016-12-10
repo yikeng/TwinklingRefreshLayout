@@ -1,19 +1,18 @@
 package com.lcodecore.twinklingrefreshlayout;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
 
-import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
 import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
-import com.lcodecore.tkrefreshlayout.v3.RefreshListenerAdapter;
-import com.lcodecore.tkrefreshlayout.v3.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.MusicAdapter;
 
-//TODO 1.float refresh有问题   2.优化SwipeCircle显示问题
+//TODO 1.优化SwipeCircle显示问题  2.有FixedHeader的界面fling有问题
 public class MusicActivity extends AppCompatActivity {
 
     private MusicAdapter adapter;
@@ -37,12 +36,11 @@ public class MusicActivity extends AppCompatActivity {
 
     private void setupListView(ListView listView) {
         TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refresh);
-//        GoogleDotView headerView = new GoogleDotView(this);
         ProgressLayout headerView = new ProgressLayout(this);
         refreshLayout.setHeaderView(headerView);
         View exHeader = View.inflate(this, R.layout.header_music, null);
         refreshLayout.addFixedExHeader(exHeader);
-        refreshLayout.setEnableOverlayRefreshView(false);
+        refreshLayout.setOverScrollRefreshShow(false);
 //        refreshLayout.setFloatRefresh(true);
         adapter = new MusicAdapter();
         listView.setAdapter(adapter);
