@@ -56,7 +56,7 @@ Android系统为了跟iOS不一样，当界面OverScroll的时候会显示一个
 #### 3.在Activity或者Fragment中配置
 ##### TwinklingRefreshLayout不会自动结束刷新或者加载更多，需要手动控制
 ```java
-refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
+refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {

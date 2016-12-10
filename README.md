@@ -58,7 +58,7 @@ To get better effect, you'd better add code `android:overScrollMode="never"` to 
 #### 3.Coding in the Activity or Fragment.
 ##### Change of state need to be manually controlled.
 ```java
-refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
+refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
             @Override
             public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
                 new Handler().postDelayed(new Runnable() {
@@ -291,3 +291,5 @@ Congratulations! Simple to use and simple to Personalise.（To see a more simple
 - more attributes.
 - Fix the NullPointerException bug in Fragment.
 - Fix the Sliding conflict.
+
+> ps：目前本人大四，就读于西安电子科技大学，正在找工作，求推荐！（lcodecore@163.com）
