@@ -311,7 +311,7 @@ public class ProgressView extends View{
         mIndicatorController.setAnimationStatus(BaseIndicatorController.AnimStatus.END);
     }
     public void startAnim(){
-        mIndicatorController.setAnimationStatus(BaseIndicatorController.AnimStatus.CANCEL);
+        mIndicatorController.setAnimationStatus(BaseIndicatorController.AnimStatus.START);
     }
 
     @Override

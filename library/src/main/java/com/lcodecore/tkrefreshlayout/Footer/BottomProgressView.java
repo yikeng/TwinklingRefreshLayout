@@ -1,6 +1,7 @@
 package com.lcodecore.tkrefreshlayout.Footer;
 
 import android.content.Context;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -33,6 +34,17 @@ public class BottomProgressView extends ProgressView implements IBottomView {
         setIndicatorId(BallPulse);
     }
 
+    private int normalColor = 0xffeeeeee;
+    private int animatingColor = 0xffe75946;
+
+    public void setNormalColor(@ColorInt int color){
+        normalColor = color;
+    }
+
+    public void setAnimatingColor(@ColorInt int color){
+        animatingColor = color;
+    }
+
     @Override
     public View getView() {
         return this;
@@ -40,26 +52,28 @@ public class BottomProgressView extends ProgressView implements IBottomView {
 
     @Override
     public void onPullingUp(float fraction, float maxHeadHeight, float headHeight) {
-       // setVisibility(GONE);
+        setIndicatorColor(normalColor);
+      stopAnim();
     }
 
     @Override
     public void startAnim(float maxHeadHeight, float headHeight) {
-        //setVisibility(VISIBLE);
+        setIndicatorColor(animatingColor);
+        startAnim();
     }
 
     @Override
     public void onPullReleasing(float fraction, float maxHeadHeight, float headHeight) {
-       // setVisibility(GONE);
+       stopAnim();
     }
 
     @Override
     public void onFinish() {
-
+        stopAnim();
     }
 
     @Override
     public void reset() {
-
+        stopAnim();
     }
 }
