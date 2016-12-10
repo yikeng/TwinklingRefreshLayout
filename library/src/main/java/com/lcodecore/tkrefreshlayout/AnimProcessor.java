@@ -87,7 +87,7 @@ public class AnimProcessor {
     private boolean isAnimHeadToRefresh = false;
 
     /**
-     * 1.满足进入刷新的条件或者主动刷新时，把Head位移到刷新位置（当前位置 -> HeadHeight）
+     * 1.满足进入刷新的条件或者主动刷新时，把Head位移到刷新位置（当前位置 ~ HeadHeight）
      */
     public void animHeadToRefresh() {
         isAnimHeadToRefresh = true;
@@ -105,7 +105,7 @@ public class AnimProcessor {
     private boolean isAnimHeadBack = false;
 
     /**
-     * 2.动画结束或不满足进入刷新状态的条件，收起头部（当前位置 -> 0）
+     * 2.动画结束或不满足进入刷新状态的条件，收起头部（当前位置 ~ 0）
      */
     public void animHeadBack() {
         isAnimHeadBack = true;
@@ -120,7 +120,7 @@ public class AnimProcessor {
     private boolean isAnimBottomToLoad = false;
 
     /**
-     * 3.满足进入加载更多的条件或者主动加载更多时，把Footer移到加载更多位置（当前位置 -> BottomHeight）
+     * 3.满足进入加载更多的条件或者主动加载更多时，把Footer移到加载更多位置（当前位置 ~ BottomHeight）
      */
     public void animBottomToLoad() {
         isAnimBottomToLoad = true;
@@ -138,7 +138,7 @@ public class AnimProcessor {
     private boolean isAnimBottomBack = false;
 
     /**
-     * 4.加载更多完成或者不满足进入加载更多模式的条件时，收起尾部（当前位置 -> 0）
+     * 4.加载更多完成或者不满足进入加载更多模式的条件时，收起尾部（当前位置 ~ 0）
      */
     public void animBottomBack() {
         isAnimBottomBack = true;

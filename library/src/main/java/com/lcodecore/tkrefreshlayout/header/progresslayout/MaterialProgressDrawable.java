@@ -31,7 +31,6 @@ import java.util.ArrayList;
 /**
  * Fancy progress indicator for Material theme.
  *
- * @hide
  */
 public class MaterialProgressDrawable extends Drawable implements Animatable {
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
@@ -130,8 +129,8 @@ public class MaterialProgressDrawable extends Drawable implements Animatable {
      * Set the overall size for the progress spinner. This updates the radius
      * and stroke width of the ring.
      *
-     * @param size One of {@link MaterialProgressDrawable.LARGE} or
-     *            {@link MaterialProgressDrawable.DEFAULT}
+     * @param size One of { MaterialProgressDrawable.LARGE} or
+     *            {MaterialProgressDrawable.DEFAULT}
      */
     public void updateSizes(@ProgressDrawableSize int size) {
         if (size == LARGE) {

@@ -17,7 +17,6 @@ import android.widget.ImageView;
  * called before the animation is actually complete and support shadows on older
  * platforms.
  *
- * @hide
  */
 public class CircleImageView extends ImageView {
 
