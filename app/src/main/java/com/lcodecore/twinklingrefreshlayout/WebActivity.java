@@ -27,7 +27,6 @@ public class WebActivity extends AppCompatActivity {
         refreshLayout.setWaveHeight(240);
         refreshLayout.setOverScrollHeight(200);
         refreshLayout.setEnableLoadmore(false);
-        refreshLayout.setEnableRefresh(false);
 
         mWebView = (WebView) findViewById(R.id.webView);
         mWebView.loadUrl("https://dribbble.com/shots");

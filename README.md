@@ -1,33 +1,42 @@
 # TwinklingRefreshLayout
-[English Version](./README_EN.md)
+[中文文档](./README_CN.md)
 
-TwinklingRefreshLayout延伸了Google的SwipeRefreshLayout的思想,不在列表控件上动刀,而是使用一个ViewGroup来包含列表控件,以保持其较低的耦合性和较高的通用性。其主要特性有：
+TwinklingRefreshLayout extended the thoughts of SwipeRefreshLayout,using a ViewGroup to include a list of Views, to maintain its low coupling and high versatility. Follows are its main features.
+ 
+ - New overscroll animations, running smoothly, much better than iOS.
+ - Support RecyclerView, ScrollView, AbsListView, WebView and so on.
+ - Support to load more.
+ - Default support cross-border rebound.
+ - You can open a pure bounds rebound mode.
+ -  Lots of methods in the class OnRefreshListener.
+ - It provides an interface to the callback during the sliding coefficient. Personalized offer good support.
 
-1. 支持RecyclerView、ScrollView、AbsListView系列(ListView、GridView)、WebView以及其它可以获取到scrollY的控件
-2. 支持加载更多
-3. 默认支持 **越界回弹**
-4. 可开启没有刷新控件的纯净越界回弹模式
-5. setOnRefreshListener中拥有大量可以回调的方法
-6. 将Header和Footer抽象成了接口,并回调了滑动过程中的系数,方便实现个性化的Header和Footer
-
-![](art/pic_large.png)
+![](art/structure_v1.0.png)
 
 ## Demo
-[下载Demo](art/app-debug.apk)
+[Download Demo](art/app-debug.apk)
 
-![](art/gif_recyclerview.gif)  ![](art/gif_listview.gif)  ![](art/gif_gridview.gif)  ![](art/gif_scrollview.gif)  ![](art/gif_webview.gif)
+![](art/gif_recyclerview.gif)  ![](art/gif_listview.gif)  ![](art/gif_gridview.gif) ![](art/gif_recyclerview2.gif) ![](art/gif_scrollview.gif)  ![](art/gif_webview.gif)
 
-## 使用方法
-#### 1.添加gradle依赖
-将libray模块复制到项目中,或者直接在build.gradle中依赖:
+You can download the Video for more details.
+
+[Music - ListView - FixedHeader](atr/gif_listview.mp4)
+[Food - RecyclerView - PureScrollMode](art/gif_recyclerview.mp4)
+[Science - GridView - SinaHeader](art/gif_gridview.mp4)
+[Photo - RecyclerView - BezierLayout](art/gif_recyclerview2.mp4)
+[Story - ScrollView - GoogleDotView](art/gif_scrollview.mp4)
+[Dribbble - WebView - FloatRefresh](art/gif_webview.mp4)
+
+## Usage
+#### 1.Add a gradle dependency.
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.3'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.4'
 ```
 
-#### 2.在xml中添加TwinklingRefreshLayout
+#### 2.Add TwinklingRefreshLayout in the layout xml.
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<com.lcodecore.library.TwinklingRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/refreshLayout"
     android:layout_width="match_parent"
@@ -39,12 +48,15 @@ compile 'com.lcodecorex:tkrefreshlayout:1.0.3'
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:overScrollMode="never" 
         android:background="#fff" />
 </com.lcodecore.library.TwinklingRefreshLayout>
 ```
 
-#### 3.在Activity或者Fragment中配置
-##### TwinklingRefreshLayout不会自动结束刷新或者加载更多，需要手动控制
+To get better effect, you'd better add code `android:overScrollMode="never"` to the childView.
+
+#### 3.Coding in the Activity or Fragment.
+##### Change of state need to be manually controlled.
 ```java
 refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(){
             @Override
@@ -69,58 +81,94 @@ refreshLayout.setOnRefreshListener(new TwinklingRefreshLayout.OnRefreshListener(
         });
     }
 ```
-使用finishRefreshing()方法结束刷新，finishLoadmore()方法结束加载更多。此处OnRefreshListener还有其它方法，可以选择需要的来重写。
 
-##### setWaveHeight、setHeaderHeight、setBottomHeight
-- setWaveHeight 设置头部可拉伸的最大高度。
-- setHeaderHeight 头部固定高度(在此高度上显示刷新状态)
-- setBottomHeight 底部高度
+Use finishRefreshing() method to end refresh, finishLoadmore() method to end load more. OnRefreshListener there are other methods, you can choose need to override. 
+
+And if you want you refresh automatically, call the method startRefresh().
+
+##### setWaveHeight、setHeaderHeight、setBottomHeight、setOverScrollHeight
+- setWaveHeight is used To set the maximum height of the head can be stretched.
+- setHeaderHeight is used to set the standard head height.
+- setBottomHeight is used to set the Bottom height.
+- setOverScrollHeight is used to set the max height of overscroll.
+
+And now dp value is supported.
 
 #### setEnableRefresh、setEnableLoadmore
-灵活的设置是否禁用上下拉。
+Flexible settings for whether to disable the pulling-down mode.
 
 ##### setHeaderView(IHeaderView headerView)、setBottomView(IBottomView bottomView)
-设置头部/底部个性化刷新效果，头部需要实现IHeaderView，底部需要实现IBottomView。
 
-##### setEnableOverlayRefreshView()
-是否允许在越界的时候显示刷新控件，默认是允许的，也就是Fling越界的时候Header或Footer照常显示，反之就是不显示；可能有特殊的情况，刷新控件会影响显示体验才设立了这个状态。
+#### setEnableOverScroll
+Whether to allow overscroll mode, opened by default.
+
+##### setOverScrollTopShow、setOverScrollBottomShow、setOverScrollRefreshShow
+Whether to allow the display refresh control on overscrolling, the default is true.
 
 ##### setPureScrollModeOn()
-开启纯净的越界回弹模式，也就是所有刷新相关的View都不显示，只显示越界回弹效果
+To open the pure overscroll mode so that refreshView would gone permanently.
 
-#### 4.扩展属性
-- tr_wave_height 头部拉伸允许的最大高度
-- tr_head_height  头部高度
-- tr_bottom_height 底部高度
-- tr_overscroll_height 允许越界的最大高度
-- tr_enable_loadmore 是否允许加载更多,默认为true
-- tr_pureScrollMode_on 是否开启纯净的越界回弹模式
-- tr_show_overlay_refreshview 是否在越界的时候展示刷新控件
+##### setAutoLoadMore
+if open the loadmore mode after overscrolling bottom automatically.
 
-#### 5.在ViewPager+Fragment中使用的注意事项
-ViewPager默认最大加载3个Fragment,Fragment被切换到3个之外时,Fragment会调用onDestroyView()方法,当再次切换回来时,View会被重新创建。上一版的Demo有点小bug,目前都已修复。
+##### addFixedExHeader
+Allow you to add a view fixed on the top.
 
-## 其它说明
-### 1.默认支持越界回弹
-这一点很多类似SwipeRefreshLayout的刷新控件都没有做到(包括SwipeRefreshLayout),因为没有拦截下来的时间会传递给列表控件，而列表控件的滚动状态很难获取。解决方案就是给列表控件设置了OnTouchListener并把事件交给GestureDetector处理,然后在列表控件的OnScrollListener中监听View是否滚动到了顶部(没有OnScrollListener的则采用延时监听策略)。
+##### startRefresh、startLoadMore、finishRefreshing、finishLoadmore
 
-### 2.setOnRefreshListener大量可以回调的方法
-- onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction)  正在下拉的过程
-- onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction)    正在上拉的过程
-- onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction)  下拉释放过程
-- onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction)  上拉释放过程
-- onRefresh(TwinklingRefreshLayout refreshLayout)  正在刷新
-- onLoadMore(TwinklingRefreshLayout refreshLayout)  正在加载更多
+##### setFloatRefresh(boolean)
+Make refresh-animation like SwipeRefreshLayout.
 
-其中fraction表示当前下拉的距离与Header高度的比值(或者当前上拉距离与Footer高度的比值)。
+#### 4.Attributes
+- tr_wave_height - Flexible head height
+- tr_head_height -  Head height
+- tr_bottom_height - Bottom height
+- tr_overscroll_height - OverScroll Height 
+- tr_enable_loadmore - default is true
+- tr_pureScrollMode_on - default is false
+- tr_overscroll_top_show - default is true
+- tr_overscroll_bottom_show - default is true
+- tr_enable_overscroll - default is true.
 
-### 3.Header和Footer
-目前已实现的Header有**BezierLayout**(图一)，**GoogleDotView**(图二)，**SinaRefreshView**(图三)；实现的Footer有 **BottomProgressView**(图一)，**LoadingView**(图三)，更多动效可以参考[AVLoadingIndicatorView](https://github.com/81813780/AVLoadingIndicatorView)库。
+## Other
+### 1.setOnRefreshListener
+- onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction)  
+- onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction)    
+- onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction)  
+- onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction)  
+- onRefresh(TwinklingRefreshLayout refreshLayout)  
+- onLoadMore(TwinklingRefreshLayout refreshLayout)  
 
-其中第一幅图源于[BeautifulRefreshForGirl](https://github.com/android-cjj/BeautifulRefreshLayout/tree/BeautifulRefreshForGirl)，原来的动效只支持21以上版本，且滑动过程中会出现View消失的情况，笔者做了一些优化并使其可以正常的在界面中使用。
+fraction = currentMoveHeight/headHeight OR (fraction = currentMoveHeight/bottomHeight).
 
-### 3.实现个性化的Header和Footer
-相关接口分别为IHeaderView和IBottomView,代码如下:
+### 3.Header and Footer
+##### BezierLayout(pic 4)
+- setWaveColor
+- setRippleColor
+
+##### GoogleDotView(pic 5)
+##### SinaRefreshView(pic 3)
+- setArrowResource
+- setTextColor
+- setPullDownStr
+- setReleaseRefreshStr
+- setRefreshingStr
+
+##### ProgressLayout(SwipeRefreshLayout pic 6)
+- setProgressBackgroundColorSchemeResource(@ColorRes int colorRes)
+- setProgressBackgroundColorSchemeColor(@ColorInt int color)
+- setColorSchemeResources(@ColorRes int... colorResIds)
+
+####Footer
+##### BottomProgressView(pic 2)
+- setNormalColor(@ColorInt int color)
+- setAnimatingColor(@ColorInt int color)
+
+##### LoadingView(pic 3)
+Here is more animations.[AVLoadingIndicatorView](https://github.com/81813780/AVLoadingIndicatorView)。
+
+### 3.Personalize the Header and Footer.
+The Header needs to implement IHeaderView interface and Footer in in the same way(IBottomView).
 ```java
 public interface IHeaderView {
     View getView();
@@ -130,24 +178,22 @@ public interface IHeaderView {
     void onPullReleasing(float fraction,float maxHeadHeight,float headHeight);
 
     void startAnim(float maxHeadHeight,float headHeight);
+    
+    void reset();
 }
 ```
 
-其中getView()方法用于在TwinklingRefreshLayout中获取到实际的Header,因此不能返回null。
+getView() method is not allow to return null.
 
-**实现像新浪微博那样的刷新效果**(有部分修改,具体请看源码),实现代码如下:
+#### Let's implement a simple refresh dynamic efficiency.
+1.Define SinaRefreshHeader extended from FrameLayout and implement IHeaderView interface.
 
-1.首先定义SinaRefreshHeader继承自FrameLayout并实现IHeaderView方法
+2.Return this in the method getView(). 
 
-2.getView()方法中返回this
-
-3.在onAttachedToWindow()或者构造函数方法中获取一下需要用到的布局
+3.Inflate and find Views in the layout xml.
 
 ```java
-@Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
+void init() {
         if (rootView == null) {
             rootView = View.inflate(getContext(), R.layout.view_sinaheader, null);
             refreshArrow = (ImageView) rootView.findViewById(R.id.iv_arrow);
@@ -158,7 +204,7 @@ public interface IHeaderView {
     }
 ```
 
-4.实现其它方法
+4.Override some methods.
 ```java
 @Override
     public void onPullingDown(float fraction, float maxHeadHeight, float headHeight) {
@@ -187,9 +233,14 @@ public interface IHeaderView {
         refreshArrow.setVisibility(GONE);
         loadingView.setVisibility(VISIBLE);
     }
+    
+    @Override
+    public void onFinish(OnAnimEndListener listener) {
+    listener.onAnimEnd();
+    }
 ```
 
-5.布局文件
+5.layout xml.
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -198,8 +249,8 @@ public interface IHeaderView {
     android:gravity="center">
     <ImageView
         android:id="@+id/iv_arrow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:src="@drawable/ic_arrow"/>
 
     <ImageView
@@ -215,63 +266,28 @@ public interface IHeaderView {
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:textSize="16sp"
-        android:text="下拉刷新"/>
+        android:text="pull down to refresh"/>
 </LinearLayout>
 ```
 
-注意fraction的使用,比如上面的代码`refreshArrow.setRotation(fraction * headHeight / maxHeadHeight * 180)`，`fraction * headHeight`表示当前头部滑动的距离，然后算出它和最大高度的比例，然后乘以180，可以使得在滑动到最大距离时Arrow恰好能旋转180度。
+Pay attention to the using of the parameter `fraction`. Such as the code above`refreshArrow.setRotation(fraction * headHeight / maxHeadHeight * 180)`，`fraction * headHeight` is the translationY of the Head and 180 is the angle the arrow would rotate，so that we can make the arrow rotate 180 degrees when the translationY is come to the maxHeadHeight.
 
 
-onPullingDown/onPullingUp表示正在下拉/正在上拉的过程。
-onPullReleasing表示向上拉/下拉释放时回调的状态。
-startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显示了加载中的小菊花）
+onPullingDown/onPullingUp
+onPullReleasing
+startAnim - be called automatically after the method onRefresh/onLoadMore is called.
 
-如上所示，轻而易举就可以实现一个个性化的Header或者Footer。（更简单的实现请参考Demo中的 **TextHeaderView(图四)**）。
+Congratulations! Simple to use and simple to Personalise.（To see a more simple example. **TextHeaderView(pic 4)**）。
 
-
-## TODO
-- 制作一个star相关的动效
-- CoordinateLayout及NestedScroll支持
-- 对回弹效果做一下优化，比如支持使用不同的插值器
-- 带视差效果的Header
-- SwipeRefreshLayout风格的刷新View
-- 允许结束刷新/加载更多前先执行完自定义动画
-
-## 更新日志
+## Update Logs
 #### v1.04
-##### 新增功能
-- **第二次重构完成**,将核心逻辑拆分为RefreshProcessor、AnimProcessor、OverScrollProcessor、CoProcessor
-- **优化越界策越，手势决定越界高度**
-- 添加类似SwipeRefreshLayout的**悬浮刷新**功能(ProgressLayout)
-- 滑到底部**自动加载更多**or回弹可选，默认为回弹
-- 将Head,Footer修改为设置位移，而不是设置高度
-- 允许在结束刷新之前执行一个动效：IHeadView.onFinish(animEndListener)
-- 新增支持Header(可以为任意类型)
-- 优化BezierLayout、SinaRefreshLayout等的显示并增加调节属性
-
-##### fixed bugs
-- 修复刷新或加载更多时，列表item没有铺满列表控件，滑动无效的问题
-- 添加主动刷新/加载更多的方法：startRefresh(),startLoadMore()
-- 修复顶部和底部越界高度不一致的问题
-- 修复WebView在底部fling时不能越界的问题
-- 动画执行时间与高度相关，动效更加柔和
-
+- Refactor the code.
+- Make animations smoothly.
+- Add support to Fixed Header.
+- Add support to float refresh mode.
+- IHeadView.onFinish(animEndListener) -> Available to run animations before finishRefresh.
 
 #### v1.03
-- 扩展了更多的属性
-- 修复Fragment回收导致的空指针异常问题
-- 加入x方向判断,减小了滑动冲突
-- 优化加载更多列表显示问题
-- 可以灵活的设置是否禁用上下拉
-- 修复GridView滑动过程中出现的白条问题
-- Demo中添加轮播条展示
-
-#### v1.02
-- 修复加载更多列表控件的显示问题
-
-#### v1.01
-- 支持了RecyclerView、ScrollView、AbsListView、WebView
-- 支持越界回弹
-- 支持个性化Header、Footer
-
-> ps：目前本人大四，就读于西安电子科技大学，正在找工作，求推荐！（lcodecore@163.com）
+- more attributes.
+- Fix the NullPointerException bug in Fragment.
+- Fix the Sliding conflict.

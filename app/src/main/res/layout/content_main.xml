@@ -11,43 +11,50 @@
         android:id="@+id/bt_music"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:layout_gravity="center"
-        android:text="Music"/>
+        android:textAllCaps="false"
+        android:text="Music - ListView - FixedHeader"/>
 
     <Button
         android:id="@+id/bt_food"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Food"/>
+        android:textAllCaps="false"
+        android:text="Food - RecyclerView - PureScrollMode"/>
 
     <Button
         android:id="@+id/bt_science"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Science"/>
+        android:textAllCaps="false"
+        android:text="Science - GridView - SinaHeader"/>
 
     <Button
         android:id="@+id/bt_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Photo"/>
+        android:textAllCaps="false"
+        android:text="Photo - RecyclerView - BezierLayout"/>
 
     <Button
         android:id="@+id/bt_story"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Story"/>
+        android:textAllCaps="false"
+        android:text="Story - ScrollView - GoogleDotView"/>
 
     <Button
         android:id="@+id/bt_enjoy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Dribbble"/>
+        android:textAllCaps="false"
+        android:text="Dribbble - WebView - FloatRefresh"/>
 
 
     <android.support.design.widget.TabLayout
