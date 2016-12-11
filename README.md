@@ -2,7 +2,7 @@
 [中文文档](./README_CN.md)
 
 TwinklingRefreshLayout extended the thoughts of SwipeRefreshLayout,using a ViewGroup to include a list of Views, to maintain its low coupling and high versatility. Follows are its main features.
- 
+
  - New overscroll animations, running smoothly, much better than iOS.
  - Support RecyclerView, ScrollView, AbsListView, WebView and so on.
  - Support to load more.
@@ -48,7 +48,7 @@ compile 'com.lcodecorex:tkrefreshlayout:1.0.4'
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:overScrollMode="never" 
+        android:overScrollMode="never"
         android:background="#fff" />
 </com.lcodecore.library.TwinklingRefreshLayout>
 ```
@@ -82,7 +82,7 @@ refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
     }
 ```
 
-Use finishRefreshing() method to end refresh, finishLoadmore() method to end load more. OnRefreshListener there are other methods, you can choose need to override. 
+Use finishRefreshing() method to end refresh, finishLoadmore() method to end load more. OnRefreshListener there are other methods, you can choose need to override.
 
 And if you want you refresh automatically, call the method startRefresh().
 
@@ -123,7 +123,7 @@ Make refresh-animation like SwipeRefreshLayout.
 - tr_wave_height - Flexible head height
 - tr_head_height -  Head height
 - tr_bottom_height - Bottom height
-- tr_overscroll_height - OverScroll Height 
+- tr_overscroll_height - OverScroll Height
 - tr_enable_loadmore - default is true
 - tr_pureScrollMode_on - default is false
 - tr_overscroll_top_show - default is true
@@ -178,7 +178,7 @@ public interface IHeaderView {
     void onPullReleasing(float fraction,float maxHeadHeight,float headHeight);
 
     void startAnim(float maxHeadHeight,float headHeight);
-    
+
     void reset();
 }
 ```
@@ -188,7 +188,7 @@ getView() method is not allow to return null.
 #### Let's implement a simple refresh dynamic efficiency.
 1.Define SinaRefreshHeader extended from FrameLayout and implement IHeaderView interface.
 
-2.Return this in the method getView(). 
+2.Return this in the method getView().
 
 3.Inflate and find Views in the layout xml.
 
@@ -233,7 +233,7 @@ void init() {
         refreshArrow.setVisibility(GONE);
         loadingView.setVisibility(VISIBLE);
     }
-    
+
     @Override
     public void onFinish(OnAnimEndListener listener) {
     listener.onAnimEnd();
@@ -292,4 +292,4 @@ Congratulations! Simple to use and simple to Personalise.（To see a more simple
 - Fix the NullPointerException bug in Fragment.
 - Fix the Sliding conflict.
 
-> ps：目前本人大四，就读于西安电子科技大学，正在找工作，求推荐！（lcodecore@163.com）
+> ps：Contact me: lcodecore@163.com

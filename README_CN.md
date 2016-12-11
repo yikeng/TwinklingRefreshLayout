@@ -46,7 +46,7 @@ compile 'com.lcodecorex:tkrefreshlayout:1.0.4'
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:overScrollMode="never" 
+        android:overScrollMode="never"
         android:background="#fff" />
 </com.lcodecore.library.TwinklingRefreshLayout>
 ```
@@ -179,7 +179,7 @@ public interface IHeaderView {
     void onPullReleasing(float fraction,float maxHeadHeight,float headHeight);
 
     void startAnim(float maxHeadHeight,float headHeight);
-    
+
     void reset();
 }
 ```
@@ -323,4 +323,4 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 支持越界回弹
 - 支持个性化Header、Footer
 
-> ps：目前本人大四，就读于西安电子科技大学，正在找工作，求推荐！（lcodecore@163.com）
+> ps：如有任何问题或者是建议，可以邮箱联系我！（lcodecore@163.com）
