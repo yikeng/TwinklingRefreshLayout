@@ -34,4 +34,14 @@ public abstract class RefreshListenerAdapter implements PullListener {
         public void onFinishLoadMore() {
 
         }
-    }
+
+        @Override
+        public void onRefreshCanceled() {
+
+        }
+
+        @Override
+        public void onLoadmoreCanceled() {
+
+        }
+}

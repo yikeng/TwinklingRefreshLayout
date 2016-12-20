@@ -43,4 +43,14 @@ public interface PullListener {
         void onFinishRefresh();
 
         void onFinishLoadMore();
+
+        /**
+        * 正在刷新时向上滑动屏幕，刷新被取消
+        */
+        void onRefreshCanceled();
+
+        /**
+         * 正在加载更多时向下滑动屏幕，加载更多被取消
+         */
+        void onLoadmoreCanceled();
     }

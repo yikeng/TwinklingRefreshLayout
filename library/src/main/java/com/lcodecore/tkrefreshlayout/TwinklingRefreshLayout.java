@@ -126,7 +126,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             layoutParams.addRule(CENTER_VERTICAL);
 
             FrameLayout extraHeadLayout = new FrameLayout(getContext());
-            extraHeadLayout.setId(View.NO_ID);
+            extraHeadLayout.setId(R.id.ex_header);
             LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
             this.addView(extraHeadLayout, layoutParams2);
@@ -446,6 +446,16 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             if (!isLoadingVisible) return;
             mBottomView.onFinish();
         }
+
+        @Override
+        public void onRefreshCanceled() {
+            if (refreshListener != null) refreshListener.onRefreshCanceled();
+        }
+
+        @Override
+        public void onLoadmoreCanceled() {
+            if (refreshListener != null) refreshListener.onLoadmoreCanceled();
+        }
     }
 
     public class CoProcessor {
@@ -614,6 +624,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             LayoutParams params = (LayoutParams) mChildView.getLayoutParams();
             params.addRule(BELOW, mExtraHeadLayout.getId());
             mChildView.setLayoutParams(params);
+            requestLayout();
         }
 
 
@@ -621,7 +632,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
          * 主动刷新、加载更多、结束
          */
         public void startRefresh() {
-            setRefreshing(true);
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -629,16 +639,12 @@ public class TwinklingRefreshLayout extends RelativeLayout {
                     if (!isPureScrollModeOn && mChildView != null) {
                         setRefreshing(true);
                         animProcessor.animHeadToRefresh();
-                        if (pullListener != null) {
-                            pullListener.onRefresh(TwinklingRefreshLayout.this);
-                        }
                     }
                 }
             });
         }
 
         public void startLoadMore() {
-            setLoadingMore(true);
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -646,9 +652,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
                     if (!isPureScrollModeOn && mChildView != null) {
                         setLoadingMore(true);
                         animProcessor.animBottomToLoad();
-                        if (pullListener != null) {
-                            pullListener.onLoadMore(TwinklingRefreshLayout.this);
-                        }
                     }
                 }
             });
@@ -759,6 +762,14 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
         public void onPullUpReleasing(float offsetY) {
             pullListener.onPullUpReleasing(TwinklingRefreshLayout.this, offsetY / mBottomHeight);
+        }
+
+        public void onRefreshCanceled(){
+            pullListener.onRefreshCanceled();
+        }
+
+        public void onLoadmoreCanceled(){
+            pullListener.onLoadmoreCanceled();
         }
 
         public void setStatePTD() {

@@ -286,6 +286,13 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 带视差效果的Header
 
 ## 更新日志
+#### v1.05紧急修复版
+- 修复底部自动加载更多问题
+- 修复FixedHeader遮挡item问题
+- RefreshListenerAdapter添加接口onRefreshCanceled()/onLoadmoreCanceled() 回调刷新被取消的状态
+- 修复刷新状态重复回调问题
+- 添加Apache License 2.0开源协议
+
 #### v1.04
 ##### 新增功能
 - **第二次重构完成**,将核心逻辑拆分为RefreshProcessor、AnimProcessor、OverScrollProcessor、CoProcessor

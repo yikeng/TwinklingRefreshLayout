@@ -159,6 +159,7 @@ public class AnimProcessor {
      */
     public void animHeadHideByVy(int vy) {
         isAnimHeadHide = true;
+        cp.onRefreshCanceled();
         vy = Math.abs(vy);
         if (vy < 5000) vy = 8000;
         animLayoutByTime(getVisibleHeadHeight(), 0, 5 * Math.abs(getVisibleHeadHeight() * 1000 / vy), animHeadUpListener, new AnimatorListenerAdapter() {
@@ -179,6 +180,7 @@ public class AnimProcessor {
      */
     public void animBottomHideByVy(int vy) {
         isAnimBottomHide = true;
+        cp.onLoadmoreCanceled();
         vy = Math.abs(vy);
         if (vy < 5000) vy = 8000;
         animLayoutByTime(getVisibleFootHeight(), 0, 5 * getVisibleFootHeight() * 1000 / vy, animBottomUpListener, new AnimatorListenerAdapter() {
@@ -231,8 +233,6 @@ public class AnimProcessor {
      */
     public void animOverScrollBottom(float vy, int computeTimes) {
         if (cp.isOsBottomLocked()) return;
-        cp.lockOsBottom();
-        isAnimOsBottom = true;
         cp.setStatePBU();
         int oh = (int) Math.abs(vy / computeTimes / 2);
         final int overHeight = oh > cp.getOsHeight() ? cp.getOsHeight() : oh;
@@ -240,6 +240,8 @@ public class AnimProcessor {
         if (cp.autoLoadMore()) {
             cp.startLoadMore();
         } else {
+            cp.lockOsBottom();
+            isAnimOsBottom = true;
             animLayoutByTime(0, overHeight, time, overScrollBottomUpListener, new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
