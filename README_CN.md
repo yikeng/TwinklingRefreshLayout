@@ -28,7 +28,7 @@ You can download the Video for more details.
 #### 1.添加gradle依赖
 将libray模块复制到项目中,或者直接在build.gradle中依赖:
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.4'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
 ```
 
 #### 2.在xml中添加TwinklingRefreshLayout
@@ -331,3 +331,23 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 支持个性化Header、Footer
 
 > ps：如有任何问题或者是建议，可以邮箱联系我！（lcodecore@163.com）
+
+
+
+License
+-------
+
+    Copyright 2016 lcodecorex
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+

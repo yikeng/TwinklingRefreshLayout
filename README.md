@@ -30,7 +30,7 @@ You can download the Video for more details.
 ## Usage
 #### 1.Add a gradle dependency.
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.4'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
 ```
 
 #### 2.Add TwinklingRefreshLayout in the layout xml.
@@ -280,6 +280,11 @@ startAnim - be called automatically after the method onRefresh/onLoadMore is cal
 Congratulations! Simple to use and simple to Personalise.（To see a more simple example. **TextHeaderView(pic 4)**）。
 
 ## Update Logs
+#### v1.05 Emergency Fix
+- Fix the bug of setAutoLoadMore().
+- Fix the bug that FixedHeader covered the first item of listview.
+- Add onRefreshCanceled()/onLoadmoreCanceled() for RefreshListenerAdapter.
+
 #### v1.04
 - Refactor the code.
 - Make animations smoothly.
@@ -293,3 +298,23 @@ Congratulations! Simple to use and simple to Personalise.（To see a more simple
 - Fix the Sliding conflict.
 
 > ps：Contact me: lcodecore@163.com
+
+
+
+License
+-------
+
+    Copyright 2016 lcodecorex
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
