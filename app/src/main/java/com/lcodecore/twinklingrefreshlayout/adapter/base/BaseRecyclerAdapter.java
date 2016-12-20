@@ -38,7 +38,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<Recycl
     }
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        runEnterAnimation(holder.itemView, position);
+//        runEnterAnimation(holder.itemView, position);
         //数据绑定
         if (enableHead) {
             if (position == 0) {

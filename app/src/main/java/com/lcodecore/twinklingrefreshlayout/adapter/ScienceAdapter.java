@@ -68,12 +68,12 @@ public class ScienceAdapter extends BaseAdapter {
         cards.add(new Card("globe", "", R.drawable.science2));
         cards.add(new Card("lab-flask-leaf", "", R.drawable.science3));
         cards.add(new Card("magnet", "", R.drawable.science4));
-//        cards.add(new Card("microscope", "", R.drawable.science5));
-//        cards.add(new Card("moon", "", R.drawable.science6));
-//        cards.add(new Card("telescope", "", R.drawable.science7));
-//        cards.add(new Card("satellite", "", R.drawable.science8));
-//        cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
-//        cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
+        cards.add(new Card("microscope", "", R.drawable.science5));
+        cards.add(new Card("moon", "", R.drawable.science6));
+        cards.add(new Card("telescope", "", R.drawable.science7));
+        cards.add(new Card("satellite", "", R.drawable.science8));
+        cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
+        cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
         notifyDataSetChanged();
     }
 
@@ -82,12 +82,12 @@ public class ScienceAdapter extends BaseAdapter {
         cards.add(new Card("globe", "", R.drawable.science2));
         cards.add(new Card("lab-flask-leaf", "", R.drawable.science3));
         cards.add(new Card("magnet", "", R.drawable.science4));
-//        cards.add(new Card("microscope", "", R.drawable.science5));
-//        cards.add(new Card("moon", "", R.drawable.science6));
-//        cards.add(new Card("telescope", "", R.drawable.science7));
-//        cards.add(new Card("satellite", "", R.drawable.science8));
-//        cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
-//        cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
+        cards.add(new Card("microscope", "", R.drawable.science5));
+        cards.add(new Card("moon", "", R.drawable.science6));
+        cards.add(new Card("telescope", "", R.drawable.science7));
+        cards.add(new Card("satellite", "", R.drawable.science8));
+        cards.add(new Card("Newtons-cradle", "", R.drawable.science9));
+        cards.add(new Card("nuclear-symbol", "", R.drawable.science10));
         notifyDataSetChanged();
     }
 }

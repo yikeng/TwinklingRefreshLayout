@@ -32,9 +32,10 @@ public class ScienceActivity extends AppCompatActivity {
 
     private void setupGridView(GridView gridView) {
         final TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refresh);
-        SinaRefreshView headerView = new SinaRefreshView(this);
-        headerView.setArrowResource(R.drawable.arrow);
-        headerView.setTextColor(0xff745D5C);
+//        SinaRefreshView headerView = new SinaRefreshView(this);
+//        headerView.setArrowResource(R.drawable.arrow);
+//        headerView.setTextColor(0xff745D5C);
+        TextHeaderView headerView = (TextHeaderView) View.inflate(this,R.layout.header_tv,null);
         refreshLayout.setHeaderView(headerView);
 
         LoadingView loadingView = new LoadingView(this);
