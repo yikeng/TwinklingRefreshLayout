@@ -177,10 +177,9 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        boolean resume = cp.consumeTouchEvent(e);
-        return resume || super.onTouchEvent(e);
+        boolean consume = cp.consumeTouchEvent(e);
+        return consume || super.onTouchEvent(e);
     }
-
 
     /*************************************
      * 开放api区

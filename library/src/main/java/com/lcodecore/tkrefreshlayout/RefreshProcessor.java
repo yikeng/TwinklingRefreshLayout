@@ -45,7 +45,6 @@ public class RefreshProcessor {
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 float dy = e.getY() - mTouchY;
-
                 if (cp.isStatePTD()) {
                     dy = Math.min(cp.getMaxHeadHeight() * 2, dy);
                     dy = Math.max(0, dy);
