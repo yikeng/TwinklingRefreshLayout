@@ -5,14 +5,16 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.MusicAdapter;
+import com.lcodecore.twinklingrefreshlayout.utils.ToastUtil;
 
-//TODO 1.优化SwipeCircle显示问题  2.有FixedHeader的界面fling有问题
+//TODO 有FixedHeader的界面fling有问题
 public class MusicActivity extends AppCompatActivity {
 
     private MusicAdapter adapter;
@@ -45,6 +47,13 @@ public class MusicActivity extends AppCompatActivity {
         adapter = new MusicAdapter();
         listView.setAdapter(adapter);
         adapter.refreshCard();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ToastUtil.show("item clicked!");
+            }
+        });
 
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override

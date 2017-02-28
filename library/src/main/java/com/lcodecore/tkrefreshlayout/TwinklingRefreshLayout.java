@@ -2,6 +2,7 @@ package com.lcodecore.tkrefreshlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -105,6 +106,9 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         a.recycle();
 
         cp = new CoProcessor();
+
+        addHeader();
+        addFooter();
     }
 
     private void init() {
@@ -114,49 +118,48 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         setPullListener(new TwinklingPullListener());
     }
 
+    private void addHeader(){
+        FrameLayout headViewLayout = new FrameLayout(getContext());
+        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
+        layoutParams.addRule(ALIGN_PARENT_TOP);
+        layoutParams.addRule(CENTER_VERTICAL);
+
+        FrameLayout extraHeadLayout = new FrameLayout(getContext());
+        extraHeadLayout.setId(R.id.ex_header);
+        LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+        this.addView(extraHeadLayout, layoutParams2);
+        this.addView(headViewLayout, layoutParams);
+
+        mExtraHeadLayout = extraHeadLayout;
+        mHeadLayout = headViewLayout;
+
+        if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
+    }
+
+    private void addFooter(){
+        FrameLayout bottomViewLayout = new FrameLayout(getContext());
+        LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+        layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
+        layoutParams2.addRule(CENTER_VERTICAL);
+        bottomViewLayout.setLayoutParams(layoutParams2);
+
+        mBottomLayout = bottomViewLayout;
+        this.addView(mBottomLayout);
+
+        if (mBottomView == null) {
+            BottomProgressView mProgressView = new BottomProgressView(getContext());
+            setBottomView(mProgressView);
+        }
+    }
+
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        //添加头部
-        if (mHeadLayout == null) {
-            FrameLayout headViewLayout = new FrameLayout(getContext());
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
-            layoutParams.addRule(ALIGN_PARENT_TOP);
-            layoutParams.addRule(CENTER_VERTICAL);
-
-            FrameLayout extraHeadLayout = new FrameLayout(getContext());
-            extraHeadLayout.setId(R.id.ex_header);
-            LayoutParams layoutParams2 = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-
-            this.addView(extraHeadLayout, layoutParams2);
-            this.addView(headViewLayout, layoutParams);
-
-            mExtraHeadLayout = extraHeadLayout;
-            mHeadLayout = headViewLayout;
-
-            if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
-        }
-
-        //添加底部
-        if (mBottomLayout == null) {
-            FrameLayout bottomViewLayout = new FrameLayout(getContext());
-            LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
-            layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
-            layoutParams2.addRule(CENTER_VERTICAL);
-            bottomViewLayout.setLayoutParams(layoutParams2);
-
-            mBottomLayout = bottomViewLayout;
-            this.addView(mBottomLayout);
-
-            if (mBottomView == null) {
-                BottomProgressView mProgressView = new BottomProgressView(getContext());
-                setBottomView(mProgressView);
-            }
-        }
-
+    protected void onFinishInflate() {
+        super.onFinishInflate();
         //获得子控件
-        mChildView = getChildAt(0);
+        //onAttachedToWindow方法中mChildView始终是第0个child，把header、footer放到构造函数中，mChildView最后被inflate
+        //TODO 可能引入新问题，fixedHeader显示异常
+        mChildView = getChildAt(3);
 
         cp.init();
     }

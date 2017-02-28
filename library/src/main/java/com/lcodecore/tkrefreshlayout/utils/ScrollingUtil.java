@@ -25,6 +25,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.AbsListView;
@@ -82,6 +83,20 @@ public class ScrollingUtil {
 
     public static boolean isScrollViewOrWebViewToTop(View view) {
         return view != null && view.getScrollY() == 0;
+    }
+
+    public static boolean isViewToTop(View view,int mTouchSlop){
+        if (view instanceof AbsListView) return isAbsListViewToTop((AbsListView) view);
+        if (view instanceof RecyclerView) return isRecyclerViewToTop((RecyclerView) view);
+        return  (view != null && Math.abs(view.getScrollY()) <= 2 * mTouchSlop);
+    }
+
+    public static boolean isViewTopBottom(View view,int mTouchSlop){
+        if (view instanceof AbsListView) return isAbsListViewToBottom((AbsListView) view);
+        if (view instanceof RecyclerView) return isRecyclerViewToBottom((RecyclerView) view);
+        if (view instanceof WebView) return isWebViewToBottom((WebView) view,mTouchSlop);
+        if (view instanceof ViewGroup) return isViewGroupToBottom((ViewGroup) view);
+        return false;
     }
 
     public static boolean isAbsListViewToTop(AbsListView absListView) {
@@ -166,8 +181,13 @@ public class ScrollingUtil {
     }
 
 
-    public static boolean isWebViewToBottom(WebView webView) {
-        return webView != null && webView.getContentHeight() * webView.getScale() == (webView.getScrollY() + webView.getMeasuredHeight());
+    public static boolean isWebViewToBottom(WebView webview,int mTouchSlop) {
+        return webview != null && ((webview.getContentHeight() * webview.getScale() - (webview.getHeight() + webview.getScrollY())) <= 2 * mTouchSlop);
+    }
+
+    public static boolean isViewGroupToBottom(ViewGroup viewGroup){
+        View subChildView = viewGroup.getChildAt(0);
+        return (subChildView != null && subChildView.getMeasuredHeight() <= viewGroup.getScrollY() + viewGroup.getHeight());
     }
 
     public static boolean isScrollViewToBottom(ScrollView scrollView) {

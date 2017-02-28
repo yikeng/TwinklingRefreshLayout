@@ -1,16 +1,18 @@
 package com.lcodecore.twinklingrefreshlayout;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.lcodecore.tkrefreshlayout.Footer.LoadingView;
-import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
 import com.lcodecore.twinklingrefreshlayout.adapter.ScienceAdapter;
+import com.lcodecore.twinklingrefreshlayout.utils.ToastUtil;
 
 public class ScienceActivity extends AppCompatActivity {
 
@@ -44,6 +46,13 @@ public class ScienceActivity extends AppCompatActivity {
         adapter = new ScienceAdapter();
         gridView.setAdapter(adapter);
         adapter.refreshCard();
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ToastUtil.show("item clicked!");
+            }
+        });
 
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override

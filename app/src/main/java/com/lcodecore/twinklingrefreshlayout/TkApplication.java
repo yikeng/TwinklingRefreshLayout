@@ -1,6 +1,7 @@
 package com.lcodecore.twinklingrefreshlayout;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.StrictMode;
 
 import com.squareup.leakcanary.LeakCanary;
@@ -13,9 +14,14 @@ import static android.os.Build.VERSION_CODES.GINGERBREAD;
  */
 
 public class TkApplication extends Application {
+
+    public static Context appContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        appContext = this;
 
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return;

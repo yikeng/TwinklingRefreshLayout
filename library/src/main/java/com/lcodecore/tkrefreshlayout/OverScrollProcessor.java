@@ -97,7 +97,7 @@ public class OverScrollProcessor {
 
         if (!cp.enableOverScroll()) return;
 
-        if (mChildView instanceof AbsListView) {
+        /*if (mChildView instanceof AbsListView) {
             ((AbsListView) mChildView).setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -138,7 +138,7 @@ public class OverScrollProcessor {
                     super.onScrollStateChanged(recyclerView, newState);
                 }
             });
-        }
+        }*/
     }
 
     private void obtainTracker(MotionEvent event) {
@@ -179,14 +179,30 @@ public class OverScrollProcessor {
 
                     View mChildView = cp.getContent();
 
-                    if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
+                    if (cp.allowOverScroll()) {
+                        if (mVelocityY >= OVER_SCROLL_MIN_VX) {
+                            if (ScrollingUtil.isViewToTop(mChildView, mTouchSlop)) {
+                                cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
+                                mVelocityY = 0;
+                                cur_delay_times = ALL_DELAY_TIMES;
+                            }
+                        } else if (mVelocityY <= -OVER_SCROLL_MIN_VX) {
+                            if (ScrollingUtil.isViewTopBottom(mChildView, mTouchSlop)) {
+                                cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
+                                mVelocityY = 0;
+                                cur_delay_times = ALL_DELAY_TIMES;
+                            }
+                        }
+                    }
 
+                    /*if (!(mChildView instanceof AbsListView || mChildView instanceof RecyclerView)) {
+                        //判断顶部越界
                         if (cp.allowOverScroll() && mVelocityY >= OVER_SCROLL_MIN_VX && (mChildView != null && Math.abs(mChildView.getScrollY()) <= 2 * mTouchSlop)) {
                             cp.getAnimProcessor().animOverScrollTop(mVelocityY, cur_delay_times);
                             mVelocityY = 0;
                             cur_delay_times = ALL_DELAY_TIMES;
                         }
-
+                        //判断底部越界
                         if (cp.allowOverScroll() && mVelocityY <= -OVER_SCROLL_MIN_VX && mChildView != null) {
                             if (mChildView instanceof WebView) {
                                 WebView webview = (WebView) (mChildView);
@@ -209,7 +225,7 @@ public class OverScrollProcessor {
                                 cur_delay_times = ALL_DELAY_TIMES;
                             }
                         }
-                    }
+                    }*/
 
                     if (cur_delay_times < ALL_DELAY_TIMES)
                         mHandler.sendEmptyMessageDelayed(MSG_CONTINUE_COMPUTE_SCROLL, 10);

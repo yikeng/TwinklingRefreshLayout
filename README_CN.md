@@ -293,6 +293,9 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 修复刷新状态重复回调问题
 - 添加Apache License 2.0开源协议
 
+#### v1.05
+- 修复触摸监听失效问题
+
 #### v1.04
 ##### 新增功能
 - **第二次重构完成**,将核心逻辑拆分为RefreshProcessor、AnimProcessor、OverScrollProcessor、CoProcessor
