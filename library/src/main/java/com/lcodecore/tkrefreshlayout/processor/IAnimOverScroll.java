@@ -1,4 +1,4 @@
-package com.lcodecore.tkrefreshlayout;
+package com.lcodecore.tkrefreshlayout.processor;
 
 /**
  * Created by lcodecore on 2017/3/3.

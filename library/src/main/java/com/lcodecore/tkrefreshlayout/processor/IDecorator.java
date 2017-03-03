@@ -1,4 +1,4 @@
-package com.lcodecore.tkrefreshlayout;
+package com.lcodecore.tkrefreshlayout.processor;
 
 import android.view.MotionEvent;
 

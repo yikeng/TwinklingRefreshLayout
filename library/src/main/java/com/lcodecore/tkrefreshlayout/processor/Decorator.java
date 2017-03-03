@@ -1,4 +1,6 @@
-package com.lcodecore.tkrefreshlayout;
+package com.lcodecore.tkrefreshlayout.processor;
+
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 
 /**
  * Created by lcodecore on 2017/3/3.

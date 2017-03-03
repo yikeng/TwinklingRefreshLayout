@@ -1,21 +1,26 @@
-package com.lcodecore.tkrefreshlayout;
+package com.lcodecore.tkrefreshlayout.processor;
 
 import android.view.MotionEvent;
 
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 /**
- * Created by lcodecore on 2016/11/26.
+ * Created by lcodecore on 2017/3/1.
  */
 
-public class RefreshProcessor {
-    private float mTouchX, mTouchY;
-    private TwinklingRefreshLayout.CoProcessor cp;
+public class RefreshProcessor implements IDecorator {
 
-    public RefreshProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
-        this.cp = coProcessor;
+    protected TwinklingRefreshLayout.CoProcessor cp;
+
+    public RefreshProcessor(TwinklingRefreshLayout.CoProcessor processor) {
+        if (processor == null) throw new NullPointerException("The coprocessor can not be null.");
+        cp = processor;
     }
 
+    private float mTouchX, mTouchY;
+
+    @Override
     public boolean interceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -39,7 +44,8 @@ public class RefreshProcessor {
         return false;
     }
 
-    public boolean consumeTouchEvent(MotionEvent e) {
+    @Override
+    public boolean dealTouchEvent(MotionEvent e) {
         if (cp.isRefreshVisible() || cp.isLoadingVisible()) return false;
 
         switch (e.getAction()) {
@@ -65,6 +71,26 @@ public class RefreshProcessor {
                 }
                 return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
+        //手指在屏幕上滚动，如果此时正处在刷新状态，可隐藏
+        int mTouchSlop = cp.getTouchSlop();
+        if (cp.isRefreshVisible() && distanceY >= mTouchSlop && !cp.isOpenFloatRefresh()) {
+            cp.setRefreshing(false);
+            cp.getAnimProcessor().animHeadHideByVy((int) velocityY);
+        }
+        if (cp.isLoadingVisible() && distanceY <= -mTouchSlop) {
+            cp.setLoadingMore(false);
+            cp.getAnimProcessor().animBottomHideByVy((int) velocityY);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         return false;
     }
 }

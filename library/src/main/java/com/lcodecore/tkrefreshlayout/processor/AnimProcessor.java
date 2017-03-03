@@ -1,4 +1,4 @@
-package com.lcodecore.tkrefreshlayout;
+package com.lcodecore.tkrefreshlayout.processor;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -7,6 +7,8 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.animation.DecelerateInterpolator;
 
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -14,14 +16,14 @@ import static android.view.View.VISIBLE;
  * Created by lcodecore on 2016/11/26.
  */
 
-class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
+public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
     private TwinklingRefreshLayout.CoProcessor cp;
     private static final float animFraction = 1f;
     //动画的变化率
     private DecelerateInterpolator decelerateInterpolator;
 
-    AnimProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
+    public AnimProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
         this.cp = coProcessor;
         decelerateInterpolator = new DecelerateInterpolator(8);
     }

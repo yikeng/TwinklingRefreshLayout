@@ -14,6 +14,10 @@ import android.widget.RelativeLayout;
 
 import com.lcodecore.tkrefreshlayout.Footer.BottomProgressView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
+import com.lcodecore.tkrefreshlayout.processor.AnimProcessor;
+import com.lcodecore.tkrefreshlayout.processor.IDecorator;
+import com.lcodecore.tkrefreshlayout.processor.OverScrollDecorator;
+import com.lcodecore.tkrefreshlayout.processor.RefreshProcessor;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
 import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
@@ -163,7 +167,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         mChildView = getChildAt(3);
 
         cp.init();
-        decorator = new OverScrollDecorator(cp, new RefreshDecorator(cp));
+        decorator = new OverScrollDecorator(cp, new RefreshProcessor(cp));
         initGestureDetector();
     }
 
@@ -580,8 +584,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     }
 
     public class CoProcessor {
-        private RefreshProcessor refreshProcessor;
-        private OverScrollProcessor overScrollProcessor;
         private AnimProcessor animProcessor;
 
         private final static int PULLING_TOP_DOWN = 0;
@@ -595,8 +597,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
         public CoProcessor() {
             animProcessor = new AnimProcessor(this);
-            overScrollProcessor = new OverScrollProcessor(this);
-            refreshProcessor = new RefreshProcessor(this);
         }
 
         public void init() {
@@ -657,14 +657,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
         public int getTouchSlop() {
             return ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        }
-
-        public boolean interceptTouchEvent(MotionEvent ev) {
-            return refreshProcessor.interceptTouchEvent(ev);
-        }
-
-        public boolean consumeTouchEvent(MotionEvent ev) {
-            return refreshProcessor.consumeTouchEvent(ev);
         }
 
         /**
