@@ -14,22 +14,17 @@ import static android.view.View.VISIBLE;
  * Created by lcodecore on 2016/11/26.
  */
 
-public class AnimProcessor {
+class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
     private TwinklingRefreshLayout.CoProcessor cp;
     private static final float animFraction = 1f;
     //动画的变化率
     private DecelerateInterpolator decelerateInterpolator;
 
-    public AnimProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
+    AnimProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
         this.cp = coProcessor;
-
         decelerateInterpolator = new DecelerateInterpolator(8);
     }
-
-    public void init() {
-    }
-
 
     public void scrollHeadByMove(float moveY) {
         float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getMaxHeadHeight() / 2) * moveY / 2;

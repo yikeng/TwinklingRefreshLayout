@@ -2,9 +2,10 @@ package com.lcodecore.tkrefreshlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -118,7 +119,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         setPullListener(new TwinklingPullListener());
     }
 
-    private void addHeader(){
+    private void addHeader() {
         FrameLayout headViewLayout = new FrameLayout(getContext());
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
         layoutParams.addRule(ALIGN_PARENT_TOP);
@@ -137,7 +138,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
     }
 
-    private void addFooter(){
+    private void addFooter() {
         FrameLayout bottomViewLayout = new FrameLayout(getContext());
         LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
         layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
@@ -158,14 +159,130 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         super.onFinishInflate();
         //获得子控件
         //onAttachedToWindow方法中mChildView始终是第0个child，把header、footer放到构造函数中，mChildView最后被inflate
-        //TODO 可能引入新问题，fixedHeader显示异常
+        //TODO 可能引入新问题：1.fixedHeader显示异常 2.悬浮刷新不可见
         mChildView = getChildAt(3);
 
         cp.init();
+        decorator = new OverScrollDecorator(cp, new RefreshDecorator(cp));
+        initGestureDetector();
     }
 
+    private IDecorator decorator;
+    private GestureDetector gestureDetector;
 
-    /*************************************  触摸事件处理  *****************************************/
+    private void initGestureDetector() {
+        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                //TODO 添加回调
+                decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
+                return super.onScroll(e1, e2, distanceX, distanceY);
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                decorator.onFingerFling(e1, e2, velocityX, velocityY);
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+        });
+    }
+
+    private VelocityTracker moveTracker;
+    private int mPointerId;
+    private float vy;
+
+    private void obtainTracker(MotionEvent event) {
+        if (null == moveTracker) {
+            moveTracker = VelocityTracker.obtain();
+        }
+        moveTracker.addMovement(event);
+    }
+
+    private void releaseTracker() {
+        if (null != moveTracker) {
+            moveTracker.clear();
+            moveTracker.recycle();
+            moveTracker = null;
+        }
+    }
+
+    /*************************************
+     * 触摸事件处理
+     *****************************************/
+    int mMaxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity();
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        //1.监听fling动作 2.获取手指滚动速度（存在滚动但非fling的状态）
+        //TODO 考虑是否可以去除GestureDetector只保留VelocityTracker
+        obtainTracker(event);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mPointerId = event.getPointerId(0);
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                moveTracker.computeCurrentVelocity(1000, mMaxVelocity);
+                vy = moveTracker.getYVelocity(mPointerId);
+                releaseTracker();
+                break;
+        }
+        gestureDetector.onTouchEvent(event);
+
+        return super.dispatchTouchEvent(event);
+    }
+    /*TODO 保留方案，解决refresh在滚动中刷新失效问题
+    private float mTouchX, mTouchY;
+    private boolean intercepted = false;
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+            switch (ev.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mTouchX = ev.getX();
+                    mTouchY = ev.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    float dx = ev.getX() - mTouchX;
+                    float dy = ev.getY() - mTouchY;
+                    if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
+                        //ListView向上滚动时这里执行不到，想办法拦截掉这个事件，不让它向下传递
+                        //模拟拦截事件
+                        if (!intercepted){
+                            if (dy > 0 && !ScrollingUtil.canChildScrollUp(cp.getScrollableView()) && cp.allowPullDown()){
+                                cp.setStatePTD();
+                                intercepted = true;
+                            }else if (dy < 0 && !ScrollingUtil.canChildScrollDown(cp.getScrollableView()) && cp.allowPullUp()) {
+                                cp.setStatePBU();
+                                intercepted = true;
+                            }else return super.dispatchTouchEvent(ev);
+                        }
+
+                        //事件已拦截到
+                        if (cp.isStatePTD()){
+                            dy = Math.min(cp.getMaxHeadHeight() * 2, dy);
+                            dy = Math.max(0, dy);
+                            cp.getAnimProcessor().scrollHeadByMove(dy);
+                        }else if(cp.isStatePBU()){
+                            dy = Math.min(cp.getBottomHeight() * 2, Math.abs(dy));
+                            dy = Math.max(0, dy);
+                            cp.getAnimProcessor().scrollBottomByMove(dy);
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    if (cp.isStatePTD()) {
+                        cp.getAnimProcessor().dealPullDownRelease();
+                    } else if (cp.isStatePBU()) {
+                        cp.getAnimProcessor().dealPullUpRelease();
+                    }
+                    intercepted = false;
+                    break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }*/
+
     /**
      * 拦截事件
      *
@@ -174,13 +291,15 @@ public class TwinklingRefreshLayout extends RelativeLayout {
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean intercept = cp.interceptTouchEvent(ev);
+//        boolean intercept = cp.interceptTouchEvent(ev);
+        boolean intercept = decorator.interceptTouchEvent(ev);
         return intercept || super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        boolean consume = cp.consumeTouchEvent(e);
+//        boolean consume = cp.consumeTouchEvent(e);
+        boolean consume = decorator.dealTouchEvent(e);
         return consume || super.onTouchEvent(e);
     }
 
@@ -488,8 +607,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
                 if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
             }
 
-            overScrollProcessor.init();
-            animProcessor.init();
+//            overScrollProcessor.init();
+//            animProcessor.init();
         }
 
         public AnimProcessor getAnimProcessor() {
@@ -766,11 +885,11 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             pullListener.onPullUpReleasing(TwinklingRefreshLayout.this, offsetY / mBottomHeight);
         }
 
-        public void onRefreshCanceled(){
+        public void onRefreshCanceled() {
             pullListener.onRefreshCanceled();
         }
 
-        public void onLoadmoreCanceled(){
+        public void onLoadmoreCanceled() {
             pullListener.onLoadmoreCanceled();
         }
 

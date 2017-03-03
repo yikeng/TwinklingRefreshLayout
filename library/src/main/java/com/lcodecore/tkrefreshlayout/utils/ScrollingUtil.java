@@ -43,6 +43,7 @@ public class ScrollingUtil {
 
     /**
      * 用来判断是否可以下拉
+     * 手指在屏幕上该方法才有效
      */
     public static boolean canChildScrollUp(View mChildView) {
         if (mChildView == null) {
