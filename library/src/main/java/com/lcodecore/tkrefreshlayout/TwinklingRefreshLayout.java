@@ -127,7 +127,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         FrameLayout headViewLayout = new FrameLayout(getContext());
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
         layoutParams.addRule(ALIGN_PARENT_TOP);
-        layoutParams.addRule(CENTER_VERTICAL);
 
         FrameLayout extraHeadLayout = new FrameLayout(getContext());
         extraHeadLayout.setId(R.id.ex_header);
@@ -146,7 +145,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         FrameLayout bottomViewLayout = new FrameLayout(getContext());
         LayoutParams layoutParams2 = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
         layoutParams2.addRule(ALIGN_PARENT_BOTTOM);
-        layoutParams2.addRule(CENTER_VERTICAL);
         bottomViewLayout.setLayoutParams(layoutParams2);
 
         mBottomLayout = bottomViewLayout;

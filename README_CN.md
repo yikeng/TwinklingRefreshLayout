@@ -295,6 +295,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 
 #### v1.05
 - 修复触摸监听失效问题
+- TODO 修复wrap_content时刷新控件显示在屏幕中央问题
 
 #### v1.04
 ##### 新增功能
