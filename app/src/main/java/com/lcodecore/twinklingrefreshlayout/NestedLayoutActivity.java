@@ -1,29 +1,33 @@
 package com.lcodecore.twinklingrefreshlayout;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.lcodecore.tkrefreshlayout.header.bezierlayout.BezierLayout;
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.header.bezierlayout.BezierLayout;
 import com.lcodecore.twinklingrefreshlayout.adapter.PhotoAdapter;
 import com.lcodecore.twinklingrefreshlayout.beans.Photo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoActivity extends AppCompatActivity {
+/**
+ * Created by lcodecore on 2017/3/4.
+ */
+
+public class NestedLayoutActivity extends AppCompatActivity {
     private PhotoAdapter photoAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo);
+        setContentView(R.layout.activity_nested_layout);
 
         setupRecyclerView((RecyclerView) findViewById(R.id.recyclerview));
 
@@ -50,16 +54,12 @@ public class PhotoActivity extends AppCompatActivity {
 //        refreshLayout.setFloatRefresh(true);
 //        refreshLayout.setPureScrollModeOn(true);
         refreshLayout.setOverScrollBottomShow(false);
+        refreshLayout.setTargetView(rv);
 //        refreshLayout.setAutoLoadMore(true);
 
 //        addHeader();
         refreshCard();
-        findViewById(R.id.ib_refresh).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshLayout.startRefresh();
-            }
-        });
+
 
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override

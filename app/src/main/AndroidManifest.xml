@@ -23,7 +23,8 @@
         <activity android:name=".ScienceActivity" />
         <activity android:name=".PhotoActivity" />
         <activity android:name=".StoryActivity" />
-        <activity android:name=".WebActivity"></activity>
+        <activity android:name=".WebActivity"/>
+        <activity android:name=".NestedLayoutActivity"/>
     </application>
 
 </manifest>

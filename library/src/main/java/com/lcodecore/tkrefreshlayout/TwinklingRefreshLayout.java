@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.lcodecore.tkrefreshlayout.Footer.BottomProgressView;
+import com.lcodecore.tkrefreshlayout.Footer.BallPulseView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
 import com.lcodecore.tkrefreshlayout.processor.AnimProcessor;
 import com.lcodecore.tkrefreshlayout.processor.IDecorator;
@@ -151,8 +151,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         this.addView(mBottomLayout);
 
         if (mBottomView == null) {
-            BottomProgressView mProgressView = new BottomProgressView(getContext());
-            setBottomView(mProgressView);
+            BallPulseView ballPulseView = new BallPulseView(getContext());
+            setBottomView(ballPulseView);
         }
     }
 
@@ -333,6 +333,20 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     }
 
     /**
+     * 手动设置刷新View
+     */
+    public void setTargetView(View targetView) {
+        if (targetView != null) mChildView = targetView;
+    }
+
+    /**
+     * 手动设置RefreshLayout的装饰
+     */
+    public void setDecorator(IDecorator decorator1) {
+        if (decorator1 != null) decorator = decorator1;
+    }
+
+    /**
      * 设置头部View
      */
     public void setHeaderView(final IHeaderView headerView) {
@@ -358,6 +372,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             public void run() {
                 if (view != null && mExtraHeadLayout != null) {
                     mExtraHeadLayout.addView(view);
+                    mExtraHeadLayout.bringToFront();
                     cp.onAddExHead();
                     cp.setExHeadFixed();
                 }
@@ -400,6 +415,12 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
     public void setFloatRefresh(boolean ifOpenFloatRefreshMode) {
         floatRefresh = ifOpenFloatRefreshMode;
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (mHeadLayout != null) mHeadLayout.bringToFront();
+            }
+        });
     }
 
     /**
