@@ -7,8 +7,9 @@
 6. 是否要支持ViewPager回弹问题
 7. 是否要支持所有的View
 8. 测试事件监听冲突问题
-9. 内存泄漏问题  -> 解决ValueAnimator潜在的内存泄漏问题；TODO 解决WebView泄漏问题
+9. 内存泄漏问题  -> 解决ValueAnimator潜在的内存泄漏问题；WebView内存泄漏问题；done
 10. 仿QQ视差效果
+11. 测试加载更多后不添加数据
 
 ## 新发现的问题
 1. beizierlayout主动调用刷新时会一片白

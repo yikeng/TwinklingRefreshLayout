@@ -1,8 +1,11 @@
 package com.lcodecore.twinklingrefreshlayout;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.WebView;
 
 import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
@@ -13,6 +16,7 @@ public class WebActivity extends AppCompatActivity {
 
     private WebView mWebView;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +31,7 @@ public class WebActivity extends AppCompatActivity {
         refreshLayout.setWaveHeight(240);
         refreshLayout.setOverScrollHeight(200);
         refreshLayout.setEnableLoadmore(false);
-        header.setColorSchemeResources(R.color.Blue,R.color.Orange,R.color.Yellow,R.color.Green);
+        header.setColorSchemeResources(R.color.Blue, R.color.Orange, R.color.Yellow, R.color.Green);
 //        header.setColorSchemeColors(0xff4674e7,0xff0ba62c);
 
         mWebView = (WebView) findViewById(R.id.webView);
@@ -61,10 +65,25 @@ public class WebActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (mWebView != null) {
-            mWebView.destroy();
-            mWebView = null;
-        }
+        destroyWebView();
         super.onDestroy();
+    }
+
+    /**
+     * 解决WebView持有mContext导致的内存泄漏问题
+     */
+    private void destroyWebView() {
+        if (mWebView != null) {
+            ViewParent parent = mWebView.getParent();
+            if (parent != null) ((ViewGroup) parent).removeView(mWebView);
+            mWebView.stopLoading();
+            mWebView.clearHistory();
+            mWebView.clearView();
+            mWebView.removeAllViews();
+            try {
+                mWebView.destroy();
+            } catch (Throwable e) {
+            }
+        }
     }
 }
