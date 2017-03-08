@@ -803,7 +803,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         public void finishLoadmore() {
             onFinishLoadMore();
             if (isLoadingVisible() && mChildView != null) {
-                ScrollingUtil.scrollAViewBy(mChildView, (int) mBottomHeight);
                 setLoadingMore(false);
                 animProcessor.animBottomBack();
             }

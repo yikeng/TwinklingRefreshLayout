@@ -249,9 +249,9 @@ public class ScrollingUtil {
     }
 
     public static void scrollAViewBy(View view, int height) {
-        if (view instanceof RecyclerView) ((RecyclerView) view).smoothScrollBy(0, height);
+        if (view instanceof RecyclerView) ((RecyclerView) view).scrollBy(0, height);
         else if (view instanceof ScrollView) ((ScrollView) view).smoothScrollBy(0, height);
-        else if (view instanceof AbsListView) ((AbsListView) view).smoothScrollBy(height, 150);
+        else if (view instanceof AbsListView) ((AbsListView) view).smoothScrollBy(height, 0);
         else {
             try {
                 Method method = view.getClass().getDeclaredMethod("smoothScrollBy", Integer.class, Integer.class);

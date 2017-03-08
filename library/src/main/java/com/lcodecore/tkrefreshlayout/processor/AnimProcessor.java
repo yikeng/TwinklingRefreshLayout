@@ -5,9 +5,11 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.support.v7.widget.RecyclerView;
 import android.view.animation.DecelerateInterpolator;
 
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -139,7 +141,19 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
      */
     public void animBottomBack() {
         isAnimBottomBack = true;
-        animLayoutByTime(getVisibleFootHeight(), 0, animBottomUpListener, new AnimatorListenerAdapter() {
+        animLayoutByTime(getVisibleFootHeight(), 0, new AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
+                //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
+                if (dy > 0) {
+                    if (cp.getContent() instanceof RecyclerView)ScrollingUtil.scrollAViewBy(cp.getContent(), dy);
+                    else ScrollingUtil.scrollAViewBy(cp.getContent(), dy/2);
+                }
+                //decorate the AnimatorUpdateListener
+                animBottomUpListener.onAnimationUpdate(animation);
+            }
+        }, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 isAnimBottomBack = false;
