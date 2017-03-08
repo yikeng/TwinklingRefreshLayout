@@ -35,6 +35,7 @@ public class WebActivity extends AppCompatActivity {
 //        header.setColorSchemeColors(0xff4674e7,0xff0ba62c);
 
         mWebView = (WebView) findViewById(R.id.webView);
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.loadUrl("https://dribbble.com/shots");
 
         refreshLayout.startRefresh();
@@ -52,18 +53,6 @@ public class WebActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        mWebView.onPause();
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        mWebView.onResume();
-        super.onResume();
-    }
-
-    @Override
     protected void onDestroy() {
         destroyWebView();
         super.onDestroy();
@@ -77,6 +66,7 @@ public class WebActivity extends AppCompatActivity {
             ViewParent parent = mWebView.getParent();
             if (parent != null) ((ViewGroup) parent).removeView(mWebView);
             mWebView.stopLoading();
+            mWebView.getSettings().setJavaScriptEnabled(false);
             mWebView.clearHistory();
             mWebView.clearView();
             mWebView.removeAllViews();

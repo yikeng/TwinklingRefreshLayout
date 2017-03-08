@@ -3,6 +3,7 @@
     package="com.lcodecore.twinklingrefreshlayout">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:name=".TkApplication"
@@ -25,6 +26,7 @@
         <activity android:name=".StoryActivity" />
         <activity android:name=".WebActivity"/>
         <activity android:name=".NestedLayoutActivity"/>
+        <activity android:name=".CoordinateActivity"/>
     </application>
 
 </manifest>

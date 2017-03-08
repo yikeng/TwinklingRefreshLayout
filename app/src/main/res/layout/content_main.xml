@@ -56,6 +56,14 @@
         android:textAllCaps="false"
         android:text="Dribbble - WebView - FloatRefresh"/>
 
+    <Button
+        android:id="@+id/bt_coordinate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAllCaps="false"
+        android:text="Photo - CoordinateLayout-Beta - FloatRefresh"/>
+
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"

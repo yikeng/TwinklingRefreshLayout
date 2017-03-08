@@ -29,6 +29,16 @@ public class StoryActivity extends AppCompatActivity {
                     }
                 }, 4000);
             }
+
+            @Override
+            public void onLoadMore(final TwinklingRefreshLayout refreshLayout) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.finishLoadmore();
+                    }
+                }, 4000);
+            }
         });
     }
 }
