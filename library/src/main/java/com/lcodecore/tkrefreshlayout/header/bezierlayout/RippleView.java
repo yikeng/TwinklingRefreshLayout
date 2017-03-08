@@ -78,14 +78,20 @@ public class RippleView extends View {
         va.start();
     }
 
-    public void stopAnim(){
-        if (va!=null && va.isRunning()) va.cancel();
+    public void stopAnim() {
+        if (va != null && va.isRunning()) va.cancel();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, r, mPaint);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (va != null) va.cancel();
     }
 
     public void setRippleEndListener(OnRippleEndListener listener) {

@@ -88,6 +88,12 @@ public class RoundProgressView extends View {
         canvas.restore();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (va!=null) va.cancel();
+    }
+
     public void startAnim(){
         if (va!=null) va.start();
     }

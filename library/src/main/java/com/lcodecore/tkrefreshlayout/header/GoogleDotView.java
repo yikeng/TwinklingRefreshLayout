@@ -167,6 +167,13 @@ public class GoogleDotView extends View implements IHeaderView {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (animator1 != null) animator1.cancel();
+        if (animator2 != null) animator2.cancel();
+    }
+
+    @Override
     public View getView() {
         return this;
     }

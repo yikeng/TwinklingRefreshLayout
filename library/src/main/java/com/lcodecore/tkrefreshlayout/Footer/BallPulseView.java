@@ -86,8 +86,16 @@ public class BallPulseView extends View implements IBottomView {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mAnimators != null) for (int i = 0; i < mAnimators.size(); i++) {
+            mAnimators.get(i).cancel();
+        }
+    }
+
     public void startAnim() {
-        if (mAnimators == null) mAnimators = createAnimators();
+        if (mAnimators == null) createAnimators();
         if (mAnimators == null) return;
         if (isStarted()) return;
 
@@ -123,8 +131,8 @@ public class BallPulseView extends View implements IBottomView {
         return false;
     }
 
-    private ArrayList<ValueAnimator> createAnimators() {
-        ArrayList<ValueAnimator> mAnimators = new ArrayList<>();
+    private void createAnimators() {
+        mAnimators = new ArrayList<>();
         int[] delays = new int[]{120, 240, 360};
         for (int i = 0; i < 3; i++) {
             final int index = i;
@@ -144,7 +152,6 @@ public class BallPulseView extends View implements IBottomView {
             });
             mAnimators.add(scaleAnim);
         }
-        return mAnimators;
     }
 
     @Override

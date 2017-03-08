@@ -81,6 +81,15 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
         return valve;
     }
 
+    private ValueAnimator waveAnimator, circleAnimator;
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (waveAnimator != null) waveAnimator.cancel();
+        if (circleAnimator != null) circleAnimator.cancel();
+    }
+
     @Override
     public View getView() {
         return this;
@@ -112,8 +121,6 @@ public class BezierLayout extends FrameLayout implements IHeaderView {
         r1.setCir_x((int) (30 * limitValue(1, fraction)));
         r1.invalidate();
     }
-
-    private ValueAnimator waveAnimator, circleAnimator;
 
     @Override
     public void startAnim(float maxHeadHeight, float headHeight) {
