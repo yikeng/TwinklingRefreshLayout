@@ -60,7 +60,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     }
 
     public void dealPullDownRelease() {
-        if (!cp.isPureScrollModeOn() && getVisibleHeadHeight() >= cp.getHeadHeight() - cp.getTouchSlop()) {
+        if (!cp.isPureScrollModeOn() && cp.enableRefresh() && getVisibleHeadHeight() >= cp.getHeadHeight() - cp.getTouchSlop()) {
             animHeadToRefresh();
         } else {
             animHeadBack();
@@ -68,7 +68,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     }
 
     public void dealPullUpRelease() {
-        if (!cp.isPureScrollModeOn() && getVisibleFootHeight() >= cp.getBottomHeight() - cp.getTouchSlop()) {
+        if (!cp.isPureScrollModeOn() && cp.enableLoadmore() && getVisibleFootHeight() >= cp.getBottomHeight() - cp.getTouchSlop()) {
             animBottomToLoad();
         } else {
             animBottomBack();
@@ -144,12 +144,16 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         animLayoutByTime(getVisibleFootHeight(), 0, new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
-                //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
-                if (dy > 0) {
-                    if (cp.getTargetView() instanceof RecyclerView)ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy);
-                    else ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy/2);
+                if (!ScrollingUtil.isViewTopBottom(cp.getTargetView(),cp.getTouchSlop())){
+                    int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
+                    //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
+                    if (dy > 0) {
+                        if (cp.getTargetView() instanceof RecyclerView)
+                            ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy);
+                        else ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy / 2);
+                    }
                 }
+
                 //decorate the AnimatorUpdateListener
                 animBottomUpListener.onAnimationUpdate(animation);
             }
@@ -205,6 +209,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
     private boolean isAnimOsTop = false;
     private boolean isOverScrollTopLocked = false;
+
     /**
      * 7.执行顶部越界  To executive cross-border springback at the top.
      * 越界高度height ∝ vy/computeTimes，此处采用的模型是 height=A*(vy + B)/computeTimes
@@ -236,6 +241,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
     private boolean isAnimOsBottom = false;
     private boolean isOverScrollBottomLocked = false;
+
     /**
      * 8.执行底部越界
      *

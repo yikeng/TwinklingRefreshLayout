@@ -286,16 +286,25 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 带视差效果的Header
 
 ## 更新日志
+#### v1.06
+- 修复触摸监听失效问题
+- 修复wrap_content时刷新控件显示在屏幕中央问题
+- 去除AVLoadingIndicatorView等依赖，改为BallPulseView
+- 优化加载更多完成时出现的闪烁问题
+- 修复ValueAnimator以及Demo中WebView带来的内存泄漏问题
+- 理论上解决了触摸、点击以及滚动监听失效等问题
+- 新增setTargetView()方法，可设置滚动事件的作用对象
+- 添加了CoordinateLayout demo(暂未在RefreshLayout中添加相关逻辑)
+- 修复三星、酷派手机出现的兼容问题 TODO
+- 支持更多的Vew TODO
+- 修复BezierLayout偶现的白屏问题 TODO
+
 #### v1.05紧急修复版
 - 修复底部自动加载更多问题
 - 修复FixedHeader遮挡item问题
 - RefreshListenerAdapter添加接口onRefreshCanceled()/onLoadmoreCanceled() 回调刷新被取消的状态
 - 修复刷新状态重复回调问题
 - 添加Apache License 2.0开源协议
-
-#### v1.05
-- 修复触摸监听失效问题
-- TODO 修复wrap_content时刷新控件显示在屏幕中央问题
 
 #### v1.04
 ##### 新增功能

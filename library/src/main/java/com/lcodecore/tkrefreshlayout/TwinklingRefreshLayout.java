@@ -103,7 +103,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         try {
             mMaxHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_head_height, (int) DensityUtil.dp2px(context, 120));
             mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
-            mMaxBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_bottom_height, (int) DensityUtil.dp2px(context, 60));
+            mMaxBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_bottom_height, (int) DensityUtil.dp2px(context, 120));
             mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
             mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
             enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
@@ -540,18 +540,21 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     @Override
     public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
         mHeadView.onPullingDown(fraction, mMaxHeadHeight, mHeadHeight);
+        if (!enableRefresh) return;
         if (refreshListener != null) refreshListener.onPullingDown(refreshLayout, fraction);
     }
 
     @Override
     public void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction) {
         mBottomView.onPullingUp(fraction, mMaxHeadHeight, mHeadHeight);
+        if (!enableLoadmore) return;
         if (refreshListener != null) refreshListener.onPullingUp(refreshLayout, fraction);
     }
 
     @Override
     public void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
         mHeadView.onPullReleasing(fraction, mMaxHeadHeight, mHeadHeight);
+        if (!enableRefresh) return;
         if (refreshListener != null)
             refreshListener.onPullDownReleasing(refreshLayout, fraction);
     }
@@ -559,6 +562,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     @Override
     public void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
         mBottomView.onPullReleasing(fraction, mMaxBottomHeight, mBottomHeight);
+        if (!enableLoadmore) return;
         if (refreshListener != null) refreshListener.onPullUpReleasing(refreshLayout, fraction);
     }
 
@@ -766,18 +770,26 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         }
 
         //TODO 支持分别设置头部或者顶部允许越界
-        private boolean enableOverScrollTop = false, enableOverScrollBottom = false;
+        //private boolean enableOverScrollTop = false, enableOverScrollBottom = false;
 
         public boolean enableOverScroll() {
             return enableOverScroll;
         }
 
         public boolean allowPullDown() {
-            return enableRefresh || enableOverScrollTop;
+            return enableRefresh || enableOverScroll;
         }
 
         public boolean allowPullUp() {
-            return enableLoadmore || enableOverScrollBottom;
+            return enableLoadmore || enableOverScroll;
+        }
+
+        public boolean enableRefresh(){
+            return enableRefresh;
+        }
+
+        public boolean enableLoadmore(){
+            return enableLoadmore;
         }
 
         public boolean allowOverScroll() {
