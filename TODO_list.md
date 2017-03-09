@@ -14,13 +14,14 @@
 13. FixedHeader问题
 14. 多点触摸处理
 15. 控制底部下拉后或者顶部上拉后再次进入动画可以保持！
-16. Refresh和OverScroll的开关耦合问题
+16. Refresh和OverScroll的开关耦合问题,即禁用loadmore后OverScroll不可用问题  **done**
+17. 测试自动加载更多功能是否正常 **done**正常
 
 ## 新发现的问题
-1. beizierlayout主动调用刷新时会一片白
+1. beizierlayout主动调用刷新时会一片白 todo
 2. BallPulseView引入了内存泄漏 **done**
 3. 新的方案，怎么让scroll更平滑；计算Footer降低与TargetView显示距离是否一致：结论，一致，问题在每次滚动的距离上  **done**
 4. requestLayout时提示 **improperly called by android.support.v7.widget.AppCompatTextView**
-5. WebView上拉不起作用
+5. WebView上拉不起作用  **done**
 6. 修改IBottomView中的参数错误，增加max_head_height,max_bottom_height属性;修改setWaveHeight方法为setMaxHeadHeight，增加setMaxBottomHeight方法  **done**
-7. 在最顶部或最底部时fling会多次反弹 **TODO**（解决办法，在最顶端fling时不响应动作）
+7. 在最顶部或最底部时fling会多次反弹 **done**（解决办法，在最顶端fling时不响应动作）

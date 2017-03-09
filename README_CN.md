@@ -296,8 +296,9 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 新增setTargetView()方法，可设置滚动事件的作用对象
 - 添加了CoordinateLayout demo(暂未在RefreshLayout中添加相关逻辑)
 - 修复三星、酷派手机出现的兼容问题 TODO
-- 支持更多的Vew TODO
-- 修复BezierLayout偶现的白屏问题 TODO
+- 修复禁用refresh、loadmore后overscroll不可用的问题
+- 修复在顶部、顶部fling时页面闪烁问题
+- 修复IBottomView中的参数错误，新增max_head_height,max_bottom_height属性，setWaveHeight方法为setMaxHeadHeight
 
 #### v1.05紧急修复版
 - 修复底部自动加载更多问题
