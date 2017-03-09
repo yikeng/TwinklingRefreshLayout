@@ -46,7 +46,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     }
 
     public void scrollBottomByMove(float moveY) {
-        float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getBottomHeight() / 2) * moveY / 2;
+        float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getMaxBottomHeight() / 2) * moveY / 2;
 
         if (cp.getFooter().getVisibility() != VISIBLE) cp.getFooter().setVisibility(VISIBLE);
 

@@ -44,7 +44,7 @@ public class CoordinateActivity extends AppCompatActivity {
         refreshLayout.setFloatRefresh(true);
         refreshLayout.setEnableOverScroll(false);
         refreshLayout.setHeaderHeight(140);
-        refreshLayout.setWaveHeight(240);
+        refreshLayout.setMaxHeadHeight(240);
         refreshLayout.setTargetView(rv);
 
         refreshCard();

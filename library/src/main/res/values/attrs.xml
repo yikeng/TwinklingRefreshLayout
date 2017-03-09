@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="TwinklingRefreshLayout">
-        <attr name="tr_wave_height" format="dimension"/>
+        <attr name="tr_max_head_height" format="dimension"/>
         <attr name="tr_head_height" format="dimension"/>
+        <attr name="tr_max_bottom_height" format="dimension"/>
         <attr name="tr_bottom_height" format="dimension"/>
         <attr name="tr_overscroll_height" format="dimension"/>
         <attr name="tr_enable_loadmore" format="boolean"/>

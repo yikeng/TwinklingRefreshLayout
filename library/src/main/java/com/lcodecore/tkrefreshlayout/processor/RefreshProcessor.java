@@ -57,7 +57,7 @@ public class RefreshProcessor implements IDecorator {
                     cp.getAnimProcessor().scrollHeadByMove(dy);
                 } else if (cp.isStatePBU()) {
                     //加载更多的动作
-                    dy = Math.min(cp.getBottomHeight() * 2, Math.abs(dy));
+                    dy = Math.min(cp.getMaxBottomHeight() * 2, Math.abs(dy));
                     dy = Math.max(0, dy);
                     cp.getAnimProcessor().scrollBottomByMove(dy);
                 }

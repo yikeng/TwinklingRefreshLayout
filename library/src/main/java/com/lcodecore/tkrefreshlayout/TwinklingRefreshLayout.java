@@ -27,7 +27,8 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 public class TwinklingRefreshLayout extends RelativeLayout implements PullListener {
 
     //波浪的高度,最大扩展高度
-    protected float mWaveHeight;
+    protected float mMaxHeadHeight;
+    protected float mMaxBottomHeight;
 
     //头部的高度
     protected float mHeadHeight;
@@ -100,8 +101,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TwinklingRefreshLayout, defStyleAttr, 0);
         try {
-            mWaveHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_wave_height, (int) DensityUtil.dp2px(context, 120));
+            mMaxHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_head_height, (int) DensityUtil.dp2px(context, 120));
             mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
+            mMaxBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_bottom_height, (int) DensityUtil.dp2px(context, 60));
             mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
             mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
             enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
@@ -177,7 +179,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                //TODO 添加回调
                 decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
@@ -423,11 +424,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     /**
      * 设置wave的下拉高度
-     *
-     * @param waveHeightDp
      */
-    public void setWaveHeight(float waveHeightDp) {
-        this.mWaveHeight = DensityUtil.dp2px(getContext(), waveHeightDp);
+    public void setMaxHeadHeight(float maxHeightDp) {
+        this.mMaxHeadHeight = DensityUtil.dp2px(getContext(), maxHeightDp);
     }
 
     /**
@@ -435,6 +434,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setHeaderHeight(float headHeightDp) {
         this.mHeadHeight = DensityUtil.dp2px(getContext(), headHeightDp);
+    }
+
+    public void setMaxBottomHeight(float maxBottomHeight){
+        mMaxBottomHeight = DensityUtil.dp2px(getContext(),maxBottomHeight);
     }
 
     /**
@@ -493,8 +496,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         if (pureScrollModeOn) {
             isOverScrollTopShow = false;
             isOverScrollBottomShow = false;
-            setWaveHeight(mOverScrollHeight);
+            setMaxHeadHeight(mOverScrollHeight);
             setHeaderHeight(mOverScrollHeight);
+            setMaxBottomHeight(mOverScrollHeight);
             setBottomHeight(mOverScrollHeight);
         }
     }
@@ -535,38 +539,38 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     @Override
     public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
-        mHeadView.onPullingDown(fraction, mWaveHeight, mHeadHeight);
+        mHeadView.onPullingDown(fraction, mMaxHeadHeight, mHeadHeight);
         if (refreshListener != null) refreshListener.onPullingDown(refreshLayout, fraction);
     }
 
     @Override
     public void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction) {
-        mBottomView.onPullingUp(fraction, mWaveHeight, mHeadHeight);
+        mBottomView.onPullingUp(fraction, mMaxHeadHeight, mHeadHeight);
         if (refreshListener != null) refreshListener.onPullingUp(refreshLayout, fraction);
     }
 
     @Override
     public void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
-        mHeadView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
+        mHeadView.onPullReleasing(fraction, mMaxHeadHeight, mHeadHeight);
         if (refreshListener != null)
             refreshListener.onPullDownReleasing(refreshLayout, fraction);
     }
 
     @Override
     public void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
-        mBottomView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
+        mBottomView.onPullReleasing(fraction, mMaxBottomHeight, mBottomHeight);
         if (refreshListener != null) refreshListener.onPullUpReleasing(refreshLayout, fraction);
     }
 
     @Override
     public void onRefresh(TwinklingRefreshLayout refreshLayout) {
-        mHeadView.startAnim(mWaveHeight, mHeadHeight);
+        mHeadView.startAnim(mMaxHeadHeight, mHeadHeight);
         if (refreshListener != null) refreshListener.onRefresh(refreshLayout);
     }
 
     @Override
     public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
-        mBottomView.startAnim(mWaveHeight, mHeadHeight);
+        mBottomView.startAnim(mMaxBottomHeight, mBottomHeight);
         if (refreshListener != null) refreshListener.onLoadMore(refreshLayout);
     }
 
@@ -628,7 +632,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         }
 
         public float getMaxHeadHeight() {
-            return mWaveHeight;
+            return mMaxHeadHeight;
         }
 
         public int getHeadHeight() {
@@ -639,6 +643,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             return mExtraHeadLayout.getHeight();
         }
 
+        public int getMaxBottomHeight(){
+            return (int) mMaxBottomHeight;
+        }
         public int getBottomHeight() {
             return (int) mBottomHeight;
         }

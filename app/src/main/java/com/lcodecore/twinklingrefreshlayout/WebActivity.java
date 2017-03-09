@@ -28,7 +28,7 @@ public class WebActivity extends AppCompatActivity {
         refreshLayout.setFloatRefresh(true);
         refreshLayout.setOverScrollRefreshShow(false);
         refreshLayout.setHeaderHeight(140);
-        refreshLayout.setWaveHeight(240);
+        refreshLayout.setMaxHeadHeight(240);
         refreshLayout.setOverScrollHeight(200);
         refreshLayout.setEnableLoadmore(false);
         header.setColorSchemeResources(R.color.Blue, R.color.Orange, R.color.Yellow, R.color.Green);
