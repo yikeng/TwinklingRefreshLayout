@@ -176,17 +176,22 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     private void initGestureDetector() {
         gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent ev) {
+                decorator.onFingerDown(ev);
+                return false;
+            }
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
-                return super.onScroll(e1, e2, distanceX, distanceY);
+                return false;
             }
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 decorator.onFingerFling(e1, e2, velocityX, velocityY);
-                return super.onFling(e1, e2, velocityX, velocityY);
+                return false;
             }
         });
     }
@@ -517,6 +522,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setAutoLoadMore(boolean ifAutoLoadMore) {
         autoLoadMore = ifAutoLoadMore;
+        setEnableLoadmore(true);
     }
 
     /**

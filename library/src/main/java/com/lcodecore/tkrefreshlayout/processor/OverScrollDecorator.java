@@ -35,24 +35,40 @@ public class OverScrollDecorator extends Decorator {
 
     @Override
     public boolean interceptTouchEvent(MotionEvent ev) {
-        return decorator!=null && decorator.interceptTouchEvent(ev);
+        return decorator != null && decorator.interceptTouchEvent(ev);
     }
 
     @Override
     public boolean dealTouchEvent(MotionEvent e) {
-        return decorator!=null && decorator.dealTouchEvent(e);
+        return decorator != null && decorator.dealTouchEvent(e);
+    }
+
+    private boolean preventTopOverScroll = false;
+    private boolean preventBottomOverScroll = false;
+
+    @Override
+    public void onFingerDown(MotionEvent ev) {
+        if (decorator != null) decorator.onFingerDown(ev);
+
+        preventTopOverScroll = ScrollingUtil.isViewToTop(cp.getTargetView(), cp.getTouchSlop());
+        preventBottomOverScroll = ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop());
     }
 
     @Override
-    public boolean onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
-        return decorator!=null && decorator.onFingerScroll(e1,e2,distanceX,distanceY,velocityY);
+    public void onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
+        if (decorator != null) decorator.onFingerScroll(e1, e2, distanceX, distanceY, velocityY);
     }
 
     @Override
-    public boolean onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        if (decorator!=null) decorator.onFingerFling(e1,e2,velocityX,velocityY);
+    public void onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if (decorator != null) decorator.onFingerFling(e1, e2, velocityX, velocityY);
         //fling时才触发OverScroll，获取速度并采用演示策略估算View是否滚动到边界
-        if (!cp.enableOverScroll()) return false;
+        if (!cp.enableOverScroll()) return;
+
+        int dy = (int) (e2.getY() - e1.getY());
+        if (dy < -cp.getTouchSlop() && preventBottomOverScroll) return;//控件滚动在底部且向上fling
+        if (dy > cp.getTouchSlop() && preventTopOverScroll) return;//控件滚动在顶部且向下fling
+
         mVelocityY = velocityY;
         if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {
             mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
@@ -60,7 +76,6 @@ public class OverScrollDecorator extends Decorator {
             mVelocityY = 0;
             cur_delay_times = ALL_DELAY_TIMES;
         }
-        return false;
     }
 
     private Handler mHandler = new Handler() {
@@ -84,7 +99,7 @@ public class OverScrollDecorator extends Decorator {
                                 cur_delay_times = ALL_DELAY_TIMES;
                             }
                         } else if (mVelocityY <= -OVER_SCROLL_MIN_VX) {
-                            if (ScrollingUtil.isViewTopBottom(mChildView, mTouchSlop)) {
+                            if (ScrollingUtil.isViewToBottom(mChildView, mTouchSlop)) {
                                 cp.getAnimProcessor().animOverScrollBottom(mVelocityY, cur_delay_times);
                                 mVelocityY = 0;
                                 cur_delay_times = ALL_DELAY_TIMES;

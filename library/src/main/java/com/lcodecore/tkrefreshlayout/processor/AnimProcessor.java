@@ -144,7 +144,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         animLayoutByTime(getVisibleFootHeight(), 0, new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                if (!ScrollingUtil.isViewTopBottom(cp.getTargetView(),cp.getTouchSlop())){
+                if (!ScrollingUtil.isViewToBottom(cp.getTargetView(),cp.getTouchSlop())){
                     int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
                     //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
                     if (dy > 0) {

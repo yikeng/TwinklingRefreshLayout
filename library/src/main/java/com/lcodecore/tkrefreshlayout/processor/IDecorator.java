@@ -11,7 +11,9 @@ public interface IDecorator {
 
     boolean dealTouchEvent(MotionEvent ev);
 
-    boolean onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY);
+    void onFingerDown(MotionEvent ev);
 
-    boolean onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);
+    void onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY);
+
+    void onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);
 }

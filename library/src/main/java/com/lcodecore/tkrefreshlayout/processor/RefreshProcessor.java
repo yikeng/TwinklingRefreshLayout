@@ -31,10 +31,10 @@ public class RefreshProcessor implements IDecorator {
                 float dx = ev.getX() - mTouchX;
                 float dy = ev.getY() - mTouchY;
                 if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
-                    if (dy > 0 && !ScrollingUtil.canChildScrollUp(cp.getTargetView()) && cp.allowPullDown()) {
+                    if (dy > 0 && ScrollingUtil.isViewToTop(cp.getTargetView(),cp.getTouchSlop()) && cp.allowPullDown()) {
                         cp.setStatePTD();
                         return true;
-                    } else if (dy < 0 && !ScrollingUtil.canChildScrollDown(cp.getTargetView()) && cp.allowPullUp()) {
+                    } else if (dy < 0 && ScrollingUtil.isViewToBottom(cp.getTargetView(),cp.getTouchSlop()) && cp.allowPullUp()) {
                         cp.setStatePBU();
                         return true;
                     }
@@ -75,7 +75,11 @@ public class RefreshProcessor implements IDecorator {
     }
 
     @Override
-    public boolean onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
+    public void onFingerDown(MotionEvent ev) {
+    }
+
+    @Override
+    public void onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
         //手指在屏幕上滚动，如果此时正处在刷新状态，可隐藏
         int mTouchSlop = cp.getTouchSlop();
         if (cp.isRefreshVisible() && distanceY >= mTouchSlop && !cp.isOpenFloatRefresh()) {
@@ -86,11 +90,9 @@ public class RefreshProcessor implements IDecorator {
             cp.setLoadingMore(false);
             cp.getAnimProcessor().animBottomHideByVy((int) velocityY);
         }
-        return false;
     }
 
     @Override
-    public boolean onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        return false;
+    public void onFingerFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
     }
 }
