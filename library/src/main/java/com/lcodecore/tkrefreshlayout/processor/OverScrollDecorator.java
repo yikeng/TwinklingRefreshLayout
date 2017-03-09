@@ -28,7 +28,7 @@ public class OverScrollDecorator extends Decorator {
     private int cur_delay_times = 0; //当前计算次数
     private static final int ALL_DELAY_TIMES = 60;  //10ms计算一次,总共计算20次
 
-    public OverScrollDecorator(TwinklingRefreshLayout.CoProcessor processor, IDecorator decorator1) {
+    public OverScrollDecorator(TwinklingRefreshLayout.CoContext processor, IDecorator decorator1) {
         super(processor, decorator1);
     }
 
@@ -74,8 +74,7 @@ public class OverScrollDecorator extends Decorator {
                 case MSG_CONTINUE_COMPUTE_SCROLL:
                     cur_delay_times++;
 
-                    //TODO Content改为TargetView
-                    View mChildView = cp.getContent();
+                    View mChildView = cp.getTargetView();
 
                     if (cp.allowOverScroll()) {
                         if (mVelocityY >= OVER_SCROLL_MIN_VX) {

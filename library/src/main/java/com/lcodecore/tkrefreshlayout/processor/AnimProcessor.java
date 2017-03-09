@@ -20,12 +20,12 @@ import static android.view.View.VISIBLE;
 
 public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
-    private TwinklingRefreshLayout.CoProcessor cp;
+    private TwinklingRefreshLayout.CoContext cp;
     private static final float animFraction = 1f;
     //动画的变化率
     private DecelerateInterpolator decelerateInterpolator;
 
-    public AnimProcessor(TwinklingRefreshLayout.CoProcessor coProcessor) {
+    public AnimProcessor(TwinklingRefreshLayout.CoContext coProcessor) {
         this.cp = coProcessor;
         decelerateInterpolator = new DecelerateInterpolator(8);
     }
@@ -39,7 +39,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         cp.getHeader().requestLayout();
 
         if (!cp.isOpenFloatRefresh()) {
-            cp.getContent().setTranslationY(offsetY);
+            cp.getTargetView().setTranslationY(offsetY);
             translateExHead((int) offsetY);
         }
         cp.onPullingDown(offsetY);
@@ -54,7 +54,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         cp.getFooter().getLayoutParams().height = (int) Math.abs(offsetY);
         cp.getFooter().requestLayout();
 
-        cp.getContent().setTranslationY(-offsetY);
+        cp.getTargetView().setTranslationY(-offsetY);
 
         cp.onPullingUp(-offsetY);
     }
@@ -147,8 +147,8 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                 int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
                 //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
                 if (dy > 0) {
-                    if (cp.getContent() instanceof RecyclerView)ScrollingUtil.scrollAViewBy(cp.getContent(), dy);
-                    else ScrollingUtil.scrollAViewBy(cp.getContent(), dy/2);
+                    if (cp.getTargetView() instanceof RecyclerView)ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy);
+                    else ScrollingUtil.scrollAViewBy(cp.getTargetView(), dy/2);
                 }
                 //decorate the AnimatorUpdateListener
                 animBottomUpListener.onAnimationUpdate(animation);
@@ -204,7 +204,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     }
 
     private boolean isAnimOsTop = false;
-
+    private boolean isOverScrollTopLocked = false;
     /**
      * 7.执行顶部越界  To executive cross-border springback at the top.
      * 越界高度height ∝ vy/computeTimes，此处采用的模型是 height=A*(vy + B)/computeTimes
@@ -213,8 +213,8 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
      * @param computeTimes 从满足条件到滚动到顶部总共计算的次数 Calculation times from sliding to top.
      */
     public void animOverScrollTop(float vy, int computeTimes) {
-        if (cp.isOsTopLocked()) return;
-        cp.lockOsTop();
+        if (isOverScrollTopLocked) return;
+        isOverScrollTopLocked = true;
         isAnimOsTop = true;
         cp.setStatePTD();
         int oh = (int) Math.abs(vy / computeTimes / 2);
@@ -227,7 +227,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         isAnimOsTop = false;
-                        cp.releaseOsTopLock();
+                        isOverScrollTopLocked = false;
                     }
                 });
             }
@@ -235,7 +235,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     }
 
     private boolean isAnimOsBottom = false;
-
+    private boolean isOverScrollBottomLocked = false;
     /**
      * 8.执行底部越界
      *
@@ -243,7 +243,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
      * @param computeTimes 从满足条件到滚动到顶部总共计算的次数
      */
     public void animOverScrollBottom(float vy, int computeTimes) {
-        if (cp.isOsBottomLocked()) return;
+        if (isOverScrollBottomLocked) return;
         cp.setStatePBU();
         int oh = (int) Math.abs(vy / computeTimes / 2);
         final int overHeight = oh > cp.getOsHeight() ? cp.getOsHeight() : oh;
@@ -251,7 +251,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         if (cp.autoLoadMore()) {
             cp.startLoadMore();
         } else {
-            cp.lockOsBottom();
+            isOverScrollBottomLocked = true;
             isAnimOsBottom = true;
             animLayoutByTime(0, overHeight, time, overScrollBottomUpListener, new AnimatorListenerAdapter() {
                 @Override
@@ -260,7 +260,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             isAnimOsBottom = false;
-                            cp.releaseOsBottomLock();
+                            isOverScrollBottomLocked = false;
                         }
                     });
                 }
@@ -275,7 +275,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
             cp.getHeader().getLayoutParams().height = height;
             cp.getHeader().requestLayout();
             if (!cp.isOpenFloatRefresh()) {
-                cp.getContent().setTranslationY(height);
+                cp.getTargetView().setTranslationY(height);
                 translateExHead(height);
             }
             cp.onPullDownReleasing(height);
@@ -288,7 +288,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
             int height = (int) animation.getAnimatedValue();
             cp.getFooter().getLayoutParams().height = height;
             cp.getFooter().requestLayout();
-            cp.getContent().setTranslationY(-height);
+            cp.getTargetView().setTranslationY(-height);
             cp.onPullUpReleasing(height);
         }
     };
@@ -302,7 +302,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                 cp.getHeader().requestLayout();
             } else cp.getHeader().setVisibility(GONE);
 
-            cp.getContent().setTranslationY(height);
+            cp.getTargetView().setTranslationY(height);
             translateExHead(height);
 
             cp.onPullDownReleasing(height);
@@ -317,7 +317,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                 cp.getFooter().getLayoutParams().height = height;
                 cp.getFooter().requestLayout();
             } else cp.getFooter().setVisibility(GONE);
-            cp.getContent().setTranslationY(-height);
+            cp.getTargetView().setTranslationY(-height);
             cp.onPullUpReleasing(height);
         }
     };

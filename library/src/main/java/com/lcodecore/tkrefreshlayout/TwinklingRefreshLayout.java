@@ -24,7 +24,7 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 /**
  * Created by lcodecore on 16/3/2.
  */
-public class TwinklingRefreshLayout extends RelativeLayout {
+public class TwinklingRefreshLayout extends RelativeLayout implements PullListener {
 
     //波浪的高度,最大扩展高度
     protected float mWaveHeight;
@@ -84,7 +84,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
     //是否允许进入越界回弹模式
     protected boolean enableOverScroll = true;
 
-    private CoProcessor cp;
+    private CoContext cp;
+    private int mTouchSlop;
 
     public TwinklingRefreshLayout(Context context) {
         this(context, null, 0);
@@ -96,31 +97,30 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
     public TwinklingRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TwinklingRefreshLayout, defStyleAttr, 0);
-        mWaveHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_wave_height, (int) DensityUtil.dp2px(context, 120));
-        mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
-        mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
-        mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
-        enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
-        isPureScrollModeOn = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_pureScrollMode_on, false);
-        isOverScrollTopShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_top_show, true);
-        isOverScrollBottomShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_bottom_show, true);
-        enableOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_overscroll, true);
-        a.recycle();
+        try {
+            mWaveHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_wave_height, (int) DensityUtil.dp2px(context, 120));
+            mHeadHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_head_height, (int) DensityUtil.dp2px(context, 80));
+            mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
+            mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
+            enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
+            isPureScrollModeOn = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_pureScrollMode_on, false);
+            isOverScrollTopShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_top_show, true);
+            isOverScrollBottomShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_bottom_show, true);
+            enableOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_overscroll, true);
+        } finally {
+            a.recycle();
+        }
 
-        cp = new CoProcessor();
+        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+        cp = new CoContext();
 
         addHeader();
         addFooter();
-    }
 
-    private void init() {
-        //使用isInEditMode解决可视化编辑器无法识别自定义控件的问题
-        if (isInEditMode()) return;
-
-        setPullListener(new TwinklingPullListener());
+        setPullListener(this);
     }
 
     private void addHeader() {
@@ -293,14 +293,12 @@ public class TwinklingRefreshLayout extends RelativeLayout {
      */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        boolean intercept = cp.interceptTouchEvent(ev);
         boolean intercept = decorator.interceptTouchEvent(ev);
         return intercept || super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-//        boolean consume = cp.consumeTouchEvent(e);
         boolean consume = decorator.dealTouchEvent(e);
         return consume || super.onTouchEvent(e);
     }
@@ -535,74 +533,72 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         this.pullListener = pullListener;
     }
 
-    private class TwinklingPullListener implements PullListener {
-
-        @Override
-        public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
-            mHeadView.onPullingDown(fraction, mWaveHeight, mHeadHeight);
-            if (refreshListener != null) refreshListener.onPullingDown(refreshLayout, fraction);
-        }
-
-        @Override
-        public void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction) {
-            mBottomView.onPullingUp(fraction, mWaveHeight, mHeadHeight);
-            if (refreshListener != null) refreshListener.onPullingUp(refreshLayout, fraction);
-        }
-
-        @Override
-        public void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
-            mHeadView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
-            if (refreshListener != null)
-                refreshListener.onPullDownReleasing(refreshLayout, fraction);
-        }
-
-        @Override
-        public void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
-            mBottomView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
-            if (refreshListener != null) refreshListener.onPullUpReleasing(refreshLayout, fraction);
-        }
-
-        @Override
-        public void onRefresh(TwinklingRefreshLayout refreshLayout) {
-            mHeadView.startAnim(mWaveHeight, mHeadHeight);
-            if (refreshListener != null) refreshListener.onRefresh(refreshLayout);
-        }
-
-        @Override
-        public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
-            mBottomView.startAnim(mWaveHeight, mHeadHeight);
-            if (refreshListener != null) refreshListener.onLoadMore(refreshLayout);
-        }
-
-        @Override
-        public void onFinishRefresh() {
-            if (!isRefreshVisible) return;
-            mHeadView.onFinish(new OnAnimEndListener() {
-                @Override
-                public void onAnimEnd() {
-                    cp.finishRefreshAfterAnim();
-                }
-            });
-        }
-
-        @Override
-        public void onFinishLoadMore() {
-            if (!isLoadingVisible) return;
-            mBottomView.onFinish();
-        }
-
-        @Override
-        public void onRefreshCanceled() {
-            if (refreshListener != null) refreshListener.onRefreshCanceled();
-        }
-
-        @Override
-        public void onLoadmoreCanceled() {
-            if (refreshListener != null) refreshListener.onLoadmoreCanceled();
-        }
+    @Override
+    public void onPullingDown(TwinklingRefreshLayout refreshLayout, float fraction) {
+        mHeadView.onPullingDown(fraction, mWaveHeight, mHeadHeight);
+        if (refreshListener != null) refreshListener.onPullingDown(refreshLayout, fraction);
     }
 
-    public class CoProcessor {
+    @Override
+    public void onPullingUp(TwinklingRefreshLayout refreshLayout, float fraction) {
+        mBottomView.onPullingUp(fraction, mWaveHeight, mHeadHeight);
+        if (refreshListener != null) refreshListener.onPullingUp(refreshLayout, fraction);
+    }
+
+    @Override
+    public void onPullDownReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
+        mHeadView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
+        if (refreshListener != null)
+            refreshListener.onPullDownReleasing(refreshLayout, fraction);
+    }
+
+    @Override
+    public void onPullUpReleasing(TwinklingRefreshLayout refreshLayout, float fraction) {
+        mBottomView.onPullReleasing(fraction, mWaveHeight, mHeadHeight);
+        if (refreshListener != null) refreshListener.onPullUpReleasing(refreshLayout, fraction);
+    }
+
+    @Override
+    public void onRefresh(TwinklingRefreshLayout refreshLayout) {
+        mHeadView.startAnim(mWaveHeight, mHeadHeight);
+        if (refreshListener != null) refreshListener.onRefresh(refreshLayout);
+    }
+
+    @Override
+    public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
+        mBottomView.startAnim(mWaveHeight, mHeadHeight);
+        if (refreshListener != null) refreshListener.onLoadMore(refreshLayout);
+    }
+
+    @Override
+    public void onFinishRefresh() {
+        if (!isRefreshVisible) return;
+        mHeadView.onFinish(new OnAnimEndListener() {
+            @Override
+            public void onAnimEnd() {
+                cp.finishRefreshAfterAnim();
+            }
+        });
+    }
+
+    @Override
+    public void onFinishLoadMore() {
+        if (!isLoadingVisible) return;
+        mBottomView.onFinish();
+    }
+
+    @Override
+    public void onRefreshCanceled() {
+        if (refreshListener != null) refreshListener.onRefreshCanceled();
+    }
+
+    @Override
+    public void onLoadmoreCanceled() {
+        if (refreshListener != null) refreshListener.onLoadmoreCanceled();
+    }
+
+
+    public class CoContext {
         private AnimProcessor animProcessor;
 
         private final static int PULLING_TOP_DOWN = 0;
@@ -614,7 +610,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
         private int exHeadMode = EX_MODE_NORMAL;
 
 
-        public CoProcessor() {
+        public CoContext() {
             animProcessor = new AnimProcessor(this);
         }
 
@@ -625,9 +621,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
                 if (mHeadLayout != null) mHeadLayout.setVisibility(GONE);
                 if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
             }
-
-//            overScrollProcessor.init();
-//            animProcessor.init();
         }
 
         public AnimProcessor getAnimProcessor() {
@@ -654,11 +647,7 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             return (int) mOverScrollHeight;
         }
 
-        public View getScrollableView() {
-            return mChildView;
-        }
-
-        public View getContent() {
+        public View getTargetView() {
             return mChildView;
         }
 
@@ -670,43 +659,8 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             return mBottomLayout;
         }
 
-        public Context getContext() {
-            return TwinklingRefreshLayout.this.getContext();
-        }
-
         public int getTouchSlop() {
-            return ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        }
-
-        /**
-         * 在越界时阻止再次进入这个状态而导致动画闪烁。  Prevent entering the overscroll-mode again on animating.
-         */
-        private boolean isOverScrollTopLocked = false;
-
-        public void lockOsTop() {
-            isOverScrollTopLocked = true;
-        }
-
-        public void releaseOsTopLock() {
-            isOverScrollTopLocked = false;
-        }
-
-        public boolean isOsTopLocked() {
-            return isOverScrollTopLocked;
-        }
-
-        private boolean isOverScrollBottomLocked = false;
-
-        public void lockOsBottom() {
-            isOverScrollBottomLocked = true;
-        }
-
-        public void releaseOsBottomLock() {
-            isOverScrollBottomLocked = false;
-        }
-
-        public boolean isOsBottomLocked() {
-            return isOverScrollBottomLocked;
+            return mTouchSlop;
         }
 
         public void resetHeaderView() {
@@ -715,19 +669,6 @@ public class TwinklingRefreshLayout extends RelativeLayout {
 
         public void resetBottomView() {
             if (mBottomView != null) mBottomView.reset();
-        }
-
-        /**
-         * 在添加附加Header前锁住，阻止一些额外的位移动画
-         */
-        private boolean isExHeadLocked = true;
-
-        public boolean isExHeadLocked() {
-            return isExHeadLocked;
-        }
-
-        private void unlockExHead() {
-            isExHeadLocked = false;
         }
 
         public View getExHead() {
@@ -750,9 +691,18 @@ public class TwinklingRefreshLayout extends RelativeLayout {
             return exHeadMode == EX_MODE_FIXED;
         }
 
+        /**
+         * 在添加附加Header前锁住，阻止一些额外的位移动画
+         */
+        private boolean isExHeadLocked = true;
+
+        public boolean isExHeadLocked() {
+            return isExHeadLocked;
+        }
+
         //添加了额外头部时触发
         public void onAddExHead() {
-            unlockExHead();
+            isExHeadLocked = false;
             LayoutParams params = (LayoutParams) mChildView.getLayoutParams();
             params.addRule(BELOW, mExtraHeadLayout.getId());
             mChildView.setLayoutParams(params);

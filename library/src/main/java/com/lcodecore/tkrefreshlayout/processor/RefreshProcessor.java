@@ -11,9 +11,9 @@ import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 public class RefreshProcessor implements IDecorator {
 
-    protected TwinklingRefreshLayout.CoProcessor cp;
+    protected TwinklingRefreshLayout.CoContext cp;
 
-    public RefreshProcessor(TwinklingRefreshLayout.CoProcessor processor) {
+    public RefreshProcessor(TwinklingRefreshLayout.CoContext processor) {
         if (processor == null) throw new NullPointerException("The coprocessor can not be null.");
         cp = processor;
     }
@@ -31,10 +31,10 @@ public class RefreshProcessor implements IDecorator {
                 float dx = ev.getX() - mTouchX;
                 float dy = ev.getY() - mTouchY;
                 if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
-                    if (dy > 0 && !ScrollingUtil.canChildScrollUp(cp.getScrollableView()) && cp.allowPullDown()) {
+                    if (dy > 0 && !ScrollingUtil.canChildScrollUp(cp.getTargetView()) && cp.allowPullDown()) {
                         cp.setStatePTD();
                         return true;
-                    } else if (dy < 0 && !ScrollingUtil.canChildScrollDown(cp.getScrollableView()) && cp.allowPullUp()) {
+                    } else if (dy < 0 && !ScrollingUtil.canChildScrollDown(cp.getTargetView()) && cp.allowPullUp()) {
                         cp.setStatePBU();
                         return true;
                     }

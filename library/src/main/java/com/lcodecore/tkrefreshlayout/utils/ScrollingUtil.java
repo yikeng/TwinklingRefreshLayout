@@ -89,6 +89,7 @@ public class ScrollingUtil {
     public static boolean isViewToTop(View view,int mTouchSlop){
         if (view instanceof AbsListView) return isAbsListViewToTop((AbsListView) view);
         if (view instanceof RecyclerView) return isRecyclerViewToTop((RecyclerView) view);
+        System.out.println("View的scrollY:"+view.getScrollY());
         return  (view != null && Math.abs(view.getScrollY()) <= 2 * mTouchSlop);
     }
 

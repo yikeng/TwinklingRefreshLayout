@@ -8,9 +8,9 @@ import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 
 public abstract class Decorator implements IDecorator {
     protected IDecorator decorator;
-    protected TwinklingRefreshLayout.CoProcessor cp;
+    protected TwinklingRefreshLayout.CoContext cp;
 
-    public Decorator(TwinklingRefreshLayout.CoProcessor processor, IDecorator decorator1) {
+    public Decorator(TwinklingRefreshLayout.CoContext processor, IDecorator decorator1) {
         cp = processor;
         decorator = decorator1;
     }
