@@ -12,14 +12,13 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.lcodecore.tkrefreshlayout.Footer.BallPulseView;
+import com.lcodecore.tkrefreshlayout.footer.BallPulseView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
 import com.lcodecore.tkrefreshlayout.processor.AnimProcessor;
 import com.lcodecore.tkrefreshlayout.processor.IDecorator;
 import com.lcodecore.tkrefreshlayout.processor.OverScrollDecorator;
 import com.lcodecore.tkrefreshlayout.processor.RefreshProcessor;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
-import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 /**
  * Created by lcodecore on 16/3/2.

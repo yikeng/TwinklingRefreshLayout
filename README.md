@@ -18,7 +18,7 @@ TwinklingRefreshLayout extended the thoughts of SwipeRefreshLayout,using a ViewG
 
 ![](art/gif_recyclerview.gif)  ![](art/gif_listview.gif)  ![](art/gif_gridview.gif) ![](art/gif_recyclerview2.gif) ![](art/gif_scrollview.gif)  ![](art/gif_webview.gif)
 
-You can download the Video for more details.
+You can download these Videos for more details.
 
 - [Music - ListView - FixedHeader](art/gif_listview.mp4)
 - [Food - RecyclerView - PureScrollMode](art/gif_recyclerview.mp4)
@@ -30,7 +30,7 @@ You can download the Video for more details.
 ## Usage
 #### 1.Add a gradle dependency.
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.6'
 ```
 
 #### 2.Add TwinklingRefreshLayout in the layout xml.
@@ -87,8 +87,9 @@ Use finishRefreshing() method to end refresh, finishLoadmore() method to end loa
 And if you want you refresh automatically, call the method startRefresh().
 
 ##### setWaveHeight、setHeaderHeight、setBottomHeight、setOverScrollHeight
-- setWaveHeight is used To set the maximum height of the head can be stretched.
+- setMaxHeadHeight is used To set the maximum height of the head can be stretched.
 - setHeaderHeight is used to set the standard head height.
+- setMaxBottomHeight.
 - setBottomHeight is used to set the Bottom height.
 - setOverScrollHeight is used to set the max height of overscroll.
 
@@ -119,9 +120,13 @@ Allow you to add a view fixed on the top.
 ##### setFloatRefresh(boolean)
 Make refresh-animation like SwipeRefreshLayout.
 
+##### setTargetView(View view)
+Set the target view that you can scroll.
+
 #### 4.Attributes
-- tr_wave_height - Flexible head height
+- tr_max_head_height - Flexible head height
 - tr_head_height -  Head height
+- tr_max_bottom_height
 - tr_bottom_height - Bottom height
 - tr_overscroll_height - OverScroll Height
 - tr_enable_loadmore - default is true
@@ -160,7 +165,7 @@ fraction = currentMoveHeight/headHeight OR (fraction = currentMoveHeight/bottomH
 - setColorSchemeResources(@ColorRes int... colorResIds)
 
 ####Footer
-##### BottomProgressView(pic 2)
+##### BallPulseView(pic 2)
 - setNormalColor(@ColorInt int color)
 - setAnimatingColor(@ColorInt int color)
 
@@ -280,6 +285,13 @@ startAnim - be called automatically after the method onRefresh/onLoadMore is cal
 Congratulations! Simple to use and simple to Personalise.（To see a more simple example. **TextHeaderView(pic 4)**）。
 
 ## Update Logs
+#### v1.06
+- Repair memory leaks of customized Views.
+- remove the dependence of AVLoadingIndicatorView.
+- Fix bugs of OverScroll when TargetView scrolls at the top/bottom.
+- Repair bugs of touching,scroll-event listeners.
+- Optimization of interface flicker problems after load-more.
+
 #### v1.05 Emergency Fix
 - Fix the bug of setAutoLoadMore().
 - Fix the bug that FixedHeader covered the first item of listview.

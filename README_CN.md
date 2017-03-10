@@ -15,7 +15,7 @@ TwinklingRefreshLayout延伸了Google的SwipeRefreshLayout的思想,不在列表
 
 ![](art/gif_recyclerview.gif)  ![](art/gif_listview.gif)  ![](art/gif_gridview.gif) ![](art/gif_recyclerview2.gif) ![](art/gif_scrollview.gif)  ![](art/gif_webview.gif)
 
-You can download the Video for more details.
+You can download these Videos for more details.
 
 - [Music - ListView - FixedHeader](art/gif_listview.mp4)
 - [Food - RecyclerView - PureScrollMode](art/gif_recyclerview.mp4)
@@ -28,7 +28,7 @@ You can download the Video for more details.
 #### 1.添加gradle依赖
 将libray模块复制到项目中,或者直接在build.gradle中依赖:
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.5'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.6'
 ```
 
 #### 2.在xml中添加TwinklingRefreshLayout
@@ -84,8 +84,9 @@ refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
 如果你想进入到界面的时候主动调用下刷新，可以调用startRefresh()/startLoadmore()方法。
 
 ##### setWaveHeight、setHeaderHeight、setBottomHeight、setOverScrollHeight
-- setWaveHeight 设置头部可拉伸的最大高度。
+- setMaxHeadHeight 设置头部可拉伸的最大高度。
 - setHeaderHeight 头部固定高度(在此高度上显示刷新状态)
+- setMaxBottomHeight
 - setBottomHeight 底部高度
 - setOverScrollHeight 设置最大的越界高度
 
@@ -115,9 +116,13 @@ refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
 ##### setFloatRefresh(boolean)
 支持切换到像SwipeRefreshLayout一样的悬浮刷新模式了。
 
+##### setTargetView(View view)
+设置滚动事件的作用对象。
+
 #### 4.扩展属性
-- tr_wave_height 头部拉伸允许的最大高度
+- tr_max_head_height 头部拉伸允许的最大高度
 - tr_head_height  头部高度
+- tr_max_bottom_height
 - tr_bottom_height 底部高度
 - tr_overscroll_height 允许越界的最大高度
 - tr_enable_loadmore 是否允许加载更多,默认为true
@@ -160,7 +165,7 @@ refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
 - setColorSchemeResources(@ColorRes int... colorResIds)
 
 ####Footer
-##### BottomProgressView(pic 2)
+##### BallPulseView(pic 2)
 - setNormalColor(@ColorInt int color)
 - setAnimatingColor(@ColorInt int color)
 
@@ -295,9 +300,9 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 理论上解决了触摸、点击以及滚动监听失效等问题
 - 新增setTargetView()方法，可设置滚动事件的作用对象
 - 添加了CoordinateLayout demo(暂未在RefreshLayout中添加相关逻辑)
-- 修复三星、酷派手机出现的兼容问题 TODO
+- 修复三星、酷派手机出现的兼容问题
 - 修复禁用refresh、loadmore后overscroll不可用的问题
-- 修复在顶部、顶部fling时页面闪烁问题
+- 修复在顶部、底部fling时页面闪烁问题
 - 修复IBottomView中的参数错误，新增max_head_height,max_bottom_height属性，setWaveHeight方法为setMaxHeadHeight
 
 #### v1.05紧急修复版

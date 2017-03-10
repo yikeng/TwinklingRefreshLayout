@@ -5,7 +5,7 @@ publish{
     userOrg = 'lcodecorex'
     groupId = 'com.lcodecorex'
     artifactId = 'tkrefreshlayout'
-    publishVersion = '1.0.5'
+    publishVersion = '1.0.6'
     website = 'https://github.com/lcodecorex/TwinklingRefreshLayout/'
 }
 
@@ -16,8 +16,8 @@ android {
     defaultConfig {
         minSdkVersion 12
         targetSdkVersion 25
-        versionCode 5
-        versionName "1.05"
+        versionCode 6
+        versionName "1.06"
     }
     buildTypes {
         release {
