@@ -1,4 +1,4 @@
-package com.lcodecore.tkrefreshlayout.Footer;
+package com.lcodecore.tkrefreshlayout.footer;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;

@@ -162,7 +162,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         super.onFinishInflate();
         //获得子控件
         //onAttachedToWindow方法中mChildView始终是第0个child，把header、footer放到构造函数中，mChildView最后被inflate
-        //TODO 可能引入新问题：1.fixedHeader显示异常 2.悬浮刷新不可见
         mChildView = getChildAt(3);
 
         cp.init();
@@ -239,56 +238,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
         return super.dispatchTouchEvent(event);
     }
-    /*TODO 保留方案，解决refresh在滚动中刷新失效问题
-    private float mTouchX, mTouchY;
-    private boolean intercepted = false;
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-            switch (ev.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mTouchX = ev.getX();
-                    mTouchY = ev.getY();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    float dx = ev.getX() - mTouchX;
-                    float dy = ev.getY() - mTouchY;
-                    if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
-                        //ListView向上滚动时这里执行不到，想办法拦截掉这个事件，不让它向下传递
-                        //模拟拦截事件
-                        if (!intercepted){
-                            if (dy > 0 && !ScrollingUtil.canChildScrollUp(cp.getScrollableView()) && cp.allowPullDown()){
-                                cp.setStatePTD();
-                                intercepted = true;
-                            }else if (dy < 0 && !ScrollingUtil.canChildScrollDown(cp.getScrollableView()) && cp.allowPullUp()) {
-                                cp.setStatePBU();
-                                intercepted = true;
-                            }else return super.dispatchTouchEvent(ev);
-                        }
-
-                        //事件已拦截到
-                        if (cp.isStatePTD()){
-                            dy = Math.min(cp.getMaxHeadHeight() * 2, dy);
-                            dy = Math.max(0, dy);
-                            cp.getAnimProcessor().scrollHeadByMove(dy);
-                        }else if(cp.isStatePBU()){
-                            dy = Math.min(cp.getBottomHeight() * 2, Math.abs(dy));
-                            dy = Math.max(0, dy);
-                            cp.getAnimProcessor().scrollBottomByMove(dy);
-                        }
-                    }
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                case MotionEvent.ACTION_UP:
-                    if (cp.isStatePTD()) {
-                        cp.getAnimProcessor().dealPullDownRelease();
-                    } else if (cp.isStatePBU()) {
-                        cp.getAnimProcessor().dealPullUpRelease();
-                    }
-                    intercepted = false;
-                    break;
-        }
-        return super.dispatchTouchEvent(ev);
-    }*/
 
     /**
      * 拦截事件
