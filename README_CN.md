@@ -289,6 +289,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 制作一个star相关的动效
 - CoordinateLayout及NestedScroll支持
 - 带视差效果的Header
+- 考虑是否需要控制底部下拉后或者顶部上拉后再次进入动画可以保持
 
 ## 更新日志
 #### v1.06
@@ -350,7 +351,7 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 支持个性化Header、Footer
 
 > ps：如有任何问题或者是建议，可以邮箱联系我！（lcodecore@163.com）
-
+> 如有问题或新的需求，请加QQ群202640706讨论，开源库会根据需求持续更新。
 
 
 License

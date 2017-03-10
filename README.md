@@ -310,7 +310,7 @@ Congratulations! Simple to use and simple to Personalise.（To see a more simple
 - Fix the Sliding conflict.
 
 > ps：Contact me: lcodecore@163.com
-
+> QQ group: 202640706
 
 
 License
