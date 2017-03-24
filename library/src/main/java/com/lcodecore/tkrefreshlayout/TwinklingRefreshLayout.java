@@ -2,7 +2,11 @@ package com.lcodecore.tkrefreshlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v4.view.NestedScrollingChild;
+import android.support.v4.view.NestedScrollingParent;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -14,11 +18,14 @@ import android.widget.RelativeLayout;
 
 import com.lcodecore.tkrefreshlayout.footer.BallPulseView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
+import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
 import com.lcodecore.tkrefreshlayout.processor.AnimProcessor;
 import com.lcodecore.tkrefreshlayout.processor.IDecorator;
 import com.lcodecore.tkrefreshlayout.processor.OverScrollDecorator;
 import com.lcodecore.tkrefreshlayout.processor.RefreshProcessor;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
+
+import java.lang.reflect.Constructor;
 
 /**
  * Created by lcodecore on 16/3/2.
@@ -48,6 +55,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     private IHeaderView mHeadView;
     private IBottomView mBottomView;
+
+    //设置的默认的header/footer class的完整包名+类名
+    private static String HEADER_CLASS_NAME = "";
+    private static String FOOTER_CLASS_NAME = "";
 
     //底部高度
     private float mBottomHeight;
@@ -139,7 +150,20 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         mExtraHeadLayout = extraHeadLayout;
         mHeadLayout = headViewLayout;
 
-        if (mHeadView == null) setHeaderView(new GoogleDotView(getContext()));
+        if (mHeadView == null) {
+            if (!TextUtils.isEmpty(HEADER_CLASS_NAME)) {
+                try {
+                    Class headClazz = Class.forName(HEADER_CLASS_NAME);
+                    Constructor ct = headClazz.getDeclaredConstructor(Context.class);
+                    setHeaderView((IHeaderView) ct.newInstance(getContext()));
+                } catch (Exception e) {
+                    Log.e("TwinklingRefreshLayout:", "setDefaultHeader classname=" + e.getMessage());
+                    setHeaderView(new GoogleDotView(getContext()));
+                }
+            } else {
+                setHeaderView(new GoogleDotView(getContext()));
+            }
+        }
     }
 
     private void addFooter() {
@@ -152,8 +176,18 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         this.addView(mBottomLayout);
 
         if (mBottomView == null) {
-            BallPulseView ballPulseView = new BallPulseView(getContext());
-            setBottomView(ballPulseView);
+            if (!TextUtils.isEmpty(FOOTER_CLASS_NAME)) {
+                try {
+                    Class clazz = Class.forName(FOOTER_CLASS_NAME);
+                    Constructor ct = clazz.getDeclaredConstructor(Context.class);
+                    setBottomView((IBottomView) ct.newInstance(getContext()));
+                } catch (Exception e) {
+                    Log.e("TwinklingRefreshLayout:", "setDefaultFooter classname=" + e.getMessage());
+                    setBottomView(new BallPulseView(getContext()));
+                }
+            } else {
+                setBottomView(new BallPulseView(getContext()));
+            }
         }
     }
 
@@ -260,6 +294,16 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     /*************************************
      * 开放api区
      *****************************************/
+    //设置默认的header class 名
+    public static void setDefaultHeader(String className) {
+        HEADER_CLASS_NAME = className;
+    }
+
+    //设置默认的footer class 名
+    public static void setDefaultFooter(String className) {
+        FOOTER_CLASS_NAME = className;
+    }
+
     //主动刷新
     public void startRefresh() {
         cp.startRefresh();
@@ -303,13 +347,8 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setHeaderView(final IHeaderView headerView) {
         if (headerView != null) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    mHeadLayout.removeAllViewsInLayout();
-                    mHeadLayout.addView(headerView.getView());
-                }
-            });
+            mHeadLayout.removeAllViewsInLayout();
+            mHeadLayout.addView(headerView.getView());
             mHeadView = headerView;
         }
     }
@@ -318,18 +357,13 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      * 设置固定在顶部的header
      */
     public void addFixedExHeader(final View view) {
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (view != null && mExtraHeadLayout != null) {
-                    mExtraHeadLayout.addView(view);
-                    mExtraHeadLayout.bringToFront();
-                    cp.onAddExHead();
-                    cp.setExHeadFixed();
-                }
-            }
-        });
+        if (view != null && mExtraHeadLayout != null) {
+            mExtraHeadLayout.addView(view);
+            mExtraHeadLayout.bringToFront();
+            if (floatRefresh) mHeadLayout.bringToFront();
+            cp.onAddExHead();
+            cp.setExHeadFixed();
+        }
     }
 
     /**TODO 适配可以随界面滚动的Header
@@ -354,13 +388,8 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setBottomView(final IBottomView bottomView) {
         if (bottomView != null) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    mBottomLayout.removeAllViewsInLayout();
-                    mBottomLayout.addView(bottomView.getView());
-                }
-            });
+            mBottomLayout.removeAllViewsInLayout();
+            mBottomLayout.addView(bottomView.getView());
             mBottomView = bottomView;
         }
     }
@@ -389,8 +418,8 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         this.mHeadHeight = DensityUtil.dp2px(getContext(), headHeightDp);
     }
 
-    public void setMaxBottomHeight(float maxBottomHeight){
-        mMaxBottomHeight = DensityUtil.dp2px(getContext(),maxBottomHeight);
+    public void setMaxBottomHeight(float maxBottomHeight) {
+        mMaxBottomHeight = DensityUtil.dp2px(getContext(), maxBottomHeight);
     }
 
     /**
@@ -419,16 +448,22 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     }
 
     /**
-     * 是否允许越界时显示刷新控件
+     * 是否允许越界时显示头部刷新控件
      */
     public void setOverScrollTopShow(boolean isOverScrollTopShow) {
         this.isOverScrollTopShow = isOverScrollTopShow;
     }
 
+    /**
+     * 是否允许越界时显示底部刷新控件
+     */
     public void setOverScrollBottomShow(boolean isOverScrollBottomShow) {
         this.isOverScrollBottomShow = isOverScrollBottomShow;
     }
 
+    /**
+     * 是否允许越界时显示刷新控件（setOverScrollTopShow,setOverScrollBottomShow统一设置方法）
+     */
     public void setOverScrollRefreshShow(boolean isOverScrollRefreshShow) {
         this.isOverScrollTopShow = isOverScrollRefreshShow;
         this.isOverScrollBottomShow = isOverScrollRefreshShow;
@@ -601,9 +636,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             return mExtraHeadLayout.getHeight();
         }
 
-        public int getMaxBottomHeight(){
+        public int getMaxBottomHeight() {
             return (int) mMaxBottomHeight;
         }
+
         public int getBottomHeight() {
             return (int) mBottomHeight;
         }
@@ -738,11 +774,11 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             return enableLoadmore || enableOverScroll;
         }
 
-        public boolean enableRefresh(){
+        public boolean enableRefresh() {
             return enableRefresh;
         }
 
-        public boolean enableLoadmore(){
+        public boolean enableLoadmore() {
             return enableLoadmore;
         }
 

@@ -32,9 +32,18 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
 
     public void scrollHeadByMove(float moveY) {
         float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getMaxHeadHeight() / 2) * moveY / 2;
-        if (cp.getHeader().getVisibility() != VISIBLE) cp.getHeader().setVisibility(VISIBLE);
 
-        if (cp.isPureScrollModeOn()) cp.getHeader().setVisibility(GONE);
+        //禁止下拉刷新时下拉不显示头部
+        if (cp.isPureScrollModeOn() || (!cp.enableRefresh() && !cp.isOverScrollTopShow())) {
+            if (cp.getHeader().getVisibility() != GONE) {
+                cp.getHeader().setVisibility(GONE);
+            }
+        } else {
+            if (cp.getHeader().getVisibility() != VISIBLE) {
+                cp.getHeader().setVisibility(VISIBLE);
+            }
+        }
+
         cp.getHeader().getLayoutParams().height = (int) Math.abs(offsetY);
         cp.getHeader().requestLayout();
 
@@ -48,9 +57,16 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
     public void scrollBottomByMove(float moveY) {
         float offsetY = decelerateInterpolator.getInterpolation(moveY / cp.getMaxBottomHeight() / 2) * moveY / 2;
 
-        if (cp.getFooter().getVisibility() != VISIBLE) cp.getFooter().setVisibility(VISIBLE);
+        if (cp.isPureScrollModeOn() || (!cp.enableLoadmore() && !cp.isOverScrollBottomShow())) {
+            if (cp.getFooter().getVisibility() != GONE) {
+                cp.getFooter().setVisibility(GONE);
+            }
+        } else {
+            if (cp.getFooter().getVisibility() != VISIBLE) {
+                cp.getFooter().setVisibility(VISIBLE);
+            }
+        }
 
-        if (cp.isPureScrollModeOn()) cp.getFooter().setVisibility(GONE);
         cp.getFooter().getLayoutParams().height = (int) Math.abs(offsetY);
         cp.getFooter().requestLayout();
 
@@ -144,7 +160,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
         animLayoutByTime(getVisibleFootHeight(), 0, new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                if (!ScrollingUtil.isViewToBottom(cp.getTargetView(),cp.getTouchSlop())){
+                if (!ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop())) {
                     int dy = getVisibleFootHeight() - (int) animation.getAnimatedValue();
                     //可以让TargetView滚动dy高度，但这样两个方向上滚动感觉画面闪烁，改为dy/2是为了消除闪烁
                     if (dy > 0) {
@@ -306,7 +322,10 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
             if (cp.isOverScrollTopShow()) {
                 cp.getHeader().getLayoutParams().height = height;
                 cp.getHeader().requestLayout();
-            } else cp.getHeader().setVisibility(GONE);
+            } else {
+                if (cp.getHeader().getVisibility() != GONE)
+                    cp.getHeader().setVisibility(GONE);
+            }
 
             cp.getTargetView().setTranslationY(height);
             translateExHead(height);
@@ -322,7 +341,10 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
             if (cp.isOverScrollBottomShow()) {
                 cp.getFooter().getLayoutParams().height = height;
                 cp.getFooter().requestLayout();
-            } else cp.getFooter().setVisibility(GONE);
+            } else {
+                if (cp.getFooter().getVisibility() != GONE)
+                    cp.getFooter().setVisibility(GONE);
+            }
             cp.getTargetView().setTranslationY(-height);
             cp.onPullUpReleasing(height);
         }

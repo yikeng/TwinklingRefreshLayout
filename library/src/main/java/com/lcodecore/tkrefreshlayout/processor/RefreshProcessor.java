@@ -30,11 +30,11 @@ public class RefreshProcessor implements IDecorator {
             case MotionEvent.ACTION_MOVE:
                 float dx = ev.getX() - mTouchX;
                 float dy = ev.getY() - mTouchY;
-                if (Math.abs(dx) <= Math.abs(dy)) {//滑动允许最大角度为45度
-                    if (dy > 0 && ScrollingUtil.isViewToTop(cp.getTargetView(),cp.getTouchSlop()) && cp.allowPullDown()) {
+                if (Math.abs(dx) <= Math.abs(dy) && Math.abs(dy) > cp.getTouchSlop()) {//滑动允许最大角度为45度
+                    if (dy > 0 && ScrollingUtil.isViewToTop(cp.getTargetView(), cp.getTouchSlop()) && cp.allowPullDown()) {
                         cp.setStatePTD();
                         return true;
-                    } else if (dy < 0 && ScrollingUtil.isViewToBottom(cp.getTargetView(),cp.getTouchSlop()) && cp.allowPullUp()) {
+                    } else if (dy < 0 && ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop()) && cp.allowPullUp()) {
                         cp.setStatePBU();
                         return true;
                     }

@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.lcodecore.tkrefreshlayout.footer.LoadingView;
+import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 
 public class StoryActivity extends AppCompatActivity {
 
@@ -14,14 +16,14 @@ public class StoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story);
 
-        TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refresh);
+        final TwinklingRefreshLayout refreshLayout = (TwinklingRefreshLayout) findViewById(R.id.refresh);
 //        ProgressLayout header = new ProgressLayout(this);
 //        refreshLayout.setHeaderView(header);
 //        refreshLayout.setFloatRefresh(true);
         refreshLayout.setOverScrollRefreshShow(false);
         refreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
-            public void onRefresh(final TwinklingRefreshLayout refreshLayout) {
+            public void onRefresh(TwinklingRefreshLayout refreshLayout1) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -31,7 +33,7 @@ public class StoryActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onLoadMore(final TwinklingRefreshLayout refreshLayout) {
+            public void onLoadMore(final TwinklingRefreshLayout refreshLayout1) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {

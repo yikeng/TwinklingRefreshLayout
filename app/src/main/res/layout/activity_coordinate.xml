@@ -4,8 +4,7 @@
     android:id="@+id/refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:addStatesFromChildren="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    android:addStatesFromChildren="true">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coord_container"
@@ -32,9 +31,9 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:src="@drawable/photo9"
                     android:scaleType="centerCrop"
-                    app:layout_collapseParallaxMultiplier="1"/>
+                    android:src="@drawable/photo9"
+                    app:layout_collapseParallaxMultiplier="1" />
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
@@ -57,3 +56,4 @@
 
     </android.support.design.widget.CoordinatorLayout>
 </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
+

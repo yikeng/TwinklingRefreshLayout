@@ -1,3 +1,16 @@
+# v1.07开发计划
+- 华为7.0 P9奔溃问题
+- setFloatRefresh(true)下拉刷新不可见问题 --View添加顺序的问题 **done**
+- 确认item点击失效问题是否解决
+- header添加时机的空指针和不显示问题 --去掉post **done**
+- 提供设置默认header、footer的方法  **done**
+- 频繁设置禁止下拉和加载失效问题？(增加RefreshMode类)
+- fixedHeader ontouch事件无响应，需手动设置clickable=true
+- setOverScrollTopShow(false)/setOverScrollBottomShow(false)/setOverScrollRefreshShow(false)  设置无效   **done**
+
+
+
+# v1.06开发计划
 ## 存在的问题
 1. 三星、酷派手机的兼容问题
 2. 依赖太旧的问题->选择去除依赖还是更新依赖  **done** 已去除依赖

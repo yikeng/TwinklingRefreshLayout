@@ -199,18 +199,15 @@ public interface IHeaderView {
 
 3.在onAttachedToWindow()或者构造函数方法中获取一下需要用到的布局
 
-```java
-@Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+4. 在onFinish()方法中调用listener.onAnimEnd()。此方法的目的是为了在finish之前可以执行一段动画。
 
-        if (rootView == null) {
-            rootView = View.inflate(getContext(), R.layout.view_sinaheader, null);
-            refreshArrow = (ImageView) rootView.findViewById(R.id.iv_arrow);
-            refreshTextView = (TextView) rootView.findViewById(R.id.tv);
-            loadingView = (ImageView) rootView.findViewById(R.id.iv_loading);
-            addView(rootView);
-        }
+```java
+private void init() {
+        View rootView = View.inflate(getContext(), R.layout.view_sinaheader, null);
+        refreshArrow = (ImageView) rootView.findViewById(R.id.iv_arrow);
+        refreshTextView = (TextView) rootView.findViewById(R.id.tv);
+        loadingView = (ImageView) rootView.findViewById(R.id.iv_loading);
+        addView(rootView);
     }
 ```
 
@@ -243,6 +240,11 @@ public interface IHeaderView {
         refreshArrow.setVisibility(GONE);
         loadingView.setVisibility(VISIBLE);
     }
+    
+    @Override
+        public void onFinish(OnAnimEndListener listener) {
+            listener.onAnimEnd();
+        }
 ```
 
 5.布局文件
@@ -292,6 +294,10 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 - 考虑是否需要控制底部下拉后或者顶部上拉后再次进入动画可以保持
 
 ## 更新日志
+#### v1.07
+- 你们要的设置默认刷新头/脚的方法来啦
+- Demo中集成StrictMode、BlockCanary检测ANR
+
 #### v1.06
 - 修复触摸监听失效问题
 - 修复wrap_content时刷新控件显示在屏幕中央问题
