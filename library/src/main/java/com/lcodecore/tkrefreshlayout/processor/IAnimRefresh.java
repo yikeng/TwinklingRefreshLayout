@@ -8,9 +8,9 @@ public interface IAnimRefresh {
     void scrollHeadByMove(float moveY);
     void scrollBottomByMove(float moveY);
     void animHeadToRefresh();
-    void animHeadBack();
+    void animHeadBack(boolean isFinishRefresh);
     void animHeadHideByVy(int vy);
     void animBottomToLoad();
-    void animBottomBack();
+    void animBottomBack(boolean isFinishRefresh);
     void animBottomHideByVy(int vy);
 }

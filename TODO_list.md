@@ -7,6 +7,12 @@
 - 频繁设置禁止下拉和加载失效问题？(增加RefreshMode类)
 - fixedHeader ontouch事件无响应，需手动设置clickable=true
 - setOverScrollTopShow(false)/setOverScrollBottomShow(false)/setOverScrollRefreshShow(false)  设置无效   **done**
+- 兼容nestedscroll
+- 状态保持问题
+- onFinishRefresh不回调问题
+- 刷新时禁止加载更多，去加载更多底部空白没回去
+- 空白View下拉无效
+- 不停下拉导致head悬浮
 
 
 

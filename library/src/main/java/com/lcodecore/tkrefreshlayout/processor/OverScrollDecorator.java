@@ -34,6 +34,11 @@ public class OverScrollDecorator extends Decorator {
 
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return decorator != null && decorator.dispatchTouchEvent(ev);
+    }
+
+    @Override
     public boolean interceptTouchEvent(MotionEvent ev) {
         return decorator != null && decorator.interceptTouchEvent(ev);
     }
@@ -45,18 +50,28 @@ public class OverScrollDecorator extends Decorator {
 
     private boolean preventTopOverScroll = false;
     private boolean preventBottomOverScroll = false;
+    private boolean checkOverScroll = false;
 
     @Override
     public void onFingerDown(MotionEvent ev) {
         if (decorator != null) decorator.onFingerDown(ev);
-
         preventTopOverScroll = ScrollingUtil.isViewToTop(cp.getTargetView(), cp.getTouchSlop());
         preventBottomOverScroll = ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop());
     }
 
     @Override
-    public void onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityY) {
-        if (decorator != null) decorator.onFingerScroll(e1, e2, distanceX, distanceY, velocityY);
+    public void onFingerUp(MotionEvent ev, boolean isFling) {
+
+        if (decorator != null) {
+            decorator.onFingerUp(ev, checkOverScroll && isFling);
+        }
+        checkOverScroll = false;
+    }
+
+    @Override
+    public void onFingerScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY, float velocityX, float velocityY) {
+        if (decorator != null)
+            decorator.onFingerScroll(e1, e2, distanceX, distanceY, velocityX, velocityY);
     }
 
     @Override
@@ -72,6 +87,7 @@ public class OverScrollDecorator extends Decorator {
         mVelocityY = velocityY;
         if (Math.abs(mVelocityY) >= OVER_SCROLL_MIN_VX) {
             mHandler.sendEmptyMessage(MSG_START_COMPUTE_SCROLL);
+            checkOverScroll = true;
         } else {
             mVelocityY = 0;
             cur_delay_times = ALL_DELAY_TIMES;

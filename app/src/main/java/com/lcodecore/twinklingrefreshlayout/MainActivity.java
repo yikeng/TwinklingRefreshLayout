@@ -22,6 +22,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         findViewById(R.id.bt_story).setOnClickListener(this);
         findViewById(R.id.bt_enjoy).setOnClickListener(this);
         findViewById(R.id.bt_coordinate).setOnClickListener(this);
+        findViewById(R.id.bt_test).setOnClickListener(this);
     }
 
     @Override
@@ -47,6 +48,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             case R.id.bt_coordinate:
                 startActivity(new Intent(MainActivity.this,CoordinateActivity.class));
+                break;
+            case R.id.bt_test:
+                startActivity(new Intent(MainActivity.this,TestActivity.class));
                 break;
         }
     }

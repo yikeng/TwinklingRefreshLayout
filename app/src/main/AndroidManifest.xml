@@ -27,6 +27,7 @@
         <activity android:name=".WebActivity"/>
         <activity android:name=".NestedLayoutActivity"/>
         <activity android:name=".CoordinateActivity"/>
+        <activity android:name=".TestActivity"/>
     </application>
 
 </manifest>

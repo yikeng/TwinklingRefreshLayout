@@ -39,8 +39,8 @@ public class TkApplication extends Application {
 
         BlockCanary.install(this,new AppBlockCanaryContext()).start();
 
-        TwinklingRefreshLayout.setDefaultHeader(SinaRefreshView.class.getName());
-        TwinklingRefreshLayout.setDefaultFooter(BallPulseView.class.getName());
+//        TwinklingRefreshLayout.setDefaultHeader(SinaRefreshView.class.getName());
+//        TwinklingRefreshLayout.setDefaultFooter(BallPulseView.class.getName());
     }
 
     private class AppBlockCanaryContext extends BlockCanaryContext{}

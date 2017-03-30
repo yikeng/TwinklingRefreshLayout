@@ -24,6 +24,7 @@ import com.lcodecore.tkrefreshlayout.processor.IDecorator;
 import com.lcodecore.tkrefreshlayout.processor.OverScrollDecorator;
 import com.lcodecore.tkrefreshlayout.processor.RefreshProcessor;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
+import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 import java.lang.reflect.Constructor;
 
@@ -72,6 +73,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     //是否加载更多视图可见
     protected boolean isLoadingVisible = false;
+
+    //是否处于刷新状态（和isRefreshVisible区别为是否开启了enableKeepHeadWhenRefresh）
+    protected boolean isRefreshing = false;
+    protected boolean isLoadingMore = false;
 
     //是否需要加载更多,默认需要
     protected boolean enableLoadmore = true;
@@ -204,33 +209,66 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     }
 
     private IDecorator decorator;
-    private GestureDetector gestureDetector;
+//    private GestureDetector gestureDetector;
+
+    public interface OnGestureListener {
+        void onDown(MotionEvent ev);
+
+        void onScroll(MotionEvent downEvent, MotionEvent currentEvent, float distanceX, float distanceY);
+
+        void onUp(MotionEvent ev, boolean isFling);
+
+        void onFling(MotionEvent downEvent, MotionEvent upEvent, float velocityX, float velocityY);
+    }
+
+    private OnGestureListener listener;
 
     private void initGestureDetector() {
-        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+        listener = new OnGestureListener() {
             @Override
-            public boolean onDown(MotionEvent ev) {
+            public void onDown(MotionEvent ev) {
                 decorator.onFingerDown(ev);
-                return false;
             }
 
             @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
-                return false;
+            public void onScroll(MotionEvent downEvent, MotionEvent currentEvent, float distanceX, float distanceY) {
+                decorator.onFingerScroll(downEvent, currentEvent, distanceX, distanceY, vx, vy);
             }
 
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                decorator.onFingerFling(e1, e2, velocityX, velocityY);
-                return false;
+            public void onUp(MotionEvent ev, boolean isFling) {
+                decorator.onFingerUp(ev, isFling);
             }
-        });
+
+            @Override
+            public void onFling(MotionEvent downEvent, MotionEvent upEvent, float velocityX, float velocityY) {
+                decorator.onFingerFling(downEvent, upEvent, velocityX, velocityY);
+            }
+        };
+//        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+//            @Override
+//            public boolean onDown(MotionEvent ev) {
+//                decorator.onFingerDown(ev);
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//                decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//                decorator.onFingerFling(e1, e2, velocityX, velocityY);
+//                return false;
+//            }
+//        });
     }
 
     private VelocityTracker moveTracker;
     private int mPointerId;
-    private float vy;
+    private float vx, vy;
 
     private void obtainTracker(MotionEvent event) {
         if (null == moveTracker) {
@@ -247,30 +285,157 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         }
     }
 
+    private VelocityTracker mVelocityTracker;
+    private float mLastFocusX;
+    private float mLastFocusY;
+    private float mDownFocusX;
+    private float mDownFocusY;
+    private int mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
+    private int mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
+    private MotionEvent mCurrentDownEvent;
+    private boolean mAlwaysInTapRegion;
+    private int touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    private int mTouchSlopSquare = touchSlop * touchSlop;
+
+    private void detectGesture(MotionEvent ev, OnGestureListener listener) {
+        final int action = ev.getAction();
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(ev);
+
+        final boolean pointerUp =
+                (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP;
+        final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
+
+        // Determine focal point
+        float sumX = 0, sumY = 0;
+        final int count = ev.getPointerCount();
+        for (int i = 0; i < count; i++) {
+            if (skipIndex == i) continue;
+            sumX += ev.getX(i);
+            sumY += ev.getY(i);
+        }
+        final int div = pointerUp ? count - 1 : count;
+        final float focusX = sumX / div;
+        final float focusY = sumY / div;
+
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mDownFocusX = mLastFocusX = focusX;
+                mDownFocusY = mLastFocusY = focusY;
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                mDownFocusX = mLastFocusX = focusX;
+                mDownFocusY = mLastFocusY = focusY;
+
+                // Check the dot product of current velocities.
+                // If the pointer that left was opposing another velocity vector, clear.
+                mVelocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+                final int upIndex = ev.getActionIndex();
+                final int id1 = ev.getPointerId(upIndex);
+                final float x1 = mVelocityTracker.getXVelocity(id1);
+                final float y1 = mVelocityTracker.getYVelocity(id1);
+                for (int i = 0; i < count; i++) {
+                    if (i == upIndex) continue;
+
+                    final int id2 = ev.getPointerId(i);
+                    final float x = x1 * mVelocityTracker.getXVelocity(id2);
+                    final float y = y1 * mVelocityTracker.getYVelocity(id2);
+
+                    final float dot = x + y;
+                    if (dot < 0) {
+                        mVelocityTracker.clear();
+                        break;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_DOWN:
+                mDownFocusX = mLastFocusX = focusX;
+                mDownFocusY = mLastFocusY = focusY;
+                if (mCurrentDownEvent != null) {
+                    mCurrentDownEvent.recycle();
+                }
+                mCurrentDownEvent = MotionEvent.obtain(ev);
+                mAlwaysInTapRegion = true;
+                listener.onDown(ev);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                final float scrollX = mLastFocusX - focusX;
+                final float scrollY = mLastFocusY - focusY;
+//                if (mAlwaysInTapRegion) {
+//                    final int deltaX = (int) (focusX - mDownFocusX);
+//                    final int deltaY = (int) (focusY - mDownFocusY);
+//                    int distance = (deltaX * deltaX) + (deltaY * deltaY);
+//                    if (distance > mTouchSlopSquare) {
+//                        listener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
+//                        mLastFocusX = focusX;
+//                        mLastFocusY = focusY;
+//                        mAlwaysInTapRegion = false;
+//                    }
+//                } else
+                    if ((Math.abs(scrollX) >= 1) || (Math.abs(scrollY) >= 1)) {
+                    listener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
+                    mLastFocusX = focusX;
+                    mLastFocusY = focusY;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                final int pointerId = ev.getPointerId(0);
+                mVelocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+                vy = mVelocityTracker.getYVelocity(pointerId);
+                vx = mVelocityTracker.getXVelocity(pointerId);
+
+                boolean isFling = false;
+                if ((Math.abs(vy) > mMinimumFlingVelocity)
+                        || (Math.abs(vx) > mMinimumFlingVelocity)) {
+                    listener.onFling(mCurrentDownEvent, ev, vx, vy);
+                    isFling = true;
+                }
+
+                listener.onUp(ev, isFling);
+
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                mAlwaysInTapRegion = false;
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
+                break;
+        }
+    }
+
     /*************************************
      * 触摸事件处理
      *****************************************/
     int mMaxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity();
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
         //1.监听fling动作 2.获取手指滚动速度（存在滚动但非fling的状态）
         //TODO 考虑是否可以去除GestureDetector只保留VelocityTracker
-        obtainTracker(event);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mPointerId = event.getPointerId(0);
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                moveTracker.computeCurrentVelocity(1000, mMaxVelocity);
-                vy = moveTracker.getYVelocity(mPointerId);
-                releaseTracker();
-                break;
-        }
-        gestureDetector.onTouchEvent(event);
-
-        return super.dispatchTouchEvent(event);
+//        obtainTracker(ev);
+//        switch (ev.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                mPointerId = ev.getPointerId(0);
+//                break;
+//            case MotionEvent.ACTION_UP:
+//            case MotionEvent.ACTION_CANCEL:
+//                moveTracker.computeCurrentVelocity(1000, mMaxVelocity);
+//                vy = moveTracker.getYVelocity(mPointerId);
+//                releaseTracker();
+//                break;
+//        }
+//        gestureDetector.onTouchEvent(ev);
+        boolean consume = decorator.dispatchTouchEvent(ev);
+        detectGesture(ev, listener);
+        return consume;
     }
 
     /**
@@ -279,17 +444,17 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      * @return return true时,ViewGroup的事件有效,执行onTouchEvent事件
      * return false时,事件向下传递,onTouchEvent无效
      */
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean intercept = decorator.interceptTouchEvent(ev);
-        return intercept || super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        boolean consume = decorator.dealTouchEvent(e);
-        return consume || super.onTouchEvent(e);
-    }
+//    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        boolean intercept = decorator.interceptTouchEvent(ev);
+//        return intercept || super.onInterceptTouchEvent(ev);
+//    }
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent e) {
+//        boolean consume = decorator.dealTouchEvent(e);
+//        return consume || super.onTouchEvent(e);
+//    }
 
     /*************************************
      * 开放api区
@@ -569,7 +734,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     @Override
     public void onFinishRefresh() {
-        if (!isRefreshVisible) return;
+        if (refreshListener != null) {
+            refreshListener.onFinishRefresh();
+        }
         mHeadView.onFinish(new OnAnimEndListener() {
             @Override
             public void onAnimEnd() {
@@ -580,7 +747,9 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     @Override
     public void onFinishLoadMore() {
-        if (!isLoadingVisible) return;
+        if (refreshListener != null) {
+            refreshListener.onFinishLoadMore();
+        }
         mBottomView.onFinish();
     }
 
@@ -606,6 +775,8 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         private static final int EX_MODE_FIXED = 1;
         private int exHeadMode = EX_MODE_NORMAL;
 
+        //是否在刷新或者加载更多后保持状态
+        protected boolean enableKeepIView = true;
 
         public CoContext() {
             animProcessor = new AnimProcessor(this);
@@ -618,6 +789,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 if (mHeadLayout != null) mHeadLayout.setVisibility(GONE);
                 if (mBottomLayout != null) mBottomLayout.setVisibility(GONE);
             }
+        }
+
+        public boolean isEnableKeepIView() {
+            return enableKeepIView;
         }
 
         public AnimProcessor getAnimProcessor() {
@@ -745,17 +920,15 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         }
 
         public void finishRefreshAfterAnim() {
-            if (isRefreshVisible() && mChildView != null) {
-                setRefreshing(false);
-                animProcessor.animHeadBack();
+            if (mChildView != null) {
+                animProcessor.animHeadBack(true);
             }
         }
 
         public void finishLoadmore() {
             onFinishLoadMore();
-            if (isLoadingVisible() && mChildView != null) {
-                setLoadingMore(false);
-                animProcessor.animBottomBack();
+            if (mChildView != null) {
+                animProcessor.animBottomBack(true);
             }
         }
 
@@ -794,12 +967,28 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             return isLoadingVisible;
         }
 
+        public void setRefreshVisible(boolean visible) {
+            isRefreshVisible = visible;
+        }
+
+        public void setLoadVisible(boolean visible) {
+            isLoadingVisible = visible;
+        }
+
         public void setRefreshing(boolean refreshing) {
-            isRefreshVisible = refreshing;
+            isRefreshing = refreshing;
+        }
+
+        public boolean isRefreshing() {
+            return isRefreshing;
+        }
+
+        public boolean isLoadingMore() {
+            return isLoadingMore;
         }
 
         public void setLoadingMore(boolean loadingMore) {
-            isLoadingVisible = loadingMore;
+            isLoadingMore = loadingMore;
         }
 
         public boolean isOpenFloatRefresh() {
@@ -854,6 +1043,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             pullListener.onPullUpReleasing(TwinklingRefreshLayout.this, offsetY / mBottomHeight);
         }
 
+        public boolean dispatchTouchEventSuper(MotionEvent ev) {
+            return TwinklingRefreshLayout.super.dispatchTouchEvent(ev);
+        }
+
         public void onRefreshCanceled() {
             pullListener.onRefreshCanceled();
         }
@@ -876,6 +1069,24 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
         public boolean isStatePBU() {
             return PULLING_BOTTOM_UP == state;
+        }
+
+        private boolean prepareFinishRefresh = false;
+        private boolean prepareFinishLoadMore = false;
+        public boolean isPrepareFinishRefresh(){
+            return prepareFinishRefresh;
+        }
+
+        public boolean isPrepareFinishLoadMore() {
+            return prepareFinishLoadMore;
+        }
+
+        public void setPrepareFinishRefresh(boolean prepareFinishRefresh) {
+            this.prepareFinishRefresh = prepareFinishRefresh;
+        }
+
+        public void setPrepareFinishLoadMore(boolean prepareFinishLoadMore) {
+            this.prepareFinishLoadMore = prepareFinishLoadMore;
         }
     }
 }
