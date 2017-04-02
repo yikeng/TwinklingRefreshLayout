@@ -13,5 +13,10 @@
         <attr name="tr_enable_overscroll" format="boolean"/>
         <attr name="tr_headerView" format="dimension"/>
         <attr name="tr_bottomView" format="dimension"/>
+        <attr name="tr_floatRefresh" format="boolean"/>
+        <attr name="tr_autoLoadMore" format="boolean"/>
+        <attr name="tr_enable_keepIView" format="boolean"/>
+        <attr name="tr_showRefreshingWhenOverScroll" format="boolean"/>
+        <attr name="tr_showLoadingWhenOverScroll" format="boolean"/>
     </declare-styleable>
 </resources>

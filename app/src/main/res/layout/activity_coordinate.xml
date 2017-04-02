@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/refresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:addStatesFromChildren="true">
+    android:layout_height="match_parent">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coord_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:addStatesFromChildren="true"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.AppBarLayout
@@ -56,4 +56,3 @@
 
     </android.support.design.widget.CoordinatorLayout>
 </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
-

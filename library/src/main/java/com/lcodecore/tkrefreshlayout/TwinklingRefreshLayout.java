@@ -2,36 +2,38 @@ package com.lcodecore.tkrefreshlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.NestedScrollingChild;
-import android.support.v4.view.NestedScrollingParent;
+import android.support.v4.view.NestedScrollingChildHelper;
+import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.lcodecore.tkrefreshlayout.footer.BallPulseView;
 import com.lcodecore.tkrefreshlayout.header.GoogleDotView;
-import com.lcodecore.tkrefreshlayout.header.SinaRefreshView;
 import com.lcodecore.tkrefreshlayout.processor.AnimProcessor;
 import com.lcodecore.tkrefreshlayout.processor.IDecorator;
 import com.lcodecore.tkrefreshlayout.processor.OverScrollDecorator;
 import com.lcodecore.tkrefreshlayout.processor.RefreshProcessor;
 import com.lcodecore.tkrefreshlayout.utils.DensityUtil;
-import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
 
 import java.lang.reflect.Constructor;
+
+import static android.support.v4.widget.ViewDragHelper.INVALID_POINTER;
 
 /**
  * Created by lcodecore on 16/3/2.
  */
-public class TwinklingRefreshLayout extends RelativeLayout implements PullListener {
+public class TwinklingRefreshLayout extends RelativeLayout implements PullListener, NestedScrollingChild {
 
     //波浪的高度,最大扩展高度
     protected float mMaxHeadHeight;
@@ -100,8 +102,21 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     //是否允许进入越界回弹模式
     protected boolean enableOverScroll = true;
 
+    //是否在刷新或者加载更多后保持状态
+    protected boolean enableKeepIView = true;
+
+    //是否在越界且处于刷新时直接显示顶部
+    protected boolean showRefreshingWhenOverScroll = true;
+
+    //是否在越界且处于加载更多时直接显示底部
+    protected boolean showLoadingWhenOverScroll = true;
+
     private CoContext cp;
-    private int mTouchSlop;
+    private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    //设置手势动作的监听器
+    private PullListener pullListener = this;
+
+    private final NestedScrollingChildHelper mChildHelper;
 
     public TwinklingRefreshLayout(Context context) {
         this(context, null, 0);
@@ -126,18 +141,22 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             isOverScrollTopShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_top_show, true);
             isOverScrollBottomShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_bottom_show, true);
             enableOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_overscroll, true);
+            floatRefresh = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_floatRefresh, false);
+            autoLoadMore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_autoLoadMore, false);
+            enableKeepIView = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_keepIView, true);
+            showRefreshingWhenOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_showRefreshingWhenOverScroll, true);
+            showLoadingWhenOverScroll = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_showLoadingWhenOverScroll, true);
         } finally {
             a.recycle();
         }
-
-        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
         cp = new CoContext();
 
         addHeader();
         addFooter();
 
-        setPullListener(this);
+        mChildHelper = new NestedScrollingChildHelper(this);
+        setNestedScrollingEnabled(true);
     }
 
     private void addHeader() {
@@ -169,6 +188,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 setHeaderView(new GoogleDotView(getContext()));
             }
         }
+        setFloatRefresh(floatRefresh);
     }
 
     private void addFooter() {
@@ -194,6 +214,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 setBottomView(new BallPulseView(getContext()));
             }
         }
+        setAutoLoadMore(autoLoadMore);
     }
 
     @Override
@@ -209,18 +230,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     }
 
     private IDecorator decorator;
-//    private GestureDetector gestureDetector;
-
-    public interface OnGestureListener {
-        void onDown(MotionEvent ev);
-
-        void onScroll(MotionEvent downEvent, MotionEvent currentEvent, float distanceX, float distanceY);
-
-        void onUp(MotionEvent ev, boolean isFling);
-
-        void onFling(MotionEvent downEvent, MotionEvent upEvent, float velocityX, float velocityY);
-    }
-
     private OnGestureListener listener;
 
     private void initGestureDetector() {
@@ -245,45 +254,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 decorator.onFingerFling(downEvent, upEvent, velocityX, velocityY);
             }
         };
-//        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-//            @Override
-//            public boolean onDown(MotionEvent ev) {
-//                decorator.onFingerDown(ev);
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-//                decorator.onFingerScroll(e1, e2, distanceX, distanceY, vy);
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-//                decorator.onFingerFling(e1, e2, velocityX, velocityY);
-//                return false;
-//            }
-//        });
     }
 
-    private VelocityTracker moveTracker;
-    private int mPointerId;
+    //VelocityX,VelocityY
     private float vx, vy;
-
-    private void obtainTracker(MotionEvent event) {
-        if (null == moveTracker) {
-            moveTracker = VelocityTracker.obtain();
-        }
-        moveTracker.addMovement(event);
-    }
-
-    private void releaseTracker() {
-        if (null != moveTracker) {
-            moveTracker.clear();
-            moveTracker.recycle();
-            moveTracker = null;
-        }
-    }
 
     private VelocityTracker mVelocityTracker;
     private float mLastFocusX;
@@ -294,8 +268,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     private int mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
     private MotionEvent mCurrentDownEvent;
     private boolean mAlwaysInTapRegion;
-    private int touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-    private int mTouchSlopSquare = touchSlop * touchSlop;
+    private int mTouchSlopSquare = mTouchSlop * mTouchSlop;
 
     private void detectGesture(MotionEvent ev, OnGestureListener listener) {
         final int action = ev.getAction();
@@ -364,18 +337,17 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             case MotionEvent.ACTION_MOVE:
                 final float scrollX = mLastFocusX - focusX;
                 final float scrollY = mLastFocusY - focusY;
-//                if (mAlwaysInTapRegion) {
-//                    final int deltaX = (int) (focusX - mDownFocusX);
-//                    final int deltaY = (int) (focusY - mDownFocusY);
-//                    int distance = (deltaX * deltaX) + (deltaY * deltaY);
-//                    if (distance > mTouchSlopSquare) {
-//                        listener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
-//                        mLastFocusX = focusX;
-//                        mLastFocusY = focusY;
-//                        mAlwaysInTapRegion = false;
-//                    }
-//                } else
-                    if ((Math.abs(scrollX) >= 1) || (Math.abs(scrollY) >= 1)) {
+                if (mAlwaysInTapRegion) {
+                    final int deltaX = (int) (focusX - mDownFocusX);
+                    final int deltaY = (int) (focusY - mDownFocusY);
+                    int distance = (deltaX * deltaX) + (deltaY * deltaY);
+                    if (distance > mTouchSlopSquare) {
+                        listener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
+                        mLastFocusX = focusX;
+                        mLastFocusY = focusY;
+                        mAlwaysInTapRegion = false;
+                    }
+                } else if ((Math.abs(scrollX) >= 1) || (Math.abs(scrollY) >= 1)) {
                     listener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
                     mLastFocusX = focusX;
                     mLastFocusY = focusY;
@@ -411,30 +383,13 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         }
     }
 
-    /*************************************
-     * 触摸事件处理
-     *****************************************/
-    int mMaxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity();
-
+    /************************************* 触摸事件处理 *****************************************/
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        //1.监听fling动作 2.获取手指滚动速度（存在滚动但非fling的状态）
-        //TODO 考虑是否可以去除GestureDetector只保留VelocityTracker
-//        obtainTracker(ev);
-//        switch (ev.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                mPointerId = ev.getPointerId(0);
-//                break;
-//            case MotionEvent.ACTION_UP:
-//            case MotionEvent.ACTION_CANCEL:
-//                moveTracker.computeCurrentVelocity(1000, mMaxVelocity);
-//                vy = moveTracker.getYVelocity(mPointerId);
-//                releaseTracker();
-//                break;
-//        }
-//        gestureDetector.onTouchEvent(ev);
+        //1.监听fling动作 2.获取手指滚动速度（存在滚动但非fling的状态）3.分发事件
         boolean consume = decorator.dispatchTouchEvent(ev);
         detectGesture(ev, listener);
+        detectNestedScroll(ev);
         return consume;
     }
 
@@ -444,21 +399,157 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      * @return return true时,ViewGroup的事件有效,执行onTouchEvent事件
      * return false时,事件向下传递,onTouchEvent无效
      */
-//    @Override
-//    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        boolean intercept = decorator.interceptTouchEvent(ev);
-//        return intercept || super.onInterceptTouchEvent(ev);
-//    }
-//
-//    @Override
-//    public boolean onTouchEvent(MotionEvent e) {
-//        boolean consume = decorator.dealTouchEvent(e);
-//        return consume || super.onTouchEvent(e);
-//    }
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean intercept = decorator.interceptTouchEvent(ev);
+        return intercept || super.onInterceptTouchEvent(ev);
+    }
 
-    /*************************************
-     * 开放api区
-     *****************************************/
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        boolean consume = decorator.dealTouchEvent(e);
+        return consume || super.onTouchEvent(e);
+    }
+
+    private final int[] mScrollOffset = new int[2];
+    private final int[] mScrollConsumed = new int[2];
+    private final int[] mNestedOffsets = new int[2];
+    private int mActivePointerId = INVALID_POINTER;
+    private int mLastTouchX;
+    private int mLastTouchY;
+    private boolean mIsBeingDragged;
+
+    private boolean detectNestedScroll(MotionEvent e) {
+        final MotionEvent vtev = MotionEvent.obtain(e);
+        final int action = MotionEventCompat.getActionMasked(e);
+        final int actionIndex = MotionEventCompat.getActionIndex(e);
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            mNestedOffsets[0] = mNestedOffsets[1] = 0;
+        }
+        vtev.offsetLocation(mNestedOffsets[0], mNestedOffsets[1]);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mActivePointerId = e.getPointerId(0);
+                mLastTouchX = (int) e.getX();
+                mLastTouchY = (int) e.getY();
+                startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL);
+                break;
+            case MotionEventCompat.ACTION_POINTER_DOWN:
+                mActivePointerId = e.getPointerId(actionIndex);
+                mLastTouchX = (int) e.getX(actionIndex);
+                mLastTouchY = (int) e.getY(actionIndex);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                final int index = e.findPointerIndex(mActivePointerId);
+                if (index < 0) {
+                    Log.e("TwinklingRefreshLayout", "Error processing scroll; pointer index for id " +
+                            mActivePointerId + " not found. Did any MotionEvents get skipped?");
+                    return false;
+                }
+
+                final int x = (int) e.getX(index);
+                final int y = (int) e.getY(index);
+
+                int dx = mLastTouchX - x;
+                int dy = mLastTouchY - y;
+
+                if (dispatchNestedPreScroll(dx, dy, mScrollConsumed, mScrollOffset)) {
+                    dx -= mScrollConsumed[0];
+                    dy -= mScrollConsumed[1];
+                    vtev.offsetLocation(mScrollOffset[0], mScrollOffset[1]);
+                    // Updated the nested offsets
+                    mNestedOffsets[0] += mScrollOffset[0];
+                    mNestedOffsets[1] += mScrollOffset[1];
+                }
+
+                if (!mIsBeingDragged && Math.abs(dy) > mTouchSlop) {
+                    final ViewParent parent = getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
+                    }
+                    mIsBeingDragged = true;
+                    if (dy > 0) {
+                        dy -= mTouchSlop;
+                    } else {
+                        dy += mTouchSlop;
+                    }
+                }
+
+                if (mIsBeingDragged) {
+                    mLastTouchY = y - mScrollOffset[1];
+
+                    final int scrolledDeltaY = 0;
+                    final int unconsumedY = dy - scrolledDeltaY;
+                    if (dispatchNestedScroll(0, scrolledDeltaY, 0, unconsumedY, mScrollOffset)) {
+                        mLastTouchX -= mScrollOffset[0];
+                        mLastTouchY -= mScrollOffset[1];
+                        vtev.offsetLocation(mScrollOffset[0], mScrollOffset[1]);
+                        mNestedOffsets[0] += mScrollOffset[0];
+                        mNestedOffsets[1] += mScrollOffset[1];
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                stopNestedScroll();
+                mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                break;
+        }
+        vtev.recycle();
+        return true;
+    }
+
+    //NestedScroll
+    @Override
+    public void setNestedScrollingEnabled(boolean enabled) {
+        super.setNestedScrollingEnabled(enabled);
+        mChildHelper.setNestedScrollingEnabled(enabled);
+    }
+
+    @Override
+    public boolean isNestedScrollingEnabled() {
+        return mChildHelper.isNestedScrollingEnabled();
+    }
+
+    @Override
+    public boolean startNestedScroll(int axes) {
+        return mChildHelper.startNestedScroll(axes);
+    }
+
+    @Override
+    public void stopNestedScroll() {
+        mChildHelper.stopNestedScroll();
+    }
+
+    @Override
+    public boolean hasNestedScrollingParent() {
+        return mChildHelper.hasNestedScrollingParent();
+    }
+
+    @Override
+    public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow) {
+        return mChildHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow);
+    }
+
+    @Override
+    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
+        return mChildHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+    }
+
+    @Override
+    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
+        return mChildHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+        return mChildHelper.dispatchNestedPreFling(velocityX, velocityY);
+    }
+
+    /************************************** 开放api区  *****************************************/
     //设置默认的header class 名
     public static void setDefaultHeader(String className) {
         HEADER_CLASS_NAME = className;
@@ -480,14 +571,14 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     }
 
     /**
-     * 刷新结束
+     * 结束刷新
      */
     public void finishRefreshing() {
         cp.finishRefreshing();
     }
 
     /**
-     * 加载更多结束
+     * 结束加载更多
      */
     public void finishLoadmore() {
         cp.finishLoadmore();
@@ -501,14 +592,14 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     }
 
     /**
-     * 手动设置RefreshLayout的装饰
+     * 手动设置RefreshLayout的装饰器
      */
     public void setDecorator(IDecorator decorator1) {
         if (decorator1 != null) decorator = decorator1;
     }
 
     /**
-     * 设置头部View
+     * 设置头部刷新View
      */
     public void setHeaderView(final IHeaderView headerView) {
         if (headerView != null) {
@@ -521,6 +612,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     /**
      * 设置固定在顶部的header
      */
+    @Deprecated
     public void addFixedExHeader(final View view) {
         if (view != null && mExtraHeadLayout != null) {
             mExtraHeadLayout.addView(view);
@@ -530,16 +622,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             cp.setExHeadFixed();
         }
     }
-
-    /**TODO 适配可以随界面滚动的Header
-     public void addNormalExHeader(View view) {
-     if (view != null && mExtraHeadLayout != null) {
-     mExtraHeadLayout.addView(view);
-     cp.onAddExHead();
-     cp.setExHeadNormal();
-     }
-     }
-     **/
 
     /**
      * 获取额外附加的头部
@@ -561,6 +643,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
     public void setFloatRefresh(boolean ifOpenFloatRefreshMode) {
         floatRefresh = ifOpenFloatRefreshMode;
+        if (!floatRefresh) return;
         post(new Runnable() {
             @Override
             public void run() {
@@ -644,16 +727,15 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     /**
      * 是否开启纯净的越界回弹模式,开启时刷新和加载更多控件不显示
      */
-    public void setPureScrollModeOn(boolean pureScrollModeOn) {
-        isPureScrollModeOn = pureScrollModeOn;
-        if (pureScrollModeOn) {
-            isOverScrollTopShow = false;
-            isOverScrollBottomShow = false;
-            setMaxHeadHeight(mOverScrollHeight);
-            setHeaderHeight(mOverScrollHeight);
-            setMaxBottomHeight(mOverScrollHeight);
-            setBottomHeight(mOverScrollHeight);
-        }
+    public void setPureScrollModeOn() {
+        isPureScrollModeOn = true;
+
+        isOverScrollTopShow = false;
+        isOverScrollBottomShow = false;
+        setMaxHeadHeight(mOverScrollHeight);
+        setHeaderHeight(mOverScrollHeight);
+        setMaxBottomHeight(mOverScrollHeight);
+        setBottomHeight(mOverScrollHeight);
     }
 
     /**
@@ -670,7 +752,20 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setAutoLoadMore(boolean ifAutoLoadMore) {
         autoLoadMore = ifAutoLoadMore;
+        if (!autoLoadMore) return;
         setEnableLoadmore(true);
+    }
+
+    public void showRefreshingWhenOverScroll(boolean ifShow) {
+        showRefreshingWhenOverScroll = ifShow;
+    }
+
+    public void showLoadingWhenOverScroll(boolean ifShow) {
+        showLoadingWhenOverScroll = ifShow;
+    }
+
+    public void setEnableKeepIView(boolean ifKeep) {
+        enableKeepIView = ifKeep;
     }
 
     /**
@@ -682,13 +777,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         if (refreshListener != null) {
             this.refreshListener = refreshListener;
         }
-    }
-
-    //设置拖动屏幕的监听器
-    private PullListener pullListener;
-
-    private void setPullListener(PullListener pullListener) {
-        this.pullListener = pullListener;
     }
 
     @Override
@@ -775,9 +863,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         private static final int EX_MODE_FIXED = 1;
         private int exHeadMode = EX_MODE_NORMAL;
 
-        //是否在刷新或者加载更多后保持状态
-        protected boolean enableKeepIView = true;
-
         public CoContext() {
             animProcessor = new AnimProcessor(this);
         }
@@ -791,12 +876,20 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             }
         }
 
+        public AnimProcessor getAnimProcessor() {
+            return animProcessor;
+        }
+
         public boolean isEnableKeepIView() {
             return enableKeepIView;
         }
 
-        public AnimProcessor getAnimProcessor() {
-            return animProcessor;
+        public boolean showRefreshingWhenOverScroll() {
+            return showRefreshingWhenOverScroll;
+        }
+
+        public boolean showLoadingWhenOverScroll() {
+            return showLoadingWhenOverScroll;
         }
 
         public float getMaxHeadHeight() {
@@ -931,9 +1024,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 animProcessor.animBottomBack(true);
             }
         }
-
-        //TODO 支持分别设置头部或者顶部允许越界
-        //private boolean enableOverScrollTop = false, enableOverScrollBottom = false;
 
         public boolean enableOverScroll() {
             return enableOverScroll;
@@ -1073,7 +1163,8 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
         private boolean prepareFinishRefresh = false;
         private boolean prepareFinishLoadMore = false;
-        public boolean isPrepareFinishRefresh(){
+
+        public boolean isPrepareFinishRefresh() {
             return prepareFinishRefresh;
         }
 

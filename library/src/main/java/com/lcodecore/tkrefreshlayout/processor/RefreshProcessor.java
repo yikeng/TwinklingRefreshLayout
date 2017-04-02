@@ -1,6 +1,7 @@
 package com.lcodecore.tkrefreshlayout.processor;
 
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
 import com.lcodecore.tkrefreshlayout.utils.ScrollingUtil;
@@ -22,16 +23,20 @@ public class RefreshProcessor implements IDecorator {
     private boolean intercepted = false;
     private boolean willAnimHead = false;
     private boolean willAnimBottom = false;
+    private boolean downEventSent = false;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                downEventSent = false;
+                intercepted = false;
                 mTouchX = ev.getX();
                 mTouchY = ev.getY();
                 cp.dispatchTouchEventSuper(ev);
                 return true;
             case MotionEvent.ACTION_MOVE:
+                mLastMoveEvent = ev;
                 float dx = ev.getX() - mTouchX;
                 float dy = ev.getY() - mTouchY;
                 if (!intercepted && Math.abs(dx) <= Math.abs(dy) && Math.abs(dy) > cp.getTouchSlop()) {//滑动允许最大角度为45度
@@ -39,6 +44,7 @@ public class RefreshProcessor implements IDecorator {
                         cp.setStatePTD();
                         mTouchX = ev.getX();
                         mTouchY = ev.getY();
+                        sendCancelEvent();
                         intercepted = true;
                         return true;
                     } else if (dy < 0 && ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop()) && cp.allowPullUp()) {
@@ -46,6 +52,7 @@ public class RefreshProcessor implements IDecorator {
                         mTouchX = ev.getX();
                         mTouchY = ev.getY();
                         intercepted = true;
+                        sendCancelEvent();
                         return true;
                     }
                 }
@@ -69,6 +76,10 @@ public class RefreshProcessor implements IDecorator {
                         dy = Math.min(0, dy);
                         cp.getAnimProcessor().scrollBottomByMove(Math.abs(dy));
                     }
+                    if (dy == 0 && !downEventSent) {
+                        downEventSent = true;
+                        sendDownEvent();
+                    }
                     return true;
                 }
                 break;
@@ -90,57 +101,31 @@ public class RefreshProcessor implements IDecorator {
         return cp.dispatchTouchEventSuper(ev);
     }
 
+    private MotionEvent mLastMoveEvent;
+
+    //发送cancel事件解决selection问题
+    private void sendCancelEvent() {
+        if (mLastMoveEvent == null) {
+            return;
+        }
+        MotionEvent last = mLastMoveEvent;
+        MotionEvent e = MotionEvent.obtain(last.getDownTime(), last.getEventTime() + ViewConfiguration.getLongPressTimeout(), MotionEvent.ACTION_CANCEL, last.getX(), last.getY(), last.getMetaState());
+        cp.dispatchTouchEventSuper(e);
+    }
+
+    private void sendDownEvent() {
+        final MotionEvent last = mLastMoveEvent;
+        MotionEvent e = MotionEvent.obtain(last.getDownTime(), last.getEventTime(), MotionEvent.ACTION_DOWN, last.getX(), last.getY(), last.getMetaState());
+        cp.dispatchTouchEventSuper(e);
+    }
+
     @Override
     public boolean interceptTouchEvent(MotionEvent ev) {
-//        switch (ev.getAction()) {
-//            case MotionEvent.ACTION_DOWN:
-//                mTouchX = ev.getX();
-//                mTouchY = ev.getY();
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                float dx = ev.getX() - mTouchX;
-//                float dy = ev.getY() - mTouchY;
-//                if (Math.abs(dx) <= Math.abs(dy) && Math.abs(dy) > cp.getTouchSlop()) {//滑动允许最大角度为45度
-//                    if (dy > 0 && ScrollingUtil.isViewToTop(cp.getTargetView(), cp.getTouchSlop()) && cp.allowPullDown()) {
-//                        cp.setStatePTD();
-//                        return true;
-//                    } else if (dy < 0 && ScrollingUtil.isViewToBottom(cp.getTargetView(), cp.getTouchSlop()) && cp.allowPullUp()) {
-//                        cp.setStatePBU();
-//                        return true;
-//                    }
-//                }
-//                break;
-//        }
         return false;
     }
 
     @Override
     public boolean dealTouchEvent(MotionEvent e) {
-//        if (cp.isRefreshVisible() || cp.isLoadingVisible()) return false;
-//
-//        switch (e.getAction()) {
-//            case MotionEvent.ACTION_MOVE:
-//                float dy = e.getY() - mTouchY;
-//                if (cp.isStatePTD()) {
-//                    dy = Math.min(cp.getMaxHeadHeight() * 2, dy);
-//                    dy = Math.max(0, dy);
-//                    cp.getAnimProcessor().scrollHeadByMove(dy);
-//                } else if (cp.isStatePBU()) {
-//                    //加载更多的动作
-//                    dy = Math.min(cp.getMaxBottomHeight() * 2, Math.abs(dy));
-//                    dy = Math.max(0, dy);
-//                    cp.getAnimProcessor().scrollBottomByMove(dy);
-//                }
-//                return true;
-//            case MotionEvent.ACTION_CANCEL:
-//            case MotionEvent.ACTION_UP:
-//                if (cp.isStatePTD()) {
-//                    cp.getAnimProcessor().dealPullDownRelease();
-//                } else if (cp.isStatePBU()) {
-//                    cp.getAnimProcessor().dealPullUpRelease();
-//                }
-//                return true;
-//        }
         return false;
     }
 

@@ -45,7 +45,7 @@ public class FoodActivity extends AppCompatActivity {
         BezierLayout headerView = new BezierLayout(this);
         refreshLayout.setHeaderView(headerView);
 //        refreshLayout.setFloatRefresh(false);
-        refreshLayout.setPureScrollModeOn(true);
+        refreshLayout.setPureScrollModeOn();
 //        refreshLayout.setEnableOverlayRefreshView(false);
 //        refreshLayout.setAutoLoadMore(true);
 

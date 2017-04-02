@@ -2,7 +2,7 @@ package com.lcodecore.twinklingrefreshlayout;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -74,6 +74,19 @@ public class CoordinateActivity extends AppCompatActivity {
             }
         });
 
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (verticalOffset >= 0) {
+                    refreshLayout.setEnableRefresh(true);
+                    refreshLayout.setEnableOverScroll(false);
+                } else {
+                    refreshLayout.setEnableRefresh(false);
+                    refreshLayout.setEnableOverScroll(false);
+                }
+            }
+        });
     }
 
     void refreshCard() {
