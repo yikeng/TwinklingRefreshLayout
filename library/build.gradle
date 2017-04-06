@@ -5,7 +5,7 @@ publish{
     userOrg = 'lcodecorex'
     groupId = 'com.lcodecorex'
     artifactId = 'tkrefreshlayout'
-    publishVersion = '1.0.7-beta'
+    publishVersion = '1.0.7'
     website = 'https://github.com/lcodecorex/TwinklingRefreshLayout/'
 }
 
