@@ -25,7 +25,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private TwinklingRefreshLayout refreshLayout;
 
     private TestButton toggle_enableLoadmore, toggle_pureScrollMode_on, toggle_overScrollTopShow, toggle_osFooterShow, toggle_enableOverScroll, toggle_enableKeepIView,
-            toggle_showRefreshingWhenOverScroll, toggle_showLoadingWhenOverScroll, toggle_floatRefresh, toggle_autoLoadMore;
+            toggle_showRefreshingWhenOverScroll, toggle_showLoadingWhenOverScroll, toggle_floatRefresh, toggle_autoLoadMore,toggle_enableRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         toggle_showLoadingWhenOverScroll = new TestButton(R.id.toggle_showLoadingWhenOverScroll, "showLoadingWhenOS", true);
         toggle_floatRefresh = new TestButton(R.id.toggle_floatRefresh, "floatRefresh", false);
         toggle_autoLoadMore = new TestButton(R.id.toggle_autoLoadMore, "autoLoadMore", false);
+        toggle_enableRefresh = new TestButton(R.id.toggle_enableRefresh,"enableRefresh",true);
     }
 
     private void setupGridView(GridView gridView) {
@@ -142,6 +143,9 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 toggle_autoLoadMore.toggle();
                 refreshLayout.setAutoLoadMore(toggle_autoLoadMore.flag);
                 break;
+            case R.id.toggle_enableRefresh:
+                toggle_enableRefresh.toggle();
+                refreshLayout.setEnableRefresh(toggle_enableRefresh.flag);
         }
     }
 

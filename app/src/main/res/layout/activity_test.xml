@@ -147,6 +147,19 @@
                     android:text="autoLoadMore->false"
                     android:textAllCaps="false" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/toggle_enableRefresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="enableRefresh->true"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

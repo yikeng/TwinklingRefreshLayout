@@ -136,6 +136,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
             mMaxBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_max_bottom_height, (int) DensityUtil.dp2px(context, 120));
             mBottomHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_bottom_height, (int) DensityUtil.dp2px(context, 60));
             mOverScrollHeight = a.getDimensionPixelSize(R.styleable.TwinklingRefreshLayout_tr_overscroll_height, (int) mHeadHeight);
+            enableRefresh = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_refresh, true);
             enableLoadmore = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_enable_loadmore, true);
             isPureScrollModeOn = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_pureScrollMode_on, false);
             isOverScrollTopShow = a.getBoolean(R.styleable.TwinklingRefreshLayout_tr_overscroll_top_show, true);
@@ -154,6 +155,11 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
 
         addHeader();
         addFooter();
+
+        setFloatRefresh(floatRefresh);
+        setAutoLoadMore(autoLoadMore);
+        setEnableRefresh(enableRefresh);
+        setEnableLoadmore(enableLoadmore);
 
         mChildHelper = new NestedScrollingChildHelper(this);
         setNestedScrollingEnabled(true);
@@ -188,7 +194,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 setHeaderView(new GoogleDotView(getContext()));
             }
         }
-        setFloatRefresh(floatRefresh);
     }
 
     private void addFooter() {
@@ -214,7 +219,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
                 setBottomView(new BallPulseView(getContext()));
             }
         }
-        setAutoLoadMore(autoLoadMore);
     }
 
     @Override
@@ -505,7 +509,6 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
     //NestedScroll
     @Override
     public void setNestedScrollingEnabled(boolean enabled) {
-        super.setNestedScrollingEnabled(enabled);
         mChildHelper.setNestedScrollingEnabled(enabled);
     }
 
@@ -693,6 +696,10 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
      */
     public void setEnableRefresh(boolean enableRefresh1) {
         this.enableRefresh = enableRefresh1;
+        if (mHeadView != null) {
+            if (enableRefresh) mHeadView.getView().setVisibility(VISIBLE);
+            else mHeadView.getView().setVisibility(GONE);
+        }
     }
 
     /**
@@ -825,6 +832,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         if (refreshListener != null) {
             refreshListener.onFinishRefresh();
         }
+        if (!cp.isEnableKeepIView() && !cp.isRefreshing()) return;
         mHeadView.onFinish(new OnAnimEndListener() {
             @Override
             public void onAnimEnd() {
@@ -838,6 +846,7 @@ public class TwinklingRefreshLayout extends RelativeLayout implements PullListen
         if (refreshListener != null) {
             refreshListener.onFinishLoadMore();
         }
+        if (!cp.isEnableKeepIView() && !cp.isLoadingMore()) return;
         mBottomView.onFinish();
     }
 

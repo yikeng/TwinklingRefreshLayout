@@ -7,6 +7,9 @@ TwinklingRefreshLayout延伸了Google的SwipeRefreshLayout的思想,不在列表
 4. 可开启没有刷新控件的纯净越界回弹模式
 5. setOnRefreshListener中拥有大量可以回调的方法
 6. 将Header和Footer抽象成了接口,并回调了滑动过程中的系数,方便实现个性化的Header和Footer
+7. 支持NestedScroll,嵌套CoordinatorLayout
+
+**目前已经支持了所有的View，比如是一个FrameLayout，LinearLayout,AnyView。**
 
 ![](art/structure_v1.0.png)
 
@@ -28,7 +31,7 @@ You can download these Videos for more details.
 #### 1.添加gradle依赖
 将libray模块复制到项目中,或者直接在build.gradle中依赖:
 ```
-compile 'com.lcodecorex:tkrefreshlayout:1.0.6'
+compile 'com.lcodecorex:tkrefreshlayout:1.0.7'
 ```
 
 #### 2.在xml中添加TwinklingRefreshLayout
@@ -119,18 +122,31 @@ refreshLayout.setOnRefreshListener(new RefreshListenerAdapter(){
 ##### setTargetView(View view)
 设置滚动事件的作用对象。
 
+##### setDefaultHeader、setDefaultFooter
+现在已经提供了设置默认的Header、Footer的static方法，可在Application或者一个Activity中这样设置：
+```java
+TwinklingRefreshLayout.setDefaultHeader(SinaRefreshView.class.getName());
+TwinklingRefreshLayout.setDefaultFooter(BallPulseView.class.getName());
+```
+
+
 #### 4.扩展属性
 - tr_max_head_height 头部拉伸允许的最大高度
 - tr_head_height  头部高度
 - tr_max_bottom_height
 - tr_bottom_height 底部高度
 - tr_overscroll_height 允许越界的最大高度
+- tr_enable_refresh 是否允许刷新,默认为true
 - tr_enable_loadmore 是否允许加载更多,默认为true
 - tr_pureScrollMode_on 是否开启纯净的越界回弹模式
 - tr_overscroll_top_show - 否允许顶部越界时显示顶部View
 - tr_overscroll_bottom_show 是否允许底部越界时显示底部View
 - tr_enable_overscroll 是否允许越界回弹
-
+- tr_floatRefresh 开启悬浮刷新模式
+- tr_autoLoadMore 越界时自动加载更多
+- tr_enable_keepIView 是否在开始刷新之后保持状态，默认为true；若需要保持原来的操作逻辑，这里设置为false即可
+- tr_showRefreshingWhenOverScroll 越界时直接显示正在刷新中的头部
+- tr_showLoadingWhenOverScroll 越界时直接显示正在加载更多中的底部
 
 ## 其它说明
 ### 1.默认支持越界回弹，并可以随手势越界不同的高度
@@ -286,17 +302,110 @@ startAnim则是在onRefresh/onLoadMore之后才会回调的过程（此处是显
 
 如上所示，轻而易举就可以实现一个个性化的Header或者Footer。（更简单的实现请参考Demo中的 **TextHeaderView(图四)**）。
 
+### NestedScroll
+#### TwinklingRefreshLayout嵌套CoordinatorLayout
+---layout
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/refresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coord_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:addStatesFromChildren="true"
+        android:fitsSystemWindows="true">
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false">
+
+            <!--...-->
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    </android.support.design.widget.CoordinatorLayout>
+</com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
+```
+
+--- 代码1
+```
+refreshLayout.setTargetView(rv);
+```
+让refreshLayout能够找到RecyclerView/ListView
+
+--- 代码2
+```java
+AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
+appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (verticalOffset >= 0) {
+            refreshLayout.setEnableRefresh(true);
+            refreshLayout.setEnableOverScroll(false);
+        } else {
+            refreshLayout.setEnableRefresh(false);
+            refreshLayout.setEnableOverScroll(false);
+        }
+    }
+});
+```
+设置AppBarLayout的移动监听器，需要下拉显示AppBarLayout时需设置setEnableRefresh(false),setEnableOverScroll(false)；AppBarLayout隐藏后还原为原来设置的值即可。
+
+####CoordinatorLayout嵌套TwinklingRefreshLayout
+--- layout
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coord_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:addStatesFromChildren="true"
+    android:fitsSystemWindows="true">
+
+    <com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout>
+
+</android.support.design.widget.CoordinatorLayout>
+```
+注意给TwinklingRefreshLayout设置一个layout_behavior="@string/appbar_scrolling_view_behavior"
 
 ## TODO
 - 制作一个star相关的动效
-- CoordinateLayout及NestedScroll支持
 - 带视差效果的Header
-- 考虑是否需要控制底部下拉后或者顶部上拉后再次进入动画可以保持
 
 ## 更新日志
 #### v1.07
 - 你们要的设置默认刷新头/脚的方法来啦
 - Demo中集成StrictMode、BlockCanary检测ANR
+- 支持NestedScroll
+- 修复item点击失效/点击闪烁的问题
+- Nested滑动显示刷新头/尾支持
+- 支持刷新/加载更多状态保持
+- 空白View亦可刷新/加载
 
 #### v1.06
 - 修复触摸监听失效问题
