@@ -174,14 +174,13 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
             public void onAnimationEnd(Animator animation) {
                 isAnimHeadBack = false;
                 cp.setRefreshVisible(false);
-                if (isFinishRefresh) {
-                    if (scrollHeadLocked && cp.isEnableKeepIView()) {
-                        cp.getHeader().getLayoutParams().height = 0;
-                        cp.getHeader().requestLayout();
-                        cp.getHeader().setTranslationY(0);
-                        scrollHeadLocked = false;
-                        cp.setRefreshing(false);
-                    }
+                if (isFinishRefresh && scrollHeadLocked && cp.isEnableKeepIView()) {
+                    cp.getHeader().getLayoutParams().height = 0;
+                    cp.getHeader().requestLayout();
+                    cp.getHeader().setTranslationY(0);
+                    scrollHeadLocked = false;
+                    cp.setRefreshing(false);
+                    cp.resetHeaderView();
                 }
             }
         });
@@ -260,6 +259,7 @@ public class AnimProcessor implements IAnimRefresh, IAnimOverScroll {
                         cp.getFooter().requestLayout();
                         cp.getFooter().setTranslationY(0);
                         scrollBottomLocked = false;
+                        cp.resetBottomView();
                         cp.setLoadingMore(false);
                     }
                 }

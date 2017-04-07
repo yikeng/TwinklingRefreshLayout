@@ -33,6 +33,16 @@ public class RefreshProcessor implements IDecorator {
                 intercepted = false;
                 mTouchX = ev.getX();
                 mTouchY = ev.getY();
+
+                if (cp.isEnableKeepIView()) {
+                    if (!cp.isRefreshing()) {
+                        cp.setPrepareFinishRefresh(false);
+                    }
+                    if (!cp.isLoadingMore()) {
+                        cp.setPrepareFinishLoadMore(false);
+                    }
+                }
+
                 cp.dispatchTouchEventSuper(ev);
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -85,8 +95,6 @@ public class RefreshProcessor implements IDecorator {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                cp.setPrepareFinishRefresh(false);
-                cp.setPrepareFinishLoadMore(false);
                 if (intercepted) {
                     if (cp.isStatePTD()) {
                         willAnimHead = true;
