@@ -11,7 +11,7 @@ TwinklingRefreshLayout extended the thoughts of SwipeRefreshLayout,using a ViewG
  -  Lots of methods in the class OnRefreshListener.
  - It provides an interface to the callback during the sliding coefficient. Personalized offer good support.
  - NestedScroll,CoordinatorLayout
- 
+
  **Any View is supported.**
 
 ![](art/structure_v1.0.png)
@@ -386,6 +386,12 @@ appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener
 ```
 Pay attention to `layout_behavior="@string/appbar_scrolling_view_behavior"` for TwinklingRefreshLayout.
 
+> ps：Contact me: lcodecore@163.com
+> QQ group: 202640706
+
+If you like this library, you can donate me. Buy me a coffee!
+
+![](art/alipay.jpg) ![](art/wepay.png)
 
 ## Update Logs
 #### v1.07
@@ -417,9 +423,6 @@ Pay attention to `layout_behavior="@string/appbar_scrolling_view_behavior"` for 
 - Fix the NullPointerException bug in Fragment.
 - Fix the Sliding conflict.
 
-> ps：Contact me: lcodecore@163.com
-> QQ group: 202640706
-
 
 License
 -------
@@ -437,4 +440,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-

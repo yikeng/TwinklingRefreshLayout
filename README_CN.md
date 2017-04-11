@@ -256,7 +256,7 @@ private void init() {
         refreshArrow.setVisibility(GONE);
         loadingView.setVisibility(VISIBLE);
     }
-    
+
     @Override
         public void onFinish(OnAnimEndListener listener) {
             listener.onAnimEnd();
@@ -397,6 +397,13 @@ appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener
 - 制作一个star相关的动效
 - 带视差效果的Header
 
+> ps：如有任何问题或者是建议，可以邮箱联系我！（lcodecore@163.com）
+> 如有问题或新的需求，请加QQ群202640706讨论，开源库会根据需求持续更新。
+
+开源库消耗了我大量的精力和时间，如果你喜欢这个库或者对自己有所帮助，还请多多支持我。Buy me a coffee!
+
+![](art/alipay.jpg) ![](art/wepay.png)
+
 ## 更新日志
 #### v1.07
 - 你们要的设置默认刷新头/脚的方法来啦
@@ -465,9 +472,6 @@ appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener
 - 支持越界回弹
 - 支持个性化Header、Footer
 
-> ps：如有任何问题或者是建议，可以邮箱联系我！（lcodecore@163.com）
-> 如有问题或新的需求，请加QQ群202640706讨论，开源库会根据需求持续更新。
-
 
 License
 -------
@@ -485,4 +489,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
