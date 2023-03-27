@@ -5,8 +5,8 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.animation.DecelerateInterpolator;
 
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;

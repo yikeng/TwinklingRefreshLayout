@@ -2,10 +2,10 @@ package com.lcodecore.twinklingrefreshlayout;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
+import com.google.android.material.appbar.AppBarLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.view.WindowManager;
 
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;

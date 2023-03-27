@@ -1,8 +1,8 @@
 package com.lcodecore.twinklingrefreshlayout.adapter;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
-import android.view.View;
+import androidx.viewpager.widget.ViewPager;
+
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -11,7 +11,6 @@ import com.lcodecore.twinklingrefreshlayout.adapter.base.CommonHolder;
 import com.lcodecore.twinklingrefreshlayout.beans.Card;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.Bind;

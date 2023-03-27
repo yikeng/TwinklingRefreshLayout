@@ -81,7 +81,7 @@
         android:text="  T  E  S  T  "/>
 
 
-    <android.support.design.widget.TabLayout
+    <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         app:tabBackground="@android:color/white"
         app:tabMode="scrollable"
@@ -90,7 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

@@ -1,7 +1,7 @@
 package com.lcodecore.twinklingrefreshlayout;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Created by lcodecore on 2017/4/6.

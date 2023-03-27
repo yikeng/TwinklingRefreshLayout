@@ -1,13 +1,11 @@
 package com.lcodecore.twinklingrefreshlayout;
 
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
-import com.lcodecore.tkrefreshlayout.footer.LoadingView;
-import com.lcodecore.tkrefreshlayout.header.progresslayout.ProgressLayout;
 
 public class StoryActivity extends AppCompatActivity {
 

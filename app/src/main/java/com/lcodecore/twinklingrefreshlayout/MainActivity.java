@@ -1,7 +1,7 @@
 package com.lcodecore.twinklingrefreshlayout;
 
 import android.content.Intent;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {

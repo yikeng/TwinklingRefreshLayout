@@ -3,9 +3,8 @@ package com.lcodecore.twinklingrefreshlayout.adapter.base;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
@@ -14,7 +13,7 @@ import com.lcodecore.twinklingrefreshlayout.utils.DensityUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import butterknife.ButterKnife;
+
 /**
  * RecyclerView适配器基类
  */

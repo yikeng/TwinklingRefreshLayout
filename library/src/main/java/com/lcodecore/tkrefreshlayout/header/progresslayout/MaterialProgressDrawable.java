@@ -1,6 +1,5 @@
 package com.lcodecore.tkrefreshlayout.header.progresslayout;
 
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -18,9 +17,10 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Animatable;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
+
 import android.util.DisplayMetrics;
 import android.view.View;
 
